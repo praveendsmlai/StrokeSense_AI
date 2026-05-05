@@ -1,29 +1,82 @@
-### Network Security Projects For Phising Data
+NeuroGuard AI: Stroke Risk Prediction System
 
-Setup github secrets:
-AWS_ACCESS_KEY_ID=
+Project Overview
 
-AWS_SECRET_ACCESS_KEY=
+NeuroGuard AI is a machine learning-based system designed to predict the risk of stroke in patients using clinical and demographic data. Early prediction of stroke can help in timely medical intervention and potentially save lives.
 
-AWS_REGION = us-east-1
-
-AWS_ECR_LOGIN_URI = 788614365622.dkr.ecr.us-east-1.amazonaws.com/networkssecurity
-ECR_REPOSITORY_NAME = networkssecurity
+This project focuses on handling imbalanced healthcare data, applying data preprocessing pipelines, and comparing multiple machine learning models to identify the best-performing approach.
 
 
-Docker Setup In EC2 commands to be Executed
-#optinal
+Dataset Information
+Dataset Name: Stroke Prediction Dataset
+File Used: train_2v.csv
+Records: ~43,000+
+Target Variable: stroke (0 = No, 1 = Yes)
 
-sudo apt-get update -y
 
-sudo apt-get upgrade
+Features:
+Feature	Description
+id	Unique identifier
+gender	Male / Female
+age	Age of patient
+hypertension	0 = No, 1 = Yes
+heart_disease	0 = No, 1 = Yes
+ever_married	Yes / No
+work_type	Job type
+Residence_type	Urban / Rural
+avg_glucose_level	Blood glucose level
+bmi	Body Mass Index
+smoking_status	Smoking habits
+stroke	Target variable
 
-#required
+Tech Stack
+Language: Python
+Libraries:
+pandas, numpy
+scikit-learn
+imbalanced-learn
 
-curl -fsSL https://get.docker.com -o get-docker.sh
+🔄 Workflow
+1. Data Preprocessing
+Missing values handled using:
+Median (numerical)
+Most frequent (categorical)
+Feature scaling with StandardScaler
+Encoding using OneHotEncoder
+Pipeline built using ColumnTransformer
 
-sudo sh get-docker.sh
+3. Train-Test Split
+75% Training / 25% Testing
+Stratified sampling ensures balanced distribution
 
-sudo usermod -aG docker ubuntu
+5. Handling Imbalance
+Applied SMOTE (Synthetic Minority Oversampling Technique)
+Used only on training data to prevent data leakage
 
-newgrp docker
+7. Models Implemented
+Logistic Regression (class_weight="balanced")
+Naive Bayes
+K-Nearest Neighbors
+Decision Tree (balanced)
+Random Forest (balanced)
+
+9. Threshold Tuning
+Custom threshold: 0.3
+Improves detection of stroke cases (important in healthcare)
+
+📊 Evaluation Metrics
+Accuracy
+F1 Score ⭐ (Primary metric)
+ROC-AUC Score
+Classification Report
+Confusion Matrix
+
+🏆 Model Selection
+Best model selected based on highest F1-score
+Helps balance precision and recall for imbalanced data
+
+📈 Key Insights
+Dataset is highly imbalanced (very few stroke cases)
+SMOTE significantly improves minority class detection
+Lower threshold increases recall (reduces false negatives)
+Tree-based models and Logistic Regression perform effectively
