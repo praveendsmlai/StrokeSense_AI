@@ -1,37 +1,29 @@
-Continue the existing PeopleConnect backend audit.
+Continue the existing PeopleConnect backend project using your completed 16-page audit and exact-file change plan.
 
-READ-ONLY ONLY. Do not modify any code, database, migrations or frontend files.
+IMPLEMENT PHASE 0 ONLY — BACKEND PREREQUISITES.
 
-Complete the previously unfinished audit by reading the actual implementation of:
+1. Fix the `alembc` typo in `requirements.txt` to `alembic`.
+2. Inspect the existing `.env` and fix the `INTELLIGENCE_PROVIDER` value typo.
+3. Configure `.env.example` with safe placeholder values, without copying secrets.
+4. Update `.gitignore` to exclude `.env`, local database files, generated storage and caches.
+5. Check Python dependency compatibility and identify missing requirements.
+6. Verify FastAPI imports, SQLAlchemy configuration and Alembic migration structure.
+7. Preserve the existing 35 Alembic revisions and their current head.
+8. Do not modify any existing database records.
+9. Do not create or seed the database yet.
+10. Do not delete Knowledge Base, Copilot, LangGraph, Chroma or other modules in this phase.
+11. Do not delete any existing files or functionality.
+12. Do not modify frontend files.
+13. Do not modify authentication, RBAC, lifecycle or business logic.
 
-- dashboard_repository.py
-- dashboard services
-- operations_service.py
-- theme_service.py
-- intelligence_service.py
-- publication_service.py
-- meeting_service.py
-- meeting_workflow_service.py
-- capture_service.py
-- configuration_service.py
-- reference_refresh_service.py
-- all relevant backend schemas
-- Alembic migration dependencies
+IMPORTANT — TECHM WINDOWS:
+Use `py` instead of `python` or `python3` for all Python commands.
 
-Also verify the original PRD and Arun API documents against their Markdown copies where available.
+After implementing Phase 0:
+- Check Python syntax and imports.
+- Verify dependency declarations.
+- Verify Alembic revision structure without upgrading the database.
+- Report exact files modified and validation results.
+- Clearly identify anything that could not be verified.
 
-Identify the exact dependencies that must be preserved when removing my duplicate Connect Lifecycle.
-
-Confirm Action Management — Creation & Editing belongs to Praveen according to the Task Breakdown Excel.
-
-Produce the final, exact-file change plan for:
-1. Retaining only Praveen's T002/T003 functionality.
-2. Removing duplicate Arun-owned lifecycle code safely.
-3. Supporting Arun's nine provisional tables in an isolated test database.
-4. Implementing automatic canonical Connect ID mapping.
-5. Completing missing Module 3 features.
-6. Fixing SQL Server compatibility.
-
-Use `py` for Python commands, never `python` or `python3`.
-
-Do not implement anything yet. Wait for approval.
+STOP after Phase 0. Do not proceed to Arun table creation, migrations, canonical mapping or lifecycle cleanup without my approval.
