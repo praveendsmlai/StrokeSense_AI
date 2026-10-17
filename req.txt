@@ -1,0 +1,531 @@
+# PEOPLECONNECT — FINAL BACKEND AUDIT & INTEGRATION READINESS
+
+You are working on my EXISTING PeopleConnect project in the Tech Mahindra Windows development environment.
+
+**THIS IS A READ-ONLY AUDIT. DO NOT MODIFY ANY FILE, DATABASE, MIGRATION OR CONFIGURATION.**
+
+My objective is to retain and complete only my assigned backend responsibilities, while preparing a clean integration with Arun Kumar's Connect Lifecycle backend.
+
+Do not create a new project.
+
+## 1. READ ALL THREE SOURCE DOCUMENTS
+
+Before inspecting or changing the implementation, locate and read these documents completely:
+
+1. PeopleConnect PRD — revised functional requirements FR-01 through FR-28.
+2. PeopleConnect Task Breakdown Excel — assignments for three developers.
+3. Arun API & Table Schema Document — documented Connect Lifecycle APIs, tables and relationships.
+
+Search the project folder and any provided reference_docs directory.
+
+If a document cannot be found or cannot be read completely, report the missing document and STOP.
+
+Do not guess its contents.
+
+The Task Breakdown Excel is the authoritative reference for developer ownership. The PRD is the authoritative reference for business functionality. Arun's API/Table Schema document is the provisional technical reference for lifecycle integration.
+
+If these documents conflict, explicitly identify the conflict rather than silently choosing an interpretation.
+
+## 2. DEVELOPER OWNERSHIP — VERY IMPORTANT
+
+The Task Breakdown Excel contains THREE developers.
+
+My name is Praveen.
+
+My backend depends primarily on Arun Kumar's Connect Lifecycle implementation.
+
+The third developer's functionality is outside my scope unless a direct dependency is explicitly documented.
+
+Read the actual task assignments and prepare an ownership matrix containing:
+
+- Task ID
+- Task name
+- Assigned developer
+- Description
+- Relevant PRD requirements
+- Dependency on other tasks
+- Existing backend implementation status
+
+### PRAVEEN
+
+Identify ALL tasks assigned to Praveen under T002 and T003.
+
+Expected scope includes:
+
+T002:
+- AI Output Generation Integration Point.
+
+T003:
+- Action Tracking and Status Management.
+- Connect Closure Control and Workflow.
+- Append-Only Case History.
+- Automated Communications and Notifications.
+- Action Reminders and Aging.
+- Unified Action Tracker.
+- Dashboards and Role-Specific Views.
+- Reporting and Analytics — Activity and Coverage.
+- Theme Analysis and Insights.
+- Administrative Configuration and Data Integration.
+- Testing and Bug Fixing.
+
+Verify this list against the actual Excel instead of assuming it is complete or correct.
+
+### ARUN KUMAR
+
+Identify Arun's tasks only to understand my backend dependencies.
+
+These may include:
+
+- Connect creation and initiation.
+- Participant selection and Excel upload.
+- Agenda preparation.
+- Meeting invitations and Teams integration.
+- Manual meeting evidence capture.
+- In-tool recording.
+- Lifecycle status and transitions.
+- Action creation/editing, where allocated to Arun.
+
+Confirm exact ownership using the Task Breakdown Excel.
+
+Do NOT develop Arun's tasks inside my backend.
+
+### THIRD DEVELOPER
+
+Identify the third developer's tasks separately.
+
+Do not develop or retain unrelated third-developer business functionality solely because it exists in the current backend.
+
+If my tasks have a verified dependency on the third developer, report it explicitly.
+
+Do not invent dependencies.
+
+## 3. FINAL TARGET ARCHITECTURE
+
+The final application will use:
+
+- One FastAPI backend.
+- One common API namespace, preferably /api/v1.
+- One shared database.
+- Arun's Connect Lifecycle as the authoritative lifecycle source.
+- My T002 and T003 backend functionality as downstream modules.
+- Shared authentication and authorized organizational scope.
+- No competing independent Connect Lifecycle.
+
+The actual Arun backend code is NOT available yet.
+
+Therefore, the immediate objective is to prepare and test my existing backend using Arun's documented schema and isolated synthetic data.
+
+Actual merging with Arun's running backend will happen later.
+
+Do not claim that real Arun integration is already complete.
+
+## 4. INSPECT EXISTING BACKEND
+
+Inspect the entire existing backend, including:
+
+- FastAPI application entry point.
+- API router registrations.
+- Routes.
+- Services.
+- Repositories.
+- Schemas.
+- SQLAlchemy models.
+- Database configuration.
+- Alembic migrations.
+- Authentication and authorization.
+- AI provider integrations.
+- Notification providers.
+- Governance and scheduler code.
+- Dashboard and reporting queries.
+- Backend tests.
+- Integration fixtures.
+
+Identify functionality that belongs to:
+
+A. Praveen's assigned T002/T003 scope.
+
+B. Arun's Connect Lifecycle scope.
+
+C. The third developer.
+
+D. Essential shared infrastructure.
+
+E. Unnecessary or duplicate functionality.
+
+Do not assume every file is owned by a single developer. A file may contain multiple responsibilities.
+
+## 5. EXISTING DUPLICATE CONNECT LIFECYCLE
+
+My current backend may contain its own independent Connect Lifecycle implementation.
+
+In the later implementation phase, I want that duplicate business functionality removed or refactored.
+
+For this audit:
+
+1. Identify duplicate Connect creation APIs.
+2. Identify duplicate participant APIs.
+3. Identify scheduling/invitation APIs.
+4. Identify lifecycle status management code.
+5. Identify duplicate Connect Type administration.
+6. Identify duplicated employee search.
+7. Identify Arun-owned evidence capture and recording logic.
+8. Identify Arun-owned Action creation/editing logic.
+9. Identify shared code that my downstream tasks still require.
+10. Identify all foreign-key and service dependencies before recommending removal.
+
+IMPORTANT:
+
+Do not simply delete connects.py or the connects database table.
+
+Other downstream services may depend on them.
+
+Inspect whether compatibility records or ID mapping are needed.
+
+Report exactly what can be safely removed, what must be preserved, and what needs refactoring.
+
+**DO NOT REMOVE ANYTHING DURING THIS AUDIT.**
+
+## 6. ARUN CONNECT LIFECYCLE SCHEMA
+
+Read the supplied Arun API & Table Schema document.
+
+The documented nine tables are:
+
+1. plan_connect_initiations
+2. plan_connect_participants
+3. participant_snapshots
+4. plan_connect_file_uploads
+5. participant_upload_rows
+6. connect_types
+7. hr_roster
+8. users
+9. audit_logs
+
+Arun's canonical Connect ID is a string such as PC-00001.
+
+Inspect the existing project for these tables and their provisional test models.
+
+Check:
+
+- Table names.
+- Column names.
+- Primary keys.
+- Foreign keys.
+- Unique constraints.
+- Status and stage enums.
+- Relationship definitions.
+- Scheduled date/time fields.
+- Participant snapshots.
+- Employee and user references.
+
+Pay special attention to:
+
+- scheduled_from and scheduled_to.
+- tenure_months and tenure_bucket.
+- file_name and file_path.
+- total_rows and processed_rows.
+- input_employee_id and input_email.
+
+Do not modify any table.
+
+Do not seed any database.
+
+Do not treat the screenshot-derived Arun schema as verified production DDL.
+
+### FUTURE TESTING REQUIREMENT
+
+In the later development phase, create or reuse an isolated disposable SQLite integration database containing:
+
+- Arun's nine provisional tables.
+- Required Module 3 tables.
+- Synthetic Arun Connects.
+- Synthetic participants.
+- Synthetic snapshots.
+- Synthetic authorized users.
+- Synthetic organizational mappings.
+
+Do not populate the existing development database with dummy records without explicit approval.
+
+The production implementation must not depend on test-only fixtures.
+
+## 7. CANONICAL CONNECT ID INTEGRATION
+
+Inspect the existing integration implementation.
+
+Specifically check:
+
+1. Whether Module 3 accepts Arun's canonical string Connect ID.
+2. Whether canonical Connect lookup is implemented.
+3. Whether Connect ID mapping exists.
+4. Whether mapping is automatic.
+5. Whether a legacy integer Connect ID is still required.
+6. Whether downstream foreign keys rely on a local connects table.
+7. Whether AI, Actions, Notifications and Reporting can resolve canonical IDs.
+8. Whether lifecycle authorization is enforced.
+9. Whether missing/unauthorized Connects fail safely.
+10. Whether duplicate lifecycle API routes can conflict with Arun's routes.
+
+Do not assume existing mapping works simply because the mapping table exists.
+
+Inspect and report exact source-code evidence.
+
+Do not implement changes yet.
+
+## 8. EMPLOYEE MASTER — NOT FOR LOGIN
+
+Employee Master is intended for employee details and approved organizational attributes.
+
+Examples:
+
+- Employee ID.
+- Employee name.
+- IBU and IBG.
+- Location.
+- Country.
+- Account/project.
+- Band and tenure.
+- Role description.
+- Other approved reporting attributes.
+
+**Employee Master must NOT be used as the authentication or login credential database.**
+
+Inspect how the existing backend currently loads and uses Employee Master.
+
+Report whether employee records are incorrectly being used for login or roles.
+
+Do not create passwords or application users from all employees.
+
+Arun's hr_roster is documented as the lifecycle employee-search and participant-resolution source.
+
+The relationship between Employee Master and hr_roster must be explicit and verified.
+
+## 9. USERS, ROLES AND AUTHORIZATION
+
+Arun's document defines a users table with roles:
+
+- EMPLOYEE
+- BHR
+- BHR_LEADER
+- PLATFORM_ADMIN
+
+This table represents application user identity/role data, not necessarily a standalone password-authentication system.
+
+Inspect the current authentication and RBAC implementation.
+
+Verify:
+
+- How identity is authenticated.
+- Where roles are loaded from.
+- How BHR is identified.
+- How BHR Leader is identified.
+- How Platform Administrator is identified.
+- How organizational scope is enforced.
+- Whether multiple BHRs can serve one IBU.
+- Whether BHR Leader scope is correct.
+- Whether unauthorized records are blocked.
+
+Both BHR and BHR Leader are permitted to create Connects within their authorized organizational scope.
+
+Do not infer user roles from Employee Master.
+
+Use approved user records and organizational mappings.
+
+If the actual BHR-to-IBU mapping source is missing, report it.
+
+Do not invent mapping records or login credentials.
+
+## 10. VERIFY MY T002 FUNCTIONALITY
+
+Inspect the existing AI Output Generation Integration Point.
+
+Check:
+
+- AI provider integration code.
+- OpenAI/Azure OpenAI configuration.
+- Evidence input contracts.
+- Minutes generation.
+- Action suggestions.
+- Insights generation.
+- Structured output validation.
+- Human review and editing.
+- Draft rejection.
+- Validation audit.
+- Sensitive/skip-level confidentiality.
+- Generation retry and idempotency.
+- Publication prevention before validation.
+
+Distinguish:
+
+- Fully implemented.
+- Partially implemented.
+- Missing.
+- Blocked by Arun's unavailable backend.
+- Requires production provider configuration.
+
+Do not falsely report configured mocks as real AI integration.
+
+## 11. VERIFY MY T003 FUNCTIONALITY
+
+Inspect each assigned T003 task independently.
+
+### Action Tracking and Status
+Check independent Action status, history, due dates, owners and SLA.
+
+### Connect Closure Control
+Check that open Actions block closure and that Arun owns the final canonical lifecycle transition.
+
+### Append-Only Case History
+Check preserved chronology, previous values and audit metadata.
+
+### Automated Notifications
+Check real provider integration, assignment notifications, BHR CC, publication and closure messages, retries and delivery states.
+
+### Action Reminders and Aging
+Check overdue calculation, escalation rules, reminder evaluation and scheduler execution.
+
+### Unified Action Tracker
+Check filters, pagination, canonical Connect references, status accuracy and authorized access.
+
+### Dashboards and Role-Specific Views
+Check BHR, BHR Leader and Platform Administrator metrics and scopes.
+
+### Reporting and Analytics
+Check FR-24, FR-25 and FR-26 requirements, including:
+
+- Date presets and combined filters.
+- IBU/IBG and available organizational dimensions.
+- Distinct Connects conducted.
+- Touchpoints versus unique employees.
+- Repeat attendance counting.
+- Reliable percentage denominators.
+- Actions closed in selected periods.
+- On-time Action completion.
+- Approved extension history.
+- Open, pending and overdue Actions.
+- Aggregate-to-detail reconciliation.
+
+### Theme Analysis and Insights
+Check theme generation, trends, sentiment, recurring concerns, hotspots, source attribution and confidentiality.
+
+### Administrative Configuration and Data Integration
+Check Module 3 SLA, reminders, escalations, reference refresh, reporting settings and audit.
+
+### Testing and Bug Fixing
+Check existing tests and identify missing coverage.
+
+For each task, report exact relevant files and missing functionality.
+
+## 12. SQL SERVER COMPATIBILITY
+
+The backend currently uses SQLite for development, while the final corporate database may use SQL Server.
+
+Inspect:
+
+- SQLAlchemy models.
+- Column types.
+- SQL expressions.
+- SQLite-specific functions.
+- Migration history.
+- Transaction handling.
+- Foreign keys.
+- Database configuration.
+
+Identify compatibility issues.
+
+Do not run migrations or change database configuration yet.
+
+Do not claim SQL Server execution success without actually testing on SQL Server.
+
+## 13. STRICT WINDOWS COMMAND RULE
+
+This Tech Mahindra Windows environment does not support the `python` command.
+
+ALWAYS use the Windows Python launcher:
+
+- `py`
+- `py -m pip`
+- `py -m pytest`
+- `py -m alembic`
+- `py -m uvicorn`
+
+NEVER use:
+
+- `python`
+- `python3`
+- `python -m ...`
+
+When inspecting an existing virtual environment, respect its configuration, but do not assume activation or direct python commands are supported.
+
+Do not install, upgrade or remove packages during this audit.
+
+Do not start services or execute tests that mutate persistent data without approval.
+
+## 14. ABSOLUTE READ-ONLY RESTRICTIONS
+
+DO NOT:
+
+- Modify backend files.
+- Modify frontend files.
+- Delete files.
+- Create new application code.
+- Run database migrations.
+- Seed data.
+- Change database values.
+- Regenerate Alembic revisions.
+- Install dependencies.
+- Create login accounts.
+- Alter authentication rules.
+- Remove duplicate lifecycle functionality yet.
+- Modify Arun test fixtures.
+- Start development implementation.
+
+Read and analyze only.
+
+If a proposed inspection command would write files, caches or database records, do not execute it.
+
+## 15. FINAL AUDIT REPORT
+
+Return the following:
+
+1. Confirmation that all three documents were read completely.
+2. Developer ownership matrix for all three developers.
+3. Exact Praveen T002/T003 task list from Excel.
+4. Arun dependency list.
+5. Third-developer dependencies, if any.
+6. Existing backend directory and file inventory.
+7. Functionality already implemented for my tasks.
+8. Missing or incomplete functionality.
+9. Duplicate Arun-owned lifecycle functionality.
+10. Backend APIs requiring removal/refactoring.
+11. Shared dependencies that must be preserved.
+12. Arun nine-table schema readiness.
+13. Canonical Connect ID mapping status.
+14. Employee Master usage status.
+15. Users/RBAC/BHR mapping status.
+16. SQL Server compatibility issues.
+17. Exact backend files requiring changes.
+18. Recommended safe implementation order.
+19. Outstanding Arun contracts that cannot yet be verified.
+20. Confirmation that ZERO files and database records were modified.
+
+### FINAL INSTRUCTION
+
+**STOP AFTER THIS READ-ONLY AUDIT.**
+
+Do not implement any code changes.
+
+Wait for my explicit approval before modifying the backend.
+
+The final future objective is:
+
+ONLY Praveen's T002/T003 backend business functionality, essential shared infrastructure, and Arun integration interfaces.
+
+No duplicate Connect Lifecycle.
+
+No unrelated third-developer implementation.
+
+No frontend modifications.
+
+No destructive database changes.
+
+Arun's actual backend integration will be performed later, after my backend is completed and tested with isolated Arun-style synthetic data.
