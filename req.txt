@@ -1,29 +1,34 @@
-Continue the existing PeopleConnect backend project using your completed 16-page audit and exact-file change plan.
+Continue my existing PeopleConnect backend after Phase 0.
 
-IMPLEMENT PHASE 0 ONLY — BACKEND PREREQUISITES.
+IMPLEMENT PHASE 1 ONLY: ARUN'S ISOLATED TEST DATABASE.
 
-1. Fix the `alembc` typo in `requirements.txt` to `alembic`.
-2. Inspect the existing `.env` and fix the `INTELLIGENCE_PROVIDER` value typo.
-3. Configure `.env.example` with safe placeholder values, without copying secrets.
-4. Update `.gitignore` to exclude `.env`, local database files, generated storage and caches.
-5. Check Python dependency compatibility and identify missing requirements.
-6. Verify FastAPI imports, SQLAlchemy configuration and Alembic migration structure.
-7. Preserve the existing 35 Alembic revisions and their current head.
-8. Do not modify any existing database records.
-9. Do not create or seed the database yet.
-10. Do not delete Knowledge Base, Copilot, LangGraph, Chroma or other modules in this phase.
-11. Do not delete any existing files or functionality.
-12. Do not modify frontend files.
-13. Do not modify authentication, RBAC, lifecycle or business logic.
+1. First verify the Alembic revision graph using `py -m alembic heads` and report any conflicting heads. Do not merge or modify revisions in this phase.
+2. Read the supplied Arun API & Table Schema document completely.
+3. Implement all nine Arun-style tables with exact documented names, columns, relationships and constraints.
+4. Keep Arun's provisional schema in separate TEST-ONLY SQLAlchemy metadata.
+5. Create a disposable SQLite integration database containing the required existing Module 3 tables and nine Arun-style tables.
+6. Add synthetic records for Connect IDs PC-00001 onward, lifecycle statuses, participants, participant snapshots, hr_roster, users, Connect Types, uploads and audit logs.
+7. Create synthetic BHR, BHR Leader and Platform Admin users with appropriate test scope mappings.
+8. Employee Master is for employee information, NOT login authentication.
+9. Add automated tests for table structure, primary/foreign keys, canonical IDs, role/scope fixtures and repeatable data setup.
+10. Ensure tests never modify an existing development or production database.
 
-IMPORTANT — TECHM WINDOWS:
-Use `py` instead of `python` or `python3` for all Python commands.
+STRICT RULES:
+- Do not implement Arun's Connect Lifecycle APIs.
+- Do not remove my duplicate lifecycle yet.
+- Do not modify frontend.
+- Do not modify existing business logic.
+- Do not run migrations against an existing database.
+- Do not create permanent Arun dummy tables in production metadata.
+- Use `py -m` commands, never `python` or `python3`.
+- Do not proceed to automatic Connect ID mapping yet.
 
-After implementing Phase 0:
-- Check Python syntax and imports.
-- Verify dependency declarations.
-- Verify Alembic revision structure without upgrading the database.
-- Report exact files modified and validation results.
-- Clearly identify anything that could not be verified.
+After implementation, run the relevant tests and report:
+- Nine-table schema verification.
+- Synthetic record counts.
+- Exact files added/modified.
+- Alembic heads.
+- Test pass/fail results.
+- Confirmation that existing application files and data were preserved.
 
-STOP after Phase 0. Do not proceed to Arun table creation, migrations, canonical mapping or lifecycle cleanup without my approval.
+STOP after Phase 1 and wait for approval.
