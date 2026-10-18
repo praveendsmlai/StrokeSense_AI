@@ -1,159 +1,38 @@
-# PEOPLECONNECT — PHASE 3C: ACTION REVIEW, APPROVAL, PUBLICATION & SLA
+Continue Phase 3C in the EXISTING PeopleConnect backend.
 
-Continue working in the EXISTING PeopleConnect backend at:
+Your assessment confirms that review, approval, publication, action tracking, SLA, notifications and audit services already exist.
 
-`C:\TechMProjects\peopleconnect\backend`
+Do not stop at analysis or produce another status report without performing the work.
 
-## Context
+Implement comprehensive Phase 3C end-to-end HTTP integration tests using the real FastAPI application, existing services, isolated SQLite test databases and Arun-style synthetic Connect data.
 
-Phase 0, Phase 1, Phase 2 and Phase 3A have been implemented. The latest reported verification is 72 passed, 0 failed.
+Verify the complete workflow:
 
-**IMPORTANT: Real Arun backend integration is DEFERRED until the final integration phase.**
+1. AI draft minutes and actions are created and persisted.
+2. Authorized reviewers can edit, approve and reject drafts.
+3. Rejected actions are never published.
+4. Only validated minutes and approved actions are published.
+5. Publication is idempotent and preserves publisher identity.
+6. Published actions have correct owners, due dates and status history.
+7. SLA calculations, reminders and escalations work according to the PRD.
+8. Notification events have correct recipients, BHR CC where required, and idempotency.
+9. Review, publication and action changes are audited.
+10. BHR and BHR_LEADER can operate within their authorized scope; out-of-scope access returns 403.
+11. Canonical Connect IDs resolve correctly without duplicate local Connect records.
+12. Invalid workflow transitions are rejected.
 
-For now, use the existing isolated Arun-style test schema, synthetic Connect records and canonical ID mapping infrastructure to implement and test Praveen's Module 3 functionality.
+Reuse existing implementation. Fix genuine defects discovered by tests, but do not bypass security, weaken assertions or introduce duplicate functionality.
 
-Do not start real Arun backend integration, production SQL Server migration or duplicate lifecycle removal.
+Do not modify Arun's real lifecycle, frontend or shared database. Do not remove Praveen's existing lifecycle yet. Use deterministic mock AI/email providers in tests.
 
-## Objective
+Use Windows `py -m` commands, never `python`.
 
-Implement and verify the complete downstream workflow required by the PeopleConnect PRD, especially FR-12 through FR-18, using the existing codebase and documented requirements as the source of truth.
+Run the Phase 3C tests and the complete backend test suite:
 
-### Step 1 — Inspect existing implementation
+py -m pytest tests/ -q
 
-Before modifying anything, inspect:
+Report exact test results, files changed, defects fixed and any PRD requirements still unverified.
 
-- Canonical Connect resolver and mapper
-- Actions APIs, models and services
-- AI generation and draft persistence
-- Review and validation services
-- Publication services
-- SLA and governance services
-- Notification services
-- Connect history and audit services
-- Existing tests and schemas
+Do not claim Phase 3C complete unless the actual review → approval → publication → action tracking → notification flow passes end-to-end.
 
-Identify which PRD requirements are already implemented, partially implemented or missing.
-
-**Do not rewrite working functionality or create duplicate services.**
-
-### Step 2 — Human review and approval
-
-Verify and complete the workflow:
-
-1. Generate draft minutes, actions and insights from recorded evidence.
-2. Store generated output as drafts.
-3. Allow authorized reviewers to edit and validate minutes.
-4. Allow reviewers to modify action descriptions, owners and due dates.
-5. Allow reviewers to approve or reject proposed actions.
-6. Preserve reviewer identity, timestamps and audit history.
-7. Prevent unapproved AI-generated actions from becoming published actions.
-8. Never automatically publish AI output.
-
-Follow the PRD exactly for permitted roles and workflow transitions.
-
-### Step 3 — Publication and action tracking
-
-Verify and complete:
-
-1. Publish only validated minutes and approved actions.
-2. Preserve the canonical Arun Connect reference.
-3. Maintain existing Module 3 foreign keys through the canonical ID mapping.
-4. Support action ownership, due dates, statuses and status history.
-5. Enforce approved-only visibility where required by the PRD.
-6. Ensure rejected actions are excluded from operational tracking.
-7. Prevent duplicate publication and duplicate notification events.
-8. Preserve all existing published records.
-
-### Step 4 — SLA, reminders and notifications
-
-Verify and complete the existing PRD-required capabilities:
-
-- Configurable SLA rules and due dates
-- Upcoming-due reminders
-- Overdue action identification
-- Escalations and supervisor recipients
-- Assignment notifications with BHR CC where required
-- Action closure notifications
-- Published minutes notifications
-- Auditable notification events
-- Idempotent notification processing
-
-Use existing notification interfaces. Implement real provider integration code where required by the PRD, but do not invent credentials or send real emails in isolated tests.
-
-### Step 5 — Canonical ID compatibility
-
-Use synthetic Arun Connect IDs such as `PC-00001`.
-
-All downstream operations must resolve the canonical Connect through the existing mapper/resolver.
-
-- Respect lifecycle adapter authorization and IBU scope.
-- Support BHR, BHR_LEADER and PLATFORM_ADMIN according to the PRD.
-- Keep Arun's canonical Connect data authoritative.
-- Do not create an independent business lifecycle.
-- Do not create duplicate compatibility Connect records.
-- Do not activate production links using test-only mechanisms.
-- Preserve fail-closed behavior.
-
-### Step 6 — End-to-end integration tests
-
-Build comprehensive tests using isolated, disposable databases and synthetic data.
-
-Test at minimum:
-
-1. Canonical Connect resolution and authorized access.
-2. Transcript/evidence → AI draft generation.
-3. Reviewer edits to minutes and actions.
-4. Approve/reject actions.
-5. Validation before publication.
-6. Approved actions published correctly.
-7. Rejected actions excluded.
-8. Action status updates and history.
-9. SLA due-date calculation.
-10. Reminder and escalation event generation.
-11. Notification idempotency.
-12. Duplicate publication prevention.
-13. Unauthorized and out-of-scope access rejection.
-14. Audit trail and history.
-15. Missing evidence, incomplete capture and invalid workflow transitions.
-
-Test actual FastAPI routes and database persistence, not merely mocked service return values.
-
-Use deterministic fake providers only in tests. Do not make real AI or email API calls during tests.
-
-### Strict constraints
-
-- Do not modify Arun's real lifecycle APIs.
-- Do not remove Praveen's existing lifecycle implementation yet.
-- Do not delete models, tables, columns or foreign keys.
-- Do not modify production or shared databases.
-- Do not execute Alembic migrations against an existing shared database.
-- Do not modify the frontend in this phase.
-- Do not bypass authentication or RBAC.
-- Do not hardcode administrative IDs, user IDs or employee identities. Resolve users and employees from the correct authoritative tables.
-- Keep employee master/HR roster data separate from login identity data.
-- Preserve all Phase 0–3A functionality.
-- Use `py -m` rather than `python` in every Windows command.
-- Do not change the Python interpreter or environment without checking the existing configuration.
-
-### Completion requirements
-
-Run:
-
-`py -m pytest tests/ -q`
-
-If tests fail, identify root causes and fix them without weakening assertions or security checks.
-
-Provide a detailed final report containing:
-
-1. PRD requirement-by-requirement implementation status.
-2. Existing functionality reused.
-3. Files added and modified.
-4. Exact API endpoints implemented or verified.
-5. Test cases and actual pass/fail counts.
-6. Database and migration changes, if any.
-7. Remaining blockers requiring Arun's real backend.
-8. Any features not fully implemented or tested.
-
-**Do not claim Phase 3C complete unless the required workflow is implemented and verified. If a requirement is blocked, report it clearly instead of claiming success.**
-
-Stop after Phase 3C. Do not automatically begin Phase 3D or real Arun integration.
+Stop after Phase 3C. Real Arun backend integration remains deferred.
