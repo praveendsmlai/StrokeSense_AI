@@ -1,15 +1,20 @@
-Fix the 5 failing Phase 3C HTTP E2E tests in tests/test_phase3c_http_e2e.py.
+Continue Phase 3C HTTP E2E verification in the existing PeopleConnect backend.
 
-Investigate SQLAlchemy database session visibility between test fixtures and FastAPI TestClient.
+Five tests in tests/test_phase3c_http_e2e.py are still failing with HTTP 404. Do not declare Phase 3C complete while these tests fail.
 
-Use an isolated temporary file-based SQLite database or a correctly shared SQLite connection pool. Ensure seeded Meeting, Minutes and Action records are committed and visible to HTTP request sessions.
+First inspect the actual FastAPI database dependency, TestClient setup, dependency overrides, SQLAlchemy engine/session factories, fixture commits, and meeting ID handling. Identify the precise cause using test output.
 
-Verify FastAPI get_db dependency overrides use the correct test database engine.
+Fix only the test infrastructure if the root cause is confirmed there. Use an isolated temporary file-based SQLite database with consistent session binding if necessary.
 
-Do not modify production API routes, RBAC, lifecycle code, schemas or migrations. Do not convert HTTP tests into service-level tests, delete tests or weaken assertions.
+STRICT RULES:
+- Keep all six HTTP E2E tests.
+- Do not replace HTTP tests with service-level tests.
+- Do not bypass authorization or mock security checks.
+- Do not modify Arun lifecycle, production database, migrations, or frontend.
+- Do not weaken test assertions or treat unexpected 404 responses as passing.
+- Use `py -m` commands on Windows. Never use `python` or `python3`.
+- Do not install packages unless an actual missing dependency is confirmed.
 
-Run all 6 Phase 3C HTTP tests and the full backend suite. Report actual results and any remaining failures.
+Run all six HTTP tests and then the full backend test suite. Report exact passed, failed, and skipped counts with remaining tracebacks.
 
-Windows: Use py -m commands, never python or python3.
-
-Stop after verification.
+Stop after verification. Do not create a completion summary unless all six HTTP tests pass.
