@@ -1,28 +1,33 @@
-Complete the missing Phase 3A HTTP test verification.
+Fix the 17 failing tests from Phase 3A verification.
 
-Run the actual Phase 3A test file:
-py -m pytest tests/test_phase3a_canonical_api.py -q
+The full test suite currently reports:
+- 41 passed
+- 17 failed
+- 660 warnings
 
-Then run the complete backend test suite:
-py -m pytest tests/ -q
+Claude identified a Pydantic Settings model attribute assignment error.
 
-Verify that real HTTP requests using PC-00001 work for:
-- GET canonical Connect
-- GET canonical Actions
-- POST canonical Action creation
-- POST canonical AI generation
+TASK:
 
-Use only isolated synthetic Arun test data and an isolated test database.
+1. Inspect the complete traceback for all 17 failures.
+2. Identify the actual root cause of each failure.
+3. Fix the test fixtures/settings overrides correctly using supported Pydantic mechanisms.
+4. Do not blindly change production Settings just to make tests pass.
+5. Preserve the production fail-closed security guards.
+6. Ensure Phase 3A HTTP tests exercise real FastAPI route handlers with isolated Arun test data.
+7. Run the Phase 3A test file and then the complete backend test suite.
+8. Report actual passed, failed, skipped and error counts.
+9. Confirm canonical PC-00001 Action and AI endpoints are genuinely tested, not mocked at the route level.
 
-Check authorization, test-only link activation, production fail-closed behavior, and database safety.
-
-IMPORTANT:
-- Do not change any code or database.
+RESTRICTIONS:
+- Fix only verified test failures and their necessary dependencies.
+- Do not remove duplicate Connect Lifecycle yet.
 - Do not modify frontend.
-- Do not execute migrations.
-- Use `py`, never `python` or `python3`.
-- If tests fail, show the exact failure instead of claiming success.
+- Do not run database migrations or modify persistent data.
+- Do not proceed to another phase.
 
-Report actual passed, failed, skipped and error counts, separately for Phase 3A and the full backend suite.
+TECHM WINDOWS:
+Always use `py`, never `python` or `python3`.
+Use `py -m pytest` for testing.
 
-STOP after verification.
+STOP after all tests have been executed and report the actual results. If failures remain, show their exact causes.
