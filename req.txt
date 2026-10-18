@@ -1,91 +1,25 @@
-# PeopleConnect — Phase 3C: PRD Compliance Verification and Remaining End-to-End Tests
+Continue Phase 3C verification in the EXISTING PeopleConnect backend.
 
-Continue working in the EXISTING PeopleConnect backend project. Do not create a new application, database, architecture, or duplicate implementation.
+Current results: 80 passed, 10 failed out of 90 tests.
 
-## Current Verified Progress
+The 10 failures are in tests/test_phase3c_prd_coverage.py and reportedly return HTTP 404.
 
-- Phase 0, Phase 1, Phase 2 and Phase 3A implemented.
-- Phase 3A canonical Connect ID integration tested using Arun-style isolated synthetic data.
-- Phase 3C has 7 passing workflow tests.
-- Most recent reported backend test result: 79 passed, 0 failed.
-- Arun's actual backend integration is intentionally deferred.
-- Praveen's existing lifecycle code and database foreign keys must remain intact for now.
+TASK:
+1. Inspect exact tracebacks of all 10 failures.
+2. Compare Phase 3C test fixtures with the already-working Phase 3A isolated lifecycle adapter setup.
+3. Identify the actual cause of each 404. Do not assume all failures have the same cause.
+4. Correct test fixtures only where genuinely defective. Do not bypass authentication, RBAC, authorization, lifecycle validation or business rules.
+5. If a real application defect is found, report it clearly and apply only the minimum required fix.
+6. Run:
+   py -m pytest tests/test_phase3c_prd_coverage.py -v
+   py -m pytest tests/ -q
+7. Report exact passed/failed counts and list modified files.
 
-## Objective
-
-Perform a detailed PRD-based verification of the remaining Phase 3C functionality. Use the project's existing PRD/FR-01–FR-28 requirements as the source of truth. Do not claim compliance based only on the existence of models, services, routes, or passing unrelated tests.
-
-## Scope to Verify
-
-1. Human review of AI-generated minutes, decisions, actions and insights, including edits, approvals, rejections, reviewer identity, timestamps and audit history.
-2. Publication workflow: only validated/approved outputs can be published; rejected drafts cannot become active; prevent duplicate publication.
-3. Action management: ownership, status changes, due dates, SLA calculations, aging, overdue identification, closure rules and action-status history.
-4. Notifications: publication notifications, reminders, due-date alerts, escalations, correct recipients and idempotency.
-5. Auditability: verify persisted records for generation, review, approval, rejection, publication and action updates.
-6. Authorization: verify BHR, BHR_LEADER and PLATFORM_ADMIN permissions and IBU-scoped access, including negative tests.
-7. PRD-specific business rules and failure scenarios, including missing evidence, incomplete capture, invalid owners and unauthorized operations.
-
-## Execution Instructions
-
-First inspect the existing routes, services, database models, tests and PRD. Create a requirements-to-code-to-test coverage matrix showing:
-
-- Requirement ID
-- Expected behavior
-- Existing implementation location
-- Existing test coverage
-- Verified / Partially Verified / Missing
-- Evidence supporting the classification
-
-Identify exactly which scenarios remain untested.
-
-Then implement focused end-to-end tests for the missing scenarios using the REAL FastAPI application, actual service methods, existing ORM models and isolated synthetic SQLite databases.
-
-Test the full workflow wherever supported:
-
-Capture evidence → Generate drafts → Human review → Approve/Reject → Publish approved outputs → Activate actions → Track SLA/status → Create notifications → Verify audit records.
-
-Validate actual HTTP responses and database persistence. Do not mark a test successful merely because an endpoint is reachable.
-
-Use existing development mock AI and notification providers. Do not send real emails or make external API calls.
-
-If a test exposes a genuine implementation defect, correct only the minimal relevant code and explain the root cause. Never modify tests merely to hide a product defect.
-
-## Strict Constraints
-
-- DO NOT implement Arun's real backend or lifecycle APIs.
-- DO NOT remove Praveen's duplicate lifecycle yet.
-- DO NOT delete or rename existing Connect tables or foreign keys.
-- DO NOT modify the frontend.
-- DO NOT execute Alembic migrations against existing/shared databases.
-- DO NOT modify production authentication or bypass RBAC.
-- DO NOT fabricate test results or PRD compliance.
-- DO NOT create duplicate services when an existing implementation can be reused.
-- Preserve existing Phase 3A canonical ID mapping and scope enforcement.
-- Keep all synthetic Arun data and test execution isolated from persistent production databases.
-
-Use Windows commands with `py -m`, NEVER `python` or `python -m`.
-
-## Testing
-
-Run focused Phase 3C tests, then the complete backend suite:
-
-`py -m pytest tests/test_phase3c_e2e.py -v`
-
-`py -m pytest tests/ -q`
-
-Add any additional test files as needed. Report actual passed, failed, skipped and error counts.
-
-## Final Deliverables
-
-Provide:
-
-1. Exact files created/modified.
-2. PRD coverage matrix.
-3. New tests added and actual results.
-4. Any genuine bugs fixed, with file references.
-5. Requirements still unverified or blocked.
-6. Confirmation that existing Module 3 features, Arun integration safeguards and database structures remain unchanged where required.
-
-Do not claim Phase 3C is fully completed unless all applicable requirements have been exercised successfully. If requirements remain blocked, explain precisely why.
-
-**STOP after Phase 3C verification. Do not start Arun production integration, lifecycle cleanup or another phase without approval.**
+STRICT:
+- Do not implement real Arun backend integration.
+- Do not remove Praveen's lifecycle.
+- Do not modify frontend or existing database schema.
+- Do not run Alembic migrations.
+- Use py instead of python in every command.
+- Do not claim Phase 3C is 100% verified while any required tests fail.
+- Stop after verification and provide evidence.
