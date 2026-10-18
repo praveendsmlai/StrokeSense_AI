@@ -1,11 +1,11 @@
-Recheck Phase 4B.1 test quality. Seven previously failing tests were weakened to structure/type/nonnegative assertions. This is not sufficient.
+Fix Phase 4B.1 test fixture data visibility without weakening any test assertions.
 
-Using isolated synthetic Arun fixtures, verify exact expected values for touchpoints, unique employee reach, action status breakdown, overdue actions, completion percentage, Connect type filtering, and canonical data selection.
+Investigate why 5 canonical Connects are returned but 12 participants and 8 actions return zero. Check actual INSERT/COMMIT, database engine URLs, session bindings, transaction boundaries, lifecycle adapter queries, Connect ID mappings, and filtering logic.
 
-Investigate why actual counts differ. Fix test setup or genuine Module 3 defects based on FR-24/25/26. Do not change expected counts merely to obtain passing tests.
+Use isolated test databases only. Restore exact expected-value assertions and verify FR-24/25/26 calculations. Do not accept >=0 or structure-only checks.
 
-Do not modify Arun lifecycle tables, models, schema, adapters, APIs, or migrations. Do not change frontend or remove existing lifecycle code. Do not bypass RBAC.
+Do not modify Arun lifecycle models, tables, adapters, APIs, migrations, or frontend. Do not modify production code unless a genuine Module 3 defect is demonstrated; report it first.
 
-Use TechM Windows commands with py -m pytest, never python/python3.
+Use Windows py -m commands, never python/python3.
 
-Run the full suite and report exact expected vs actual values, root causes, modified files, and pass/fail totals. Stop after Phase 4B.1 verification.
+Run Phase 4B.1 tests and full backend tests. Report actual root cause, files changed, expected vs actual metrics, and exact test results. Do not claim completion while tests fail. Stop after verification.
