@@ -1,24 +1,42 @@
-Continue the existing PeopleConnect backend project.
+**PeopleConnect — Phase 3A Final End-to-End Verification**
 
-**Task: Fix and verify the remaining Phase 3A integration gaps.**
+Continue in the EXISTING PeopleConnect backend. Do not create a new project.
 
-Current status: 64 backend tests reportedly pass, but the final acceptance report identified unresolved issues.
+**Current status:** 68 backend tests passing, including 10 Phase 3A HTTP acceptance tests. Canonical ID mapping, BHR/BHR_LEADER scope authorization, and generation actor parameter have been addressed.
 
-1. Fix `arun_canonical_id_mapper.py`, which currently creates compatibility Connect records with `business_unit=None`. Derive the correct IBU from Arun's documented canonical Connect data. Do not invent fields or hardcode an IBU.
-2. Verify real BHR, BHR_LEADER, and PLATFORM_ADMIN authorization using separate application user/role/scope data. Employee Master must not be used as the login credential store.
-3. Test that authorized BHR/BHR_LEADER users can access Connects within their scope and cannot access Connects outside their scope.
-4. Verify the canonical `PC-00001` mapping and downstream Actions APIs using actual FastAPI HTTP tests, not only mocked service tests.
-5. Test successful AI generation with valid synthetic meeting evidence and a test provider. Do not treat HTTP 422 or 503 as successful AI generation.
-6. Run the complete backend test suite using `py -m pytest tests/ -q`. Fix genuine defects without weakening authorization, security checks, or test assertions.
+**Task:** Complete the two remaining end-to-end verification gaps.
 
-**Restrictions:**
-- Backend changes only; do not modify frontend.
-- Do not implement Arun's lifecycle APIs.
-- Do not delete the local compatibility `connects` table or existing downstream foreign keys.
-- Use isolated synthetic test databases only.
-- Do not run migrations against shared or production databases.
-- Never bypass authorization to make tests pass.
-- Use `py`, not `python`, for all Python commands.
-- Preserve existing Module 3 functionality and the 35 Alembic migrations.
+**1. Action Creation End-to-End**
+- Use an isolated test database with Arun's documented nine-table schema and existing Module 3 tables.
+- Create a valid canonical Connect (`PC-00001`) and authorized test user.
+- Call the actual FastAPI Action Creation endpoint using the canonical ID.
+- Verify the action is persisted in the correct Module 3 table.
+- Retrieve it through the actual Action Listing endpoint.
+- Verify canonical-to-local ID mapping, owner, due date, status, authorization, and database persistence.
+- Verify unauthorized users cannot create or view out-of-scope actions.
 
-At completion, report the exact files changed, tests executed, passed/failed counts, any unresolved issues, and whether BHR/BHR_LEADER authorization and successful AI generation were actually verified. Do not claim completion for untested functionality.
+**2. AI Generation End-to-End**
+- Create a valid canonical Connect with completed capture and legitimate test meeting evidence.
+- Use the existing configured AI provider abstraction with a deterministic test provider. Do not require real API credentials.
+- Call the actual FastAPI Generation endpoint.
+- Verify successful draft persistence for minutes, actions, themes, and intelligence results according to the PRD and existing implementation.
+- Ensure generated AI actions and themes remain subject to human review. Do not automatically approve or publish them.
+- Verify invalid/incomplete captures are rejected appropriately.
+- Verify repeated generation does not create unintended duplicate records.
+- Verify BHR/BHR_LEADER scope restrictions.
+
+**Critical requirements**
+- Follow the existing PeopleConnect PRD, especially FR-13 through FR-18 and relevant AI requirements.
+- Arun's lifecycle remains the authoritative source for Connect identity and organizational scope.
+- Employee Master and Arun's HR roster are distinct from application login users. Do not use fabricated admin employee records as actual participants or action owners.
+- Preserve existing authorization; never bypass production security to make tests pass.
+- Preserve one-backend, one-shared-database integration architecture. Separate databases are permitted only inside disposable test fixtures.
+- Do not create or alter Arun's production tables.
+- Do not modify frontend, delete existing modules, or remove lifecycle routes.
+- No unnecessary migrations or unrelated refactoring.
+- Use `py -m` instead of `python` in every command.
+- Run actual tests and report exact pass/fail/skip counts. Do not claim success merely because endpoints return HTTP 200/201 or expected error codes.
+
+**Before implementation:** Inspect the existing routes, services, schemas, models, tests, and PRD. Reuse existing functionality and identify precisely what is missing.
+
+**After implementation:** Provide modified files, actual test results, verified database persistence, remaining blockers, and any functionality not fully tested. Do not proceed to Phase 3B.
