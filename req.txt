@@ -1,34 +1,56 @@
-Continue my existing PeopleConnect backend after Phase 0.
+Continue the existing PeopleConnect backend after Phase 1.
 
-IMPLEMENT PHASE 1 ONLY: ARUN'S ISOLATED TEST DATABASE.
+IMPLEMENT PHASE 2 ONLY — AUTOMATIC CANONICAL CONNECT ID MAPPING.
 
-1. First verify the Alembic revision graph using `py -m alembic heads` and report any conflicting heads. Do not merge or modify revisions in this phase.
-2. Read the supplied Arun API & Table Schema document completely.
-3. Implement all nine Arun-style tables with exact documented names, columns, relationships and constraints.
-4. Keep Arun's provisional schema in separate TEST-ONLY SQLAlchemy metadata.
-5. Create a disposable SQLite integration database containing the required existing Module 3 tables and nine Arun-style tables.
-6. Add synthetic records for Connect IDs PC-00001 onward, lifecycle statuses, participants, participant snapshots, hr_roster, users, Connect Types, uploads and audit logs.
-7. Create synthetic BHR, BHR Leader and Platform Admin users with appropriate test scope mappings.
-8. Employee Master is for employee information, NOT login authentication.
-9. Add automated tests for table structure, primary/foreign keys, canonical IDs, role/scope fixtures and repeatable data setup.
-10. Ensure tests never modify an existing development or production database.
+Read the PRD, Task Breakdown Excel, Arun API/Table Schema document, and your previous audit before modifying code.
 
-STRICT RULES:
-- Do not implement Arun's Connect Lifecycle APIs.
-- Do not remove my duplicate lifecycle yet.
-- Do not modify frontend.
-- Do not modify existing business logic.
-- Do not run migrations against an existing database.
-- Do not create permanent Arun dummy tables in production metadata.
-- Use `py -m` commands, never `python` or `python3`.
-- Do not proceed to automatic Connect ID mapping yet.
+OBJECTIVE:
+Make Praveen's T002/T003 backend work with Arun's canonical Connect IDs (PC-00001, PC-00002, etc.) using the nine isolated test tables created in Phase 1.
 
-After implementation, run the relevant tests and report:
-- Nine-table schema verification.
-- Synthetic record counts.
-- Exact files added/modified.
-- Alembic heads.
-- Test pass/fail results.
-- Confirmation that existing application files and data were preserved.
+REQUIREMENTS:
 
-STOP after Phase 1 and wait for approval.
+1. Inspect existing connects, connect_lifecycle_links, downstream foreign keys, lifecycle gateway and adapter code.
+2. Accept Arun's canonical string Connect ID in relevant Module 3 downstream APIs.
+3. Verify Connect existence, status and authorized organizational scope through the lifecycle adapter.
+4. Automatically create or resolve the existing internal compatibility Connect record and active mapping when needed.
+5. Keep mapping atomic, idempotent and safe under repeated/concurrent requests.
+6. Never create a compatibility Connect for a missing or unauthorized Arun Connect.
+7. Do not create a second authoritative Connect Lifecycle.
+8. Preserve existing Module 3 foreign keys, Actions, AI outputs, notifications and reports.
+9. Use Arun's documented lifecycle attributes; do not invent missing fields.
+10. Apply authorization using verified Arun scope and approved BHR mappings. Fail closed when authorization cannot be verified.
+11. Use Phase 1 synthetic fixtures for integration tests.
+12. Keep test-only Arun adapters separate from production.
+13. Preserve the production fail-closed guard until Arun's actual backend adapter is available.
+14. Do not remove duplicate lifecycle APIs yet.
+15. Do not modify frontend.
+16. Do not delete tables or existing data.
+17. Do not run migrations against an existing/shared database.
+18. Add a migration only if necessary; test it on a disposable database.
+
+TEST:
+- Valid PC-00001 mapping.
+- Repeated mapping returns the same internal Connect.
+- Concurrent requests do not create duplicates.
+- Missing and unauthorized Connect rejection.
+- BHR and BHR Leader scope enforcement.
+- Downstream Action and AI records resolve to the correct canonical Connect.
+- Existing legacy behavior remains intact where still required.
+- Test-only tables never enter production metadata.
+- Existing 30 Phase 1 tests still pass.
+
+TECHM WINDOWS:
+Always use `py`, never `python` or `python3`.
+Use `py -m pytest`, `py -m alembic`, etc.
+
+Run focused and available backend regression tests.
+
+REPORT:
+- Exact files modified/added.
+- Mapping implementation and transaction behavior.
+- Tests executed and actual results.
+- Migration status.
+- Remaining dependency on Arun's real backend.
+- Confirmation of zero frontend changes.
+
+STOP AFTER PHASE 2. Do not remove the duplicate lifecycle or proceed to Phase 3 without approval.
