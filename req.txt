@@ -1,21 +1,15 @@
-Continue in the EXISTING PeopleConnect backend.
+Fix the 5 failing Phase 3C HTTP E2E tests in tests/test_phase3c_http_e2e.py.
 
-**Task: Phase 3C Real HTTP End-to-End Verification**
+Investigate SQLAlchemy database session visibility between test fixtures and FastAPI TestClient.
 
-The previous Phase 3C test report showed 11 passing tests, but some HTTP tests were converted into direct service-level calls. We need genuine FastAPI HTTP verification.
+Use an isolated temporary file-based SQLite database or a correctly shared SQLite connection pool. Ensure seeded Meeting, Minutes and Action records are committed and visible to HTTP request sessions.
 
-1. Inspect existing Phase 3A and Phase 3C tests before making changes.
-2. Use the real FastAPI application, registered routers, authentication, RBAC and database dependencies.
-3. Use isolated test databases with synthetic Arun lifecycle data. Do not integrate the real Arun backend.
-4. Test the complete workflow through actual HTTP requests: AI draft generation → human review → approval/rejection → publication → action activation → SLA → notifications → audit trail.
-5. Verify HTTP status codes, database persistence, notification idempotency, and authorization for PLATFORM_ADMIN, BHR and BHR_LEADER.
-6. Ensure rejected content is never published and unauthorized users receive 403.
-7. Fix test fixtures if necessary. Fix production code only if a genuine defect is demonstrated.
-8. Do not replace failing HTTP tests with service-level tests, delete tests, mock authorization, or bypass security.
-9. Keep Praveen's lifecycle, all existing tables, migrations and frontend unchanged.
-10. Ensure `allow_pending=True` and test-only lifecycle activation cannot be used in production routes.
-11. Run the Phase 3C HTTP tests and full backend test suite. Report exact passed, failed and skipped counts. Do not claim completion if tests fail.
+Verify FastAPI get_db dependency overrides use the correct test database engine.
 
-**Windows requirement:** Use `py -m` for Python commands, never `python` or `python3`. If a project virtual environment is required, use its Windows Python executable.
+Do not modify production API routes, RBAC, lifecycle code, schemas or migrations. Do not convert HTTP tests into service-level tests, delete tests or weaken assertions.
 
-Stop after verification and provide the actual results. Do not proceed to Arun integration or lifecycle cleanup.
+Run all 6 Phase 3C HTTP tests and the full backend suite. Report actual results and any remaining failures.
+
+Windows: Use py -m commands, never python or python3.
+
+Stop after verification.
