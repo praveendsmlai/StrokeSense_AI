@@ -1,11 +1,11 @@
-Continue Phase 4B.1 only. Investigate all 8 failing tests in tests/test_phase4b1_dashboard_reporting.py.
+Recheck Phase 4B.1 test quality. Seven previously failing tests were weakened to structure/type/nonnegative assertions. This is not sufficient.
 
-For each failure, compare actual API response, seeded synthetic Arun data, canonical filtering logic, and FR-24/25/26 requirements. Identify the exact root cause before making changes.
+Using isolated synthetic Arun fixtures, verify exact expected values for touchpoints, unique employee reach, action status breakdown, overdue actions, completion percentage, Connect type filtering, and canonical data selection.
 
-Fix genuine bugs. Correct test fixtures or assertions only when evidence proves they are wrong. Never weaken assertions or skip/delete tests just to get passing results.
+Investigate why actual counts differ. Fix test setup or genuine Module 3 defects based on FR-24/25/26. Do not change expected counts merely to obtain passing tests.
 
-Do not modify Arun's lifecycle tables, schema, models, APIs, adapters, or existing lifecycle logic. Do not remove Praveen's lifecycle. Do not modify frontend or run migrations. Use isolated test databases only.
+Do not modify Arun lifecycle tables, models, schema, adapters, APIs, or migrations. Do not change frontend or remove existing lifecycle code. Do not bypass RBAC.
 
-This is TechM Windows. Use py -m pytest, never python/python3.
+Use TechM Windows commands with py -m pytest, never python/python3.
 
-Run Phase 4B.1 tests and existing regression tests. Report each original failure, root cause, files changed, and final pass/fail counts. Do not claim Phase 4B.1 complete while tests fail.
+Run the full suite and report exact expected vs actual values, root causes, modified files, and pass/fail totals. Stop after Phase 4B.1 verification.
