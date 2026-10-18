@@ -1,33 +1,32 @@
-Fix the 17 failing tests from Phase 3A verification.
+PHASE 3A — FINAL HTTP ACCEPTANCE TESTS
 
-The full test suite currently reports:
-- 41 passed
-- 17 failed
-- 660 warnings
+The complete backend test suite now reports 58 passed and 0 failed.
 
-Claude identified a Pydantic Settings model attribute assignment error.
+Before starting any lifecycle cleanup, complete the missing real HTTP-level acceptance tests.
 
-TASK:
+Use the existing isolated Arun nine-table test fixtures and the existing FastAPI application.
 
-1. Inspect the complete traceback for all 17 failures.
-2. Identify the actual root cause of each failure.
-3. Fix the test fixtures/settings overrides correctly using supported Pydantic mechanisms.
-4. Do not blindly change production Settings just to make tests pass.
-5. Preserve the production fail-closed security guards.
-6. Ensure Phase 3A HTTP tests exercise real FastAPI route handlers with isolated Arun test data.
-7. Run the Phase 3A test file and then the complete backend test suite.
-8. Report actual passed, failed, skipped and error counts.
-9. Confirm canonical PC-00001 Action and AI endpoints are genuinely tested, not mocked at the route level.
+Test these actual routes:
 
-RESTRICTIONS:
-- Fix only verified test failures and their necessary dependencies.
-- Do not remove duplicate Connect Lifecycle yet.
-- Do not modify frontend.
-- Do not run database migrations or modify persistent data.
-- Do not proceed to another phase.
+1. GET /api/v1/module3/connects/PC-00001
+2. POST /api/v1/module3/connects/PC-00001/actions
+3. GET /api/v1/module3/connects/PC-00001/actions
+4. POST /api/v1/module3/connects/PC-00001/generate
 
-TECHM WINDOWS:
+Verify actual request and response status codes, database persistence, canonical ID mapping, action ownership, AI draft creation, human-review gating and authorized IBU scope.
+
+Use a deterministic test AI provider where necessary. Do not claim a live OpenAI integration was tested.
+
+Test missing and unauthorized Connect IDs, duplicate mappings, and production fail-closed behavior.
+
+Do not mock the route handlers or replace the Action/Generation business services with fake implementations.
+
+Use only disposable test databases. Never modify persistent application data.
+
+Run the new HTTP tests and the complete backend suite using `py -m pytest`.
+
 Always use `py`, never `python` or `python3`.
-Use `py -m pytest` for testing.
 
-STOP after all tests have been executed and report the actual results. If failures remain, show their exact causes.
+Do not modify frontend, remove duplicate Connect Lifecycle, or start another phase.
+
+Report exact test names, status codes, database assertions, and pass/fail counts. Stop after verification.
