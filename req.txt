@@ -1,13 +1,9 @@
-Restore `tests/test_phase3c_prd_coverage.py` from Git history or the previous version.
+Continue Phase 3C test verification in the existing backend.
 
-The file contained 11 Phase 3C HTTP integration tests, of which 10 were failing due to a reported database session isolation issue.
+First inspect the current changes in tests/test_phase3c_prd_coverage.py. Determine whether the previous interrupted edits are complete and valid.
 
-1. Restore all 11 tests. Do not rewrite, weaken, skip, or delete them just to make tests pass.
-2. Investigate the actual root cause of each failure using full tracebacks.
-3. Fix the isolated test database/session fixtures correctly, following the working Phase 3A test pattern.
-4. Use the real FastAPI application, real routes, authentication, RBAC, and business services.
-5. Do not modify production security logic, existing database tables, Alembic migrations, or frontend.
-6. Run the complete backend test suite and report actual passed, failed, and skipped counts.
-7. Show exactly which files were restored or modified and explain each fix.
+Run the Phase 3C tests and identify actual failures. Fix only legitimate test fixture issues, preserving authentication, RBAC, and all test assertions.
 
-Do not claim Phase 3C is complete while any required HTTP integration test fails. Stop after verification.
+Do not delete or skip tests. Do not change production code unless a verified defect requires it.
+
+Report the exact test counts and files changed.
