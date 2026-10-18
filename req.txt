@@ -1,32 +1,262 @@
-PHASE 3A — FINAL HTTP ACCEPTANCE TESTS
+# PEOPLECONNECT — PHASE 3A HTTP ACCEPTANCE TEST RECOVERY
 
-The complete backend test suite now reports 58 passed and 0 failed.
+Continue development in the EXISTING PeopleConnect backend at:
 
-Before starting any lifecycle cleanup, complete the missing real HTTP-level acceptance tests.
+`C:\TechMProjects\peopleconnect\backend`
 
-Use the existing isolated Arun nine-table test fixtures and the existing FastAPI application.
+This is an existing project. DO NOT create a new project, rebuild the backend, or start implementation from scratch.
 
-Test these actual routes:
+## 1. Project context
 
-1. GET /api/v1/module3/connects/PC-00001
-2. POST /api/v1/module3/connects/PC-00001/actions
-3. GET /api/v1/module3/connects/PC-00001/actions
-4. POST /api/v1/module3/connects/PC-00001/generate
+PeopleConnect is a FastAPI, SQLAlchemy and Alembic application.
 
-Verify actual request and response status codes, database persistence, canonical ID mapping, action ownership, AI draft creation, human-review gating and authorized IBU scope.
+Development must follow:
+- Revised PeopleConnect PRD, FR-01 through FR-28.
+- PeopleConnect Task Breakdown Excel.
+- Arun API & Table Schema reference.
+- Existing implemented backend source code.
 
-Use a deterministic test AI provider where necessary. Do not claim a live OpenAI integration was tested.
+Ownership:
+- Arun: T002 Connect Lifecycle, participant management, scheduling, invitations, evidence capture and recording.
+- Praveen: T002 AI Output Generation Integration Point and all assigned T003 Actions, Notifications, Reporting, Dashboard, Themes, Administration and related features.
+- Abhishek: T001 authentication, RBAC and shared security.
 
-Test missing and unauthorized Connect IDs, duplicate mappings, and production fail-closed behavior.
+Do not duplicate Arun's or Abhishek's functionality.
 
-Do not mock the route handlers or replace the Action/Generation business services with fake implementations.
+## 2. Current implementation
 
-Use only disposable test databases. Never modify persistent application data.
+Phase 0:
+- Configuration and dependency declaration fixes completed.
 
-Run the new HTTP tests and the complete backend suite using `py -m pytest`.
+Phase 1:
+- Nine Arun-style SQLAlchemy test tables.
+- Synthetic test records.
+- 30 schema tests.
 
-Always use `py`, never `python` or `python3`.
+Phase 2:
+- `app/services/arun_canonical_id_mapper.py`
+- Canonical ID to internal Connect mapping.
+- Additional mapping tests.
 
-Do not modify frontend, remove duplicate Connect Lifecycle, or start another phase.
+Phase 3A:
+- `app/services/canonical_connect_resolver.py`
+- `app/api/routes/canonical_connects.py`
+- Registration in `app/api/router.py`
+- Canonical routes for Connect details, Actions and AI generation.
 
-Report exact test names, status codes, database assertions, and pass/fail counts. Stop after verification.
+Before the latest HTTP acceptance work, the complete backend suite reported:
+
+58 passed, 0 failed.
+
+That result does NOT prove the full Phase 3A HTTP acceptance tests passed.
+
+## 3. Current problem — investigate existing modifications first
+
+The previous Claude session attempted HTTP acceptance tests in:
+
+`tests/test_phase3a_http_acceptance.py`
+
+Problems observed:
+
+1. Importing the full FastAPI application failed because the `docx` dependency appeared unavailable.
+2. Instead of fixing or identifying the dependency problem, the test was changed to construct a minimal FastAPI application containing only canonical routes.
+3. Requests returned HTTP 403 because router-level `APPLICATION_READ` permission and other authorization dependencies were not satisfied.
+4. The previous session attempted to override `get_resource_authorizer` and use mock authorizers.
+5. The session ended with a request-blocked message before completing the work.
+
+IMPORTANT: The previous session may have already modified `tests/test_phase3a_http_acceptance.py`.
+
+First inspect the current state of that test file and its changes before doing anything else.
+
+Do not assume the previous changes are correct.
+
+## 4. First task — inspect and establish the actual state
+
+Inspect:
+
+- `app/main.py`
+- `app/api/router.py`
+- `app/api/routes/canonical_connects.py`
+- `app/core/security.py`
+- `app/core/config.py`
+- `app/services/canonical_connect_resolver.py`
+- `app/services/arun_canonical_id_mapper.py`
+- `tests/conftest.py`
+- `tests/test_phase3a_canonical_api.py`
+- `tests/test_phase3a_http_acceptance.py`
+- Existing application users, roles, permissions and IBU scope mappings.
+
+Determine:
+- Whether the full application imports successfully.
+- Whether `python-docx` is declared in `requirements.txt`.
+- Whether the dependency is installed in the selected Python environment.
+- Whether the latest test modifications still use a minimal FastAPI application.
+- Whether any authorization dependency has been bypassed.
+- Whether the existing test fixtures can authenticate an authorized BHR, BHR Leader or Platform Administrator.
+- Which actual tests currently pass or fail.
+
+Do not reinstall everything or upgrade packages automatically.
+
+If a declared dependency is missing, report the exact package and installation command. Install only if permitted by the environment and existing project instructions.
+
+## 5. Restore correct HTTP testing
+
+The objective is to test the actual existing FastAPI application.
+
+Use the real application factory and registered routers.
+
+Do not create a minimal replacement FastAPI application merely to make tests pass.
+
+Do not replace actual route handlers or Action/Generation business services with mocks.
+
+Use isolated test SQLite databases with Arun's nine synthetic tables.
+
+Test data must include:
+- Canonical Connect `PC-00001`.
+- Valid lifecycle status and participant data.
+- A valid synthetic ApplicationUser.
+- Required role assignments and permissions.
+- Approved IBU scope mappings.
+- Employee Master reference data only where required by existing foreign keys.
+
+Employee Master must NOT become the login or role authorization source.
+
+## 6. Authorization — mandatory
+
+Keep all existing production authentication, RBAC and authorization checks.
+
+The previous HTTP test returned 403 Forbidden.
+
+Do not bypass `APPLICATION_READ`, `get_resource_authorizer`, `require_permission`, or Connect-level authorization.
+
+Instead, investigate the actual permission requirements and configure a correctly authorized synthetic test principal through the existing supported authentication mechanism.
+
+Use the real RBAC permission and scope evaluation.
+
+Required positive cases:
+- Authorized BHR in the correct IBU.
+- Authorized BHR Leader within the approved scope.
+- Platform Administrator within permitted scope.
+
+Required negative cases:
+- Missing authentication.
+- User without required permission.
+- BHR from an unauthorized IBU.
+- Missing canonical Connect.
+- Invalid canonical Connect ID.
+
+Verify that unauthorized access remains rejected.
+
+Do not alter production security rules to make tests pass.
+
+## 7. Required Phase 3A HTTP acceptance tests
+
+Execute HTTP-level integration tests against:
+
+1. `GET /api/v1/module3/connects/PC-00001`
+2. `POST /api/v1/module3/connects/PC-00001/actions`
+3. `GET /api/v1/module3/connects/PC-00001/actions`
+4. `POST /api/v1/module3/connects/PC-00001/generate`
+
+For each route verify:
+- Actual HTTP status code.
+- Real FastAPI handler execution.
+- Authorization outcome.
+- Canonical Connect mapping.
+- Correct internal Connect ID.
+- Correct database records and foreign keys.
+- Request and response schema.
+- No duplicate compatibility Connect on repeated access.
+
+For Actions:
+- Create an Action with a verified owner and due date.
+- Confirm the Action persists.
+- Read the Action through the canonical route.
+- Confirm its Connect association and owner.
+- Verify unauthorized users cannot create or read it.
+
+For AI Generation:
+- Use synthetic evidence in the isolated test database.
+- Use a deterministic test AI provider, not an external live LLM.
+- Exercise the real GenerationService.
+- Verify draft output persistence and the human-validation boundary.
+- Do not automatically publish AI output.
+- Report explicitly if missing evidence contracts prevent this test.
+
+Do not claim AI generation is verified simply because a test receives HTTP 200 without checking actual output and database state.
+
+## 8. Test-only lifecycle mapping
+
+Preserve existing Phase 2 and Phase 3A components.
+
+- Pending links remain blocked in normal production mode.
+- Test-only activation must require a test environment and test-only adapter.
+- Do not make production activation automatic.
+- Do not modify Arun's provisional table definitions without documenting a genuine mismatch.
+- Keep existing production ORM metadata separate from Arun's test metadata.
+- Do not insert synthetic data into a persistent application database.
+
+## 9. Implementation boundaries
+
+Make the minimum necessary corrections to the existing HTTP test harness and directly related defects.
+
+DO NOT:
+- Remove duplicate Connect Lifecycle.
+- Implement Arun's lifecycle APIs.
+- Rewrite authentication or RBAC.
+- Modify frontend.
+- Drop database tables or columns.
+- Run Alembic upgrades.
+- Change production security permissions.
+- Create a second AI generation pipeline.
+- Implement unrelated PRD tasks.
+- Replace real services with fake services merely to produce passing tests.
+
+If the problem depends on unavailable real Arun backend contracts, stop and report that blocker.
+
+## 10. TECH MAHINDRA WINDOWS — MANDATORY
+
+Use the Windows Python launcher `py`.
+
+Never use `python` or `python3` as shell commands.
+
+Examples:
+
+`py -m pytest tests/test_phase3a_http_acceptance.py -vv`
+
+`py -m pytest tests/ -q`
+
+`py -m pip show python-docx`
+
+`py -m alembic heads`
+
+Do not change the Python interpreter unexpectedly.
+
+## 11. Final verification
+
+After the necessary fixes, execute:
+
+`py -m pytest tests/test_phase3a_http_acceptance.py -vv`
+
+Then:
+
+`py -m pytest tests/ -q`
+
+Report:
+
+1. Root cause of the initial `docx` import issue.
+2. Root cause of HTTP 403.
+3. Whether authentication/authorization was tested using real security logic.
+4. Every file modified.
+5. HTTP status codes for all four routes.
+6. Database persistence assertions.
+7. Exact number of passed, failed, skipped and errored tests.
+8. Whether existing 58 tests remain passing.
+9. Whether AI Generation was genuinely exercised.
+10. Any remaining issue requiring Arun or Abhishek.
+
+Do not describe Phase 3A as fully verified if actual HTTP tests are missing or failing.
+
+STOP after completing Phase 3A acceptance testing. Do not proceed to lifecycle cleanup or Phase 3B.
+
+**Success means the actual PeopleConnect FastAPI application passes the canonical HTTP acceptance tests using properly authorized synthetic users, without bypassing security.**
