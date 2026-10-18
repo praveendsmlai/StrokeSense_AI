@@ -1,15 +1,28 @@
-Verify Phase 3A before proceeding.
+Complete the missing Phase 3A HTTP test verification.
 
-Run all available backend tests, including the Phase 1, Phase 2 and Phase 3A HTTP integration tests, using `py -m pytest -q`.
+Run the actual Phase 3A test file:
+py -m pytest tests/test_phase3a_canonical_api.py -q
 
-Report the exact number of passed, failed, skipped and errored tests.
+Then run the complete backend test suite:
+py -m pytest tests/ -q
 
-Specifically confirm with executed HTTP tests that canonical ID PC-00001 works for Action creation/listing and AI generation with isolated Arun test fixtures.
+Verify that real HTTP requests using PC-00001 work for:
+- GET canonical Connect
+- GET canonical Actions
+- POST canonical Action creation
+- POST canonical AI generation
 
-Ensure production remains fail-closed, tests do not modify any persistent database, and the frontend is unchanged.
+Use only isolated synthetic Arun test data and an isolated test database.
 
-Do not modify code, migrations, database or configuration. If any test fails, report its exact error without fixing it yet.
+Check authorization, test-only link activation, production fail-closed behavior, and database safety.
 
-IMPORTANT: On this Tech Mahindra Windows environment always use `py`, never `python` or `python3`.
+IMPORTANT:
+- Do not change any code or database.
+- Do not modify frontend.
+- Do not execute migrations.
+- Use `py`, never `python` or `python3`.
+- If tests fail, show the exact failure instead of claiming success.
 
-Stop after reporting the actual results.
+Report actual passed, failed, skipped and error counts, separately for Phase 3A and the full backend suite.
+
+STOP after verification.
