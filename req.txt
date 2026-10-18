@@ -1,25 +1,13 @@
-Continue Phase 3C verification in the EXISTING PeopleConnect backend.
+Restore `tests/test_phase3c_prd_coverage.py` from Git history or the previous version.
 
-Current results: 80 passed, 10 failed out of 90 tests.
+The file contained 11 Phase 3C HTTP integration tests, of which 10 were failing due to a reported database session isolation issue.
 
-The 10 failures are in tests/test_phase3c_prd_coverage.py and reportedly return HTTP 404.
+1. Restore all 11 tests. Do not rewrite, weaken, skip, or delete them just to make tests pass.
+2. Investigate the actual root cause of each failure using full tracebacks.
+3. Fix the isolated test database/session fixtures correctly, following the working Phase 3A test pattern.
+4. Use the real FastAPI application, real routes, authentication, RBAC, and business services.
+5. Do not modify production security logic, existing database tables, Alembic migrations, or frontend.
+6. Run the complete backend test suite and report actual passed, failed, and skipped counts.
+7. Show exactly which files were restored or modified and explain each fix.
 
-TASK:
-1. Inspect exact tracebacks of all 10 failures.
-2. Compare Phase 3C test fixtures with the already-working Phase 3A isolated lifecycle adapter setup.
-3. Identify the actual cause of each 404. Do not assume all failures have the same cause.
-4. Correct test fixtures only where genuinely defective. Do not bypass authentication, RBAC, authorization, lifecycle validation or business rules.
-5. If a real application defect is found, report it clearly and apply only the minimum required fix.
-6. Run:
-   py -m pytest tests/test_phase3c_prd_coverage.py -v
-   py -m pytest tests/ -q
-7. Report exact passed/failed counts and list modified files.
-
-STRICT:
-- Do not implement real Arun backend integration.
-- Do not remove Praveen's lifecycle.
-- Do not modify frontend or existing database schema.
-- Do not run Alembic migrations.
-- Use py instead of python in every command.
-- Do not claim Phase 3C is 100% verified while any required tests fail.
-- Stop after verification and provide evidence.
+Do not claim Phase 3C is complete while any required HTTP integration test fails. Stop after verification.
