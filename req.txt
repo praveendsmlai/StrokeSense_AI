@@ -1,11 +1,51 @@
-Fix Phase 4B.1 test fixture data visibility without weakening any test assertions.
+import sqlite3
+import uuid
 
-Investigate why 5 canonical Connects are returned but 12 participants and 8 actions return zero. Check actual INSERT/COMMIT, database engine URLs, session bindings, transaction boundaries, lifecycle adapter queries, Connect ID mappings, and filtering logic.
+c = sqlite3.connect("peopleconnect.db")
+c.execute("PRAGMA foreign_keys=ON")
 
-Use isolated test databases only. Restore exact expected-value assertions and verify FR-24/25/26 calculations. Do not accept >=0 or structure-only checks.
+emp = c.execute(
+    "SELECT employee_id, emp_name, email_id FROM employees WHERE employee_id=?",
+    ("1025216",)
+).fetchone()
 
-Do not modify Arun lifecycle models, tables, adapters, APIs, migrations, or frontend. Do not modify production code unless a genuine Module 3 defect is demonstrated; report it first.
+assert emp is not None, "Employee not found"
 
-Use Windows py -m commands, never python/python3.
+user = c.execute(
+    "SELECT id FROM application_users WHERE employee_id=?",
+    (emp[0],)
+).fetchone()
 
-Run Phase 4B.1 tests and full backend tests. Report actual root cause, files changed, expected vs actual metrics, and exact test results. Do not claim completion while tests fail. Stop after verification.
+user_id = user[0] if user else str(uuid.uuid4())
+
+try:
+    if not user:
+        c.execute(
+            """INSERT INTO application_users
+            (id, employee_id, email, display_name, is_active)
+            VALUES (?, ?, ?, ?, ?)""",
+            (user_id, emp[0], emp[2], emp[1], 1)
+        )
+
+    c.execute(
+        """INSERT OR IGNORE INTO application_user_roles
+        (user_id, role) VALUES (?, ?)""",
+        (user_id, "PLATFORM_ADMIN")
+    )
+
+    c.commit()
+    print("ADMIN SETUP SUCCESSFUL")
+
+except Exception:
+    c.rollback()
+    raise
+
+print(c.execute(
+    """SELECT u.employee_id, u.display_name, r.role
+    FROM application_users u
+    JOIN application_user_roles r ON r.user_id = u.id
+    WHERE u.employee_id = ?""",
+    ("1025216",)
+).fetchall())
+
+c.close()
