@@ -1,51 +1,31 @@
 import sqlite3
-import uuid
 
-c = sqlite3.connect("peopleconnect.db")
-c.execute("PRAGMA foreign_keys=ON")
+conn = sqlite3.connect("peopleconnect.db")
 
-emp = c.execute(
-    "SELECT employee_id, emp_name, email_id FROM employees WHERE employee_id=?",
-    ("1025216",)
-).fetchone()
+tables = [
+    "plan_connect_initiations",
+    "plan_connect_participants",
+    "participant_snapshots",
+    "plan_connect_file_uploads",
+    "participant_upload_rows",
+    "connect_types",
+    "hr_roster",
+    "users",
+    "audit_logs",
+]
 
-assert emp is not None, "Employee not found"
+for table in tables:
+    exists = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+        (table,)
+    ).fetchone()
 
-user = c.execute(
-    "SELECT id FROM application_users WHERE employee_id=?",
-    (emp[0],)
-).fetchone()
+    if exists:
+        count = conn.execute(
+            f'SELECT COUNT(*) FROM "{table}"'
+        ).fetchone()[0]
+        print(f"{table}: EXISTS | Records: {count}")
+    else:
+        print(f"{table}: NOT FOUND")
 
-user_id = user[0] if user else str(uuid.uuid4())
-
-try:
-    if not user:
-        c.execute(
-            """INSERT INTO application_users
-            (id, employee_id, email, display_name, is_active)
-            VALUES (?, ?, ?, ?, ?)""",
-            (user_id, emp[0], emp[2], emp[1], 1)
-        )
-
-    c.execute(
-        """INSERT OR IGNORE INTO application_user_roles
-        (user_id, role) VALUES (?, ?)""",
-        (user_id, "PLATFORM_ADMIN")
-    )
-
-    c.commit()
-    print("ADMIN SETUP SUCCESSFUL")
-
-except Exception:
-    c.rollback()
-    raise
-
-print(c.execute(
-    """SELECT u.employee_id, u.display_name, r.role
-    FROM application_users u
-    JOIN application_user_roles r ON r.user_id = u.id
-    WHERE u.employee_id = ?""",
-    ("1025216",)
-).fetchall())
-
-c.close()
+conn.close()
