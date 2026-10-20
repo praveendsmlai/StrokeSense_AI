@@ -1,1 +1,1 @@
-findstr /n /i "def get_canonical resolve_local resolve_canonical resolve_verified get_connect" app\api\routes\canonical_connects.py app\services\lifecycle_data_access.py
+py -c "from pathlib import Path; p=Path('app/services/canonical_connect_resolver.py'); print(''.join(p.read_text(encoding='utf-8').splitlines(keepends=True)[:160]))"
