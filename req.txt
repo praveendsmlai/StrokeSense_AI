@@ -1,1 +1,1 @@
-py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT id, status, current_stage FROM plan_connect_initiations').fetchall()); c.close()"
+py -c "from app.db.session import Database; from app.core.config import Settings; from app.services.arun_documented_lifecycle_adapter import ArunDocumentedLifecycleAdapter; db=Database(Settings()); s=db.session_factory(); a=ArunDocumentedLifecycleAdapter(s); print(a.get_connect('PC-00002')); s.close(); db.dispose()"
