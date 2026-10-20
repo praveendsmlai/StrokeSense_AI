@@ -1,153 +1,29 @@
-"""Explicit Phase 2C test adapter for the disposable Arun-schema database.
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
-This module is intentionally under ``tests``.  Production application modules
-depend only on ``LifecycleReadAdapter`` and cannot discover or load this class.
-"""
-from __future__ import annotations
+from tests.integration.arun_schema.models import ArunTestBase
+from tests.integration.arun_schema.fixture import _seed
 
-import re
-from datetime import date
+engine = create_engine("sqlite:///peopleconnect.db")
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+with engine.begin() as connection:
+    existing = set(
+        __import__("sqlalchemy").inspect(connection).get_table_names()
+    )
+    arun_tables = set(ArunTestBase.metadata.tables.keys())
 
-from app.models.connect_lifecycle_link import LIFECYCLE_SOURCE_ARUN
-from app.services.lifecycle_read_adapter import (
-    CanonicalLifecycleConnect,
-    LifecycleParticipant,
-    LifecycleParticipantSnapshot,
-)
-from .models import ArunPlanConnectInitiation, ArunPlanConnectParticipant
+    if existing & arun_tables:
+        raise RuntimeError("Arun tables already exist. Setup stopped.")
 
+    ArunTestBase.metadata.create_all(connection)
 
-_CANONICAL_ID = re.compile(r"^PC-\d{5,}$")
+try:
+    with Session(engine) as session:
+        _seed(session)
+        session.commit()
+except Exception:
+    with engine.begin() as connection:
+        ArunTestBase.metadata.drop_all(connection)
+    raise
 
-
-class ArunSchemaTestAdapter:
-    """Read-only adapter over the provisional schema in a disposable database."""
-
-    source = LIFECYCLE_SOURCE_ARUN
-    is_test_only = True
-
-    def __init__(self, session: Session) -> None:
-        self.session = session
-
-    def get_connect(self, canonical_id: str) -> CanonicalLifecycleConnect | None:
-        self._validate_id(canonical_id)
-        row = self.session.scalar(self._statement().where(ArunPlanConnectInitiation.id == canonical_id))
-        return self._translate(row) if row is not None else None
-
-    def list_connects(
-        self,
-        *,
-        initiator_id: str | None = None,
-        statuses: set[str] | None = None,
-        start_date: date | None = None,
-        end_date: date | None = None,
-        employee_ibu: str | None = None,
-    ) -> list[CanonicalLifecycleConnect]:
-        statement = self._statement()
-        if initiator_id is not None:
-            statement = statement.where(ArunPlanConnectInitiation.initiator_id == initiator_id)
-        if statuses:
-            statement = statement.where(ArunPlanConnectInitiation.status.in_(statuses))
-        if start_date is not None:
-            statement = statement.where(ArunPlanConnectInitiation.meeting_date >= start_date)
-        if end_date is not None:
-            statement = statement.where(ArunPlanConnectInitiation.meeting_date <= end_date)
-        rows = self.session.scalars(statement.order_by(ArunPlanConnectInitiation.id)).all()
-        values = [self._translate(row) for row in rows]
-        if employee_ibu is not None:
-            values = [value for value in values if self._in_scope(value, employee_ibu)]
-        return values
-
-    def can_access(
-        self,
-        canonical_id: str,
-        *,
-        initiator_id: str | None = None,
-        employee_ibu: str | None = None,
-    ) -> bool:
-        connect = self.get_connect(canonical_id)
-        if connect is None:
-            return False
-        if initiator_id is not None and connect.initiator_id != initiator_id:
-            return False
-        return employee_ibu is None or self._in_scope(connect, employee_ibu)
-
-    @staticmethod
-    def _statement():
-        return select(ArunPlanConnectInitiation).options(
-            selectinload(ArunPlanConnectInitiation.connect_type),
-            selectinload(ArunPlanConnectInitiation.participants).selectinload(ArunPlanConnectParticipant.snapshots),
-        )
-
-    @staticmethod
-    def _validate_id(canonical_id: str) -> None:
-        if not isinstance(canonical_id, str) or not _CANONICAL_ID.fullmatch(canonical_id):
-            raise ValueError("Canonical lifecycle IDs must use the documented PC-NNNNN format.")
-
-    @staticmethod
-    def _in_scope(connect: CanonicalLifecycleConnect, employee_ibu: str) -> bool:
-        return connect.bhr_employee_ibu == employee_ibu or any(
-            participant.snapshot is not None and participant.snapshot.ibu == employee_ibu
-            for participant in connect.participants
-        )
-
-    @staticmethod
-    def _translate(row: ArunPlanConnectInitiation) -> CanonicalLifecycleConnect:
-        participants = tuple(
-            LifecycleParticipant(
-                participant_id=participant.id,
-                employee_id=participant.employee_id,
-                email=participant.email,
-                name=participant.name,
-                department=participant.department,
-                role=participant.role,
-                source=participant.participant_source,
-                status=participant.status,
-                snapshot=(
-                    LifecycleParticipantSnapshot(
-                        participant_id=participant.id,
-                        employee_id=snapshot.employee_id,
-                        employee_name=snapshot.employee_name,
-                        email=snapshot.email,
-                        department=snapshot.department,
-                        ibu=snapshot.ibu,
-                        ibg=snapshot.ibg,
-                        account=snapshot.account,
-                        process=snapshot.process,
-                        country=snapshot.country,
-                        office_location=snapshot.office_location,
-                        supervisor_id=snapshot.supervisor_id,
-                        supervisor_name=snapshot.supervisor_name,
-                        business_unit_code=snapshot.business_unit_code,
-                        business_unit_descr=snapshot.business_unit_descr,
-                        tenure_months=snapshot.tenure_months,
-                        tenure_bucket=snapshot.tenure_bucket,
-                        role_description=snapshot.role_description,
-                    )
-                    if (snapshot := next(iter(participant.snapshots), None)) is not None
-                    else None
-                ),
-            )
-            for participant in row.participants
-        )
-        return CanonicalLifecycleConnect(
-            canonical_id=row.id,
-            initiator_id=row.initiator_id,
-            connect_type_id=row.connect_type_id,
-            connect_type_name=row.connect_type_name,
-            status=row.status,
-            current_stage=row.current_stage,
-            workflow_type=row.workflow_type,
-            meeting_date=row.meeting_date,
-            start_time=row.start_time,
-            end_time=row.end_time,
-            scheduled_from=row.scheduled_from,
-            scheduled_to=row.scheduled_to,
-            meeting_mode=row.meeting_mode,
-            participant_count=row.participant_count,
-            bhr_employee_ibu=row.bhr_employee_ibu,
-            participants=participants,
-        )
+print("ARUN DUMMY SETUP SUCCESSFUL")
