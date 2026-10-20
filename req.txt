@@ -1,1 +1,1 @@
-py -c "from pathlib import Path; p=Path('app/services/arun_canonical_id_mapper.py'); print(''.join(p.read_text(encoding='utf-8').splitlines(keepends=True)[83:189]))"
+py -c "from pathlib import Path; p=Path('app/api/routes/canonical_connects.py'); print(''.join(p.read_text(encoding='utf-8').splitlines(keepends=True)[30:115]))"
