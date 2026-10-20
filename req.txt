@@ -1,1 +1,247 @@
-findstr /n /i "CREATE TABLE plan_connect_initiations plan_connect_participants participant_snapshots" tests\test_arun_schema.py
+"""Screenshot-faithful provisional Arun lifecycle models for Phase 2B tests.
+
+Source: ``ARUN_LIFECYCLE_SCHEMA_SPEC.md`` §§4–5.  These are test-only
+transcriptions, not verified Arun DDL; their metadata is never production metadata.
+"""
+from __future__ import annotations
+
+from datetime import date, datetime, time
+
+from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Integer, String, Text, Time, UniqueConstraint
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+CONNECT_STATUSES = ("DRAFT", "INITIATED", "IN_PROGRESS", "SCHEDULED", "COMPLETED", "CANCELLED")
+CONNECT_STAGES = ("INITIATE", "REVIEW", "EVIDENCE_CAPTURE", "COMPLETED")
+WORKFLOW_TYPES = ("PLANNED", "BACKDATED")
+MEETING_MODES = ("TEAMS", "HYBRID", "IN_PERSON")
+PARTICIPANT_SOURCES = ("SEARCH", "UPLOAD")
+PARTICIPANT_STATUSES = ("VALID", "INACTIVE", "DUPLICATE", "UNRESOLVED", "OUT_OF_SCOPE", "INVALID")
+UPLOAD_STATUSES = ("UPLOADED", "PROCESSING", "VALIDATED", "PARTIAL_SUCCESS", "FAILED")
+CONNECT_TYPE_STATUSES = ("ACTIVE", "INACTIVE", "RETIRED")
+USER_ROLES = ("EMPLOYEE", "BHR", "BHR_LEADER", "PLATFORM_ADMIN")
+ENRICHMENT_STATUSES = ("SUCCESS", "FAILED")
+
+
+class ArunTestBase(DeclarativeBase):
+    """Dedicated test metadata; names may coincide with production tables."""
+
+
+class ArunUser(ArunTestBase):
+    __tablename__ = "users"
+    __table_args__ = (CheckConstraint(f"role IN {USER_ROLES}", name="ck_test_users_role"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    employee_id: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    department: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    role: Mapped[str] = mapped_column(String(32), nullable=False, default="BHR", index=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    initiations = relationship("ArunPlanConnectInitiation", back_populates="initiator")
+    uploads = relationship("ArunPlanConnectFileUpload", back_populates="uploader")
+
+
+class ArunConnectType(ArunTestBase):
+    __tablename__ = "connect_types"
+    __table_args__ = (CheckConstraint(f"status IN {CONNECT_TYPE_STATUSES}", name="ck_test_connect_types_status"),)
+    connect_type_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    name: Mapped[str] = mapped_column(String(150), nullable=False, unique=True, index=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="ACTIVE", index=True)
+    skip_attendee_list: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    default_agenda: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_by: Mapped[str] = mapped_column(String(36), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    initiations = relationship("ArunPlanConnectInitiation", back_populates="connect_type")
+
+
+class ArunHrRoster(ArunTestBase):
+    __tablename__ = "hr_roster"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    employee_id: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
+    role: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    department: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    ibu: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    ibg: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    account: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    process: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    business_unit_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    business_unit_descr: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    country: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    office_location: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    supervisor_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    supervisor_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    tenure_months: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    tenure_bucket: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class ArunPlanConnectInitiation(ArunTestBase):
+    __tablename__ = "plan_connect_initiations"
+    __table_args__ = (
+        CheckConstraint(f"status IN {CONNECT_STATUSES}", name="ck_test_initiations_status"),
+        CheckConstraint(f"current_stage IN {CONNECT_STAGES}", name="ck_test_initiations_stage"),
+        CheckConstraint(f"workflow_type IN {WORKFLOW_TYPES}", name="ck_test_initiations_workflow"),
+        CheckConstraint(f"meeting_mode IN {MEETING_MODES}", name="ck_test_initiations_mode"),
+    )
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    initiator_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    client_request_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    connect_type_id: Mapped[str | None] = mapped_column(ForeignKey("connect_types.connect_type_id"), nullable=True, index=True)
+    connect_type_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    subject: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    bhr_firstname: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    bhr_lastname: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    bhr_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    bhr_employee_ibu: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    meeting_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    start_time: Mapped[time | None] = mapped_column(Time, nullable=True)
+    end_time: Mapped[time | None] = mapped_column(Time, nullable=True)
+    scheduled_from: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    scheduled_to: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    meeting_mode: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    additional_emails: Mapped[str | None] = mapped_column(Text, nullable=True)
+    agenda: Mapped[str | None] = mapped_column(Text, nullable=True)
+    workflow_type: Mapped[str | None] = mapped_column(String(16), nullable=True, index=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="DRAFT", index=True)
+    current_stage: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
+    participant_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    teams_deeplink: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confirmed_accuracy: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    follow_up_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    invited_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    emails_sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    sent_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    row_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    initiator = relationship("ArunUser", back_populates="initiations")
+    connect_type = relationship("ArunConnectType", back_populates="initiations")
+    participants = relationship("ArunPlanConnectParticipant", back_populates="initiation")
+    uploads = relationship("ArunPlanConnectFileUpload", back_populates="initiation")
+
+
+class ArunPlanConnectParticipant(ArunTestBase):
+    __tablename__ = "plan_connect_participants"
+    __table_args__ = (
+        UniqueConstraint("plan_connect_id", "employee_id", name="uq_test_lifecycle_participant"),
+        CheckConstraint(f"participant_source IN {PARTICIPANT_SOURCES}", name="ck_test_participant_source"),
+        CheckConstraint(f"status IN {PARTICIPANT_STATUSES}", name="ck_test_participant_status"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    plan_connect_id: Mapped[str] = mapped_column(ForeignKey("plan_connect_initiations.id"), nullable=False, index=True)
+    employee_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    department: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    role: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    participant_source: Mapped[str] = mapped_column(String(16), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="VALID", index=True)
+    invitation_status: Mapped[str] = mapped_column(String(32), nullable=False, default="NOT_SENT", index=True)
+    added_by: Mapped[str] = mapped_column(String(64), nullable=False)
+    added_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    initiation = relationship("ArunPlanConnectInitiation", back_populates="participants")
+    snapshots = relationship("ArunParticipantSnapshot", back_populates="participant")
+    upload_rows = relationship("ArunParticipantUploadRow", back_populates="participant")
+
+
+class ArunParticipantSnapshot(ArunTestBase):
+    __tablename__ = "participant_snapshots"
+    __table_args__ = (CheckConstraint(f"enrichment_status IN {ENRICHMENT_STATUSES}", name="ck_test_snapshot_enrichment"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    participant_id: Mapped[str] = mapped_column(ForeignKey("plan_connect_participants.id"), nullable=False, index=True)
+    employee_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    employee_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    department: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    ibu: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    ibg: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    account: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    process: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    country: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    office_location: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    supervisor_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    supervisor_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    business_unit_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    business_unit_descr: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    tenure_months: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    tenure_bucket: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    role_description: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    source_system: Mapped[str] = mapped_column(String(64), nullable=False, default="HR_ROSTER")
+    source_effective_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    enrichment_status: Mapped[str] = mapped_column(String(16), nullable=False)
+    enrichment_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    snapshot_created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    participant = relationship("ArunPlanConnectParticipant", back_populates="snapshots")
+
+
+class ArunPlanConnectFileUpload(ArunTestBase):
+    __tablename__ = "plan_connect_file_uploads"
+    __table_args__ = (CheckConstraint(f"status IN {UPLOAD_STATUSES}", name="ck_test_upload_status"),)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    plan_connect_id: Mapped[str] = mapped_column(ForeignKey("plan_connect_initiations.id"), nullable=False, index=True)
+    uploader_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_path: Mapped[str] = mapped_column(String(512), nullable=False)
+    file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    total_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    processed_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    valid_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    duplicate_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    inactive_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    unresolved_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    out_of_scope_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    invalid_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    parse_errors: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    processing_started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    processing_completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    initiation = relationship("ArunPlanConnectInitiation", back_populates="uploads")
+    uploader = relationship("ArunUser", back_populates="uploads")
+    rows = relationship("ArunParticipantUploadRow", back_populates="upload")
+
+
+class ArunParticipantUploadRow(ArunTestBase):
+    __tablename__ = "participant_upload_rows"
+    __table_args__ = (
+        UniqueConstraint("upload_id", "row_number", name="uq_test_lifecycle_upload_row"),
+        CheckConstraint(f"validation_status IN {PARTICIPANT_STATUSES}", name="ck_test_upload_row_status"),
+    )
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    upload_id: Mapped[str] = mapped_column(ForeignKey("plan_connect_file_uploads.id"), nullable=False, index=True)
+    row_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    input_employee_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    input_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    resolved_employee_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    validation_status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    participant_id: Mapped[str | None] = mapped_column(ForeignKey("plan_connect_participants.id"), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    upload = relationship("ArunPlanConnectFileUpload", back_populates="rows")
+    participant = relationship("ArunPlanConnectParticipant", back_populates="upload_rows")
+
+
+class ArunAuditLog(ArunTestBase):
+    __tablename__ = "audit_logs"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    actor_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    action: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    resource_type: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    resource_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    result: Mapped[str] = mapped_column(String(16), nullable=False)
+    details: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
