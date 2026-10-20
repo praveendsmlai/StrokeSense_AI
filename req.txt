@@ -1,1 +1,1 @@
-py -c "from pathlib import Path; p=Path('app/services/canonical_connect_resolver.py'); print(''.join(p.read_text(encoding='utf-8').splitlines(keepends=True)[:160]))"
+findstr /n /i "def map_canonical_id def _create def _find def _authorize def _validate" app\services\arun_canonical_id_mapper.py
