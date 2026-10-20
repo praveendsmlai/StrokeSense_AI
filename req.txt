@@ -1,1 +1,1 @@
-py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT * FROM connect_lifecycle_links').fetchall()); c.close()"
+findstr /n /i "def resolve def get def create def link" app\services\connect_lifecycle_gateway.py app\repositories\connect_lifecycle_link_repository.py
