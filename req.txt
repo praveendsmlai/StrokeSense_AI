@@ -1,1 +1,1 @@
-py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); names=['plan_connect_initiations','plan_connect_participants','participant_snapshots','plan_connect_file_uploads','participant_upload_rows','connect_types','hr_roster','users','audit_logs']; print([(n,c.execute('SELECT COUNT(*) FROM '+n).fetchone()[0]) for n in names]); c.close()"
+py -c "from pathlib import Path; p=Path('tests/test_phase3a_http_acceptance.py'); print(''.join(p.read_text(encoding='utf-8').splitlines(keepends=True)[34:105]))"
