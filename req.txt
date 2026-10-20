@@ -1,1 +1,25 @@
-py -c "from pathlib import Path; p=Path('tests/test_phase3a_http_acceptance.py'); print('\n'.join(p.read_text(encoding='utf-8').splitlines()[90:103]))"
+from app.main import create_app
+from app.core.config import Settings
+from app.db.session import Database
+from app.services.arun_documented_lifecycle_adapter import (
+    ArunDocumentedLifecycleAdapter,
+)
+
+
+class DevSwaggerSettings(Settings):
+    app_env: str = "test"
+    lifecycle_integration_mode: str = "canonical"
+    canonical_lifecycle_contract_enabled: bool = True
+    allow_isolated_test_lifecycle_adapter: bool = True
+
+
+settings = DevSwaggerSettings()
+app = create_app(settings)
+
+db = Database(settings)
+arun_session = db.session_factory()
+
+app.state.lifecycle_adapter = ArunDocumentedLifecycleAdapter(
+    arun_session
+)
+app.state.allow_isolated_test_lifecycle_adapter = True
