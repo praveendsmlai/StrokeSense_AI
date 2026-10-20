@@ -1,2 +1,1 @@
-cd C:\TechMProjects\peopleconnect\backend
-py -c "import sqlite3; s=sqlite3.connect('peopleconnect.db'); d=sqlite3.connect('peopleconnect-before-arun-dummy.db'); s.backup(d); d.close(); s.close(); print('BACKUP SUCCESSFUL')"
+findstr /n /i "CREATE TABLE plan_connect_initiations plan_connect_participants participant_snapshots" tests\test_arun_schema.py
