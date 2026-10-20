@@ -1,255 +1,153 @@
-"""Safe, deterministic fixture database for the Phase 2B Arun-schema tests.
+"""Explicit Phase 2C test adapter for the disposable Arun-schema database.
 
-The fixture is deliberately a separate SQLite file under a caller-provided
-temporary root.  It does not import application metadata, migrations, or a
-development database URL.
+This module is intentionally under ``tests``.  Production application modules
+depend only on ``LifecycleReadAdapter`` and cannot discover or load this class.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import date, datetime, time
-from pathlib import Path
-from urllib.parse import unquote, urlparse
+import re
+from datetime import date
 
-from sqlalchemy import Engine, create_engine, event, inspect
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import select
+from sqlalchemy.orm import Session, selectinload
 
-from .models import (
-    ArunAuditLog,
-    ArunConnectType,
-    ArunHrRoster,
-    ArunParticipantSnapshot,
-    ArunParticipantUploadRow,
-    ArunPlanConnectFileUpload,
-    ArunPlanConnectInitiation,
-    ArunPlanConnectParticipant,
-    ArunTestBase,
-    ArunUser,
+from app.models.connect_lifecycle_link import LIFECYCLE_SOURCE_ARUN
+from app.services.lifecycle_read_adapter import (
+    CanonicalLifecycleConnect,
+    LifecycleParticipant,
+    LifecycleParticipantSnapshot,
 )
+from .models import ArunPlanConnectInitiation, ArunPlanConnectParticipant
 
 
-class UnsafeLifecycleFixtureTarget(ValueError):
-    """Raised when a disposable fixture could target a non-temporary database."""
+_CANONICAL_ID = re.compile(r"^PC-\d{5,}$")
 
 
-LIFECYCLE_TABLES = frozenset(ArunTestBase.metadata.tables)
-_STAMP = datetime(2026, 10, 15, 9, 0, 0)
-_USER_BHR = "10000000-0000-0000-0000-000000000001"
-_USER_ADMIN = "10000000-0000-0000-0000-000000000002"
+class ArunSchemaTestAdapter:
+    """Read-only adapter over the provisional schema in a disposable database."""
 
+    source = LIFECYCLE_SOURCE_ARUN
+    is_test_only = True
 
-def assert_isolated_database_path(database_path: Path, *, allowed_root: Path) -> Path:
-    """Return a resolved disposable SQLite path or reject it before any I/O."""
-    target = database_path.resolve()
-    root = allowed_root.resolve()
-    try:
-        target.relative_to(root)
-    except ValueError as exc:
-        raise UnsafeLifecycleFixtureTarget("fixture database must be inside its temporary root") from exc
-    if target.name.lower() == "peopleconnect.db":
-        raise UnsafeLifecycleFixtureTarget("fixture database cannot be named peopleconnect.db")
-    if target.suffix.lower() not in {".db", ".sqlite", ".sqlite3"}:
-        raise UnsafeLifecycleFixtureTarget("fixture database must be a SQLite database file")
-    return target
+    def __init__(self, session: Session) -> None:
+        self.session = session
 
+    def get_connect(self, canonical_id: str) -> CanonicalLifecycleConnect | None:
+        self._validate_id(canonical_id)
+        row = self.session.scalar(self._statement().where(ArunPlanConnectInitiation.id == canonical_id))
+        return self._translate(row) if row is not None else None
 
-def sqlite_url_for(database_path: Path) -> str:
-    return f"sqlite:///{database_path.resolve().as_posix()}"
+    def list_connects(
+        self,
+        *,
+        initiator_id: str | None = None,
+        statuses: set[str] | None = None,
+        start_date: date | None = None,
+        end_date: date | None = None,
+        employee_ibu: str | None = None,
+    ) -> list[CanonicalLifecycleConnect]:
+        statement = self._statement()
+        if initiator_id is not None:
+            statement = statement.where(ArunPlanConnectInitiation.initiator_id == initiator_id)
+        if statuses:
+            statement = statement.where(ArunPlanConnectInitiation.status.in_(statuses))
+        if start_date is not None:
+            statement = statement.where(ArunPlanConnectInitiation.meeting_date >= start_date)
+        if end_date is not None:
+            statement = statement.where(ArunPlanConnectInitiation.meeting_date <= end_date)
+        rows = self.session.scalars(statement.order_by(ArunPlanConnectInitiation.id)).all()
+        values = [self._translate(row) for row in rows]
+        if employee_ibu is not None:
+            values = [value for value in values if self._in_scope(value, employee_ibu)]
+        return values
 
+    def can_access(
+        self,
+        canonical_id: str,
+        *,
+        initiator_id: str | None = None,
+        employee_ibu: str | None = None,
+    ) -> bool:
+        connect = self.get_connect(canonical_id)
+        if connect is None:
+            return False
+        if initiator_id is not None and connect.initiator_id != initiator_id:
+            return False
+        return employee_ibu is None or self._in_scope(connect, employee_ibu)
 
-def assert_isolated_database_url(url: str, *, allowed_root: Path) -> Path:
-    """Reject non-SQLite, in-memory, and non-temporary URLs before connection."""
-    parsed = urlparse(url)
-    if parsed.scheme != "sqlite" or not parsed.path or parsed.path in {":memory:", "/:memory:"}:
-        raise UnsafeLifecycleFixtureTarget("fixture requires a file-backed SQLite URL")
-    # SQLAlchemy turns a Windows absolute path into /C:/... in a sqlite URL.
-    return assert_isolated_database_path(Path(unquote(parsed.path.lstrip("/"))), allowed_root=allowed_root)
+    @staticmethod
+    def _statement():
+        return select(ArunPlanConnectInitiation).options(
+            selectinload(ArunPlanConnectInitiation.connect_type),
+            selectinload(ArunPlanConnectInitiation.participants).selectinload(ArunPlanConnectParticipant.snapshots),
+        )
 
+    @staticmethod
+    def _validate_id(canonical_id: str) -> None:
+        if not isinstance(canonical_id, str) or not _CANONICAL_ID.fullmatch(canonical_id):
+            raise ValueError("Canonical lifecycle IDs must use the documented PC-NNNNN format.")
 
-@dataclass
-class ArunFixtureDatabase:
-    path: Path
-    allowed_root: Path
-    engine: Engine
-    session_factory: sessionmaker[Session]
+    @staticmethod
+    def _in_scope(connect: CanonicalLifecycleConnect, employee_ibu: str) -> bool:
+        return connect.bhr_employee_ibu == employee_ibu or any(
+            participant.snapshot is not None and participant.snapshot.ibu == employee_ibu
+            for participant in connect.participants
+        )
 
-    def session(self) -> Session:
-        return self.session_factory()
-
-    def dispose(self) -> None:
-        self.engine.dispose()
-        target = assert_isolated_database_path(self.path, allowed_root=self.allowed_root)
-        if target.exists():
-            target.unlink()
-
-
-def create_seeded_fixture_database(database_path: Path, *, allowed_root: Path) -> ArunFixtureDatabase:
-    """Create a new disposable database and seed every documented lifecycle case."""
-    target = assert_isolated_database_path(database_path, allowed_root=allowed_root)
-    if target.exists():
-        raise UnsafeLifecycleFixtureTarget("fixture target already exists; refusing to overwrite it")
-    target.parent.mkdir(parents=True, exist_ok=True)
-    url = sqlite_url_for(target)
-    assert_isolated_database_url(url, allowed_root=allowed_root)
-    engine = create_engine(url)
-
-    @event.listens_for(engine, "connect")
-    def _enable_foreign_keys(dbapi_connection, _connection_record) -> None:
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
-
-    ArunTestBase.metadata.create_all(engine)
-    fixture = ArunFixtureDatabase(
-        path=target,
-        allowed_root=allowed_root.resolve(),
-        engine=engine,
-        session_factory=sessionmaker(bind=engine),
-    )
-    session = fixture.session()
-    try:
-        _seed(session)
-        session.commit()
-    except Exception:
-        session.rollback()
-        fixture.dispose()
-        raise
-    finally:
-        session.close()
-    return fixture
-
-
-def fixture_table_names(engine: Engine) -> frozenset[str]:
-    return frozenset(inspect(engine).get_table_names())
-
-
-def _seed(session: Session) -> None:
-    """Use synthetic, deterministic values only; no current application data."""
-    users = [
-        ArunUser(id=_USER_BHR, email="bhr.fixture@example.test", name="Fixture BHR", employee_id="FIX-BHR-001", department="People", role="BHR", is_active=True, created_at=_STAMP, updated_at=_STAMP),
-        ArunUser(id=_USER_ADMIN, email="admin.fixture@example.test", name="Fixture Admin", employee_id="FIX-ADMIN-001", department="Platform", role="PLATFORM_ADMIN", is_active=True, created_at=_STAMP, updated_at=_STAMP),
-        ArunUser(id="10000000-0000-0000-0000-000000000003", email="leader.fixture@example.test", name="Fixture Leader", employee_id="FIX-LEAD-001", department="People", role="BHR_LEADER", is_active=True, created_at=_STAMP, updated_at=_STAMP),
-        ArunUser(id="10000000-0000-0000-0000-000000000004", email="employee.fixture@example.test", name="Fixture Employee", employee_id="FIX-USER-001", department="Delivery", role="EMPLOYEE", is_active=True, created_at=_STAMP, updated_at=_STAMP),
-    ]
-    types = [
-        ArunConnectType(connect_type_id="20000000-0000-0000-0000-000000000001", name="Career conversation", description="Synthetic active type", status="ACTIVE", skip_attendee_list=False, default_agenda="Career discussion", created_by=_USER_ADMIN, created_at=_STAMP, updated_by=None, updated_at=None),
-        ArunConnectType(connect_type_id="20000000-0000-0000-0000-000000000002", name="Skip-level", description="Synthetic restricted-attendee type", status="ACTIVE", skip_attendee_list=True, default_agenda="Skip-level agenda", created_by=_USER_ADMIN, created_at=_STAMP, updated_by=_USER_ADMIN, updated_at=_STAMP),
-        ArunConnectType(connect_type_id="20000000-0000-0000-0000-000000000003", name="Retired fixture type", description=None, status="RETIRED", skip_attendee_list=False, default_agenda=None, created_by=_USER_ADMIN, created_at=_STAMP, updated_by=_USER_ADMIN, updated_at=_STAMP),
-    ]
-    session.add_all(users + types)
-    roster_specs = [
-        ("30000000-0000-0000-0000-000000000001", "FIX-EMP-100", "Fixture One", "fixture.one@example.test", "IBU-A", "IBG-Alpha", "Hyderabad", True),
-        ("30000000-0000-0000-0000-000000000002", "FIX-EMP-200", "Fixture Two", "fixture.two@example.test", "IBU-A", "IBG-Alpha", "Chennai", True),
-        ("30000000-0000-0000-0000-000000000003", "FIX-EMP-300", "Fixture Three", "fixture.three@example.test", "IBU-B", "IBG-Beta", "Pune", True),
-        ("30000000-0000-0000-0000-000000000004", "FIX-EMP-400", "Fixture Four", "fixture.four@example.test", "IBU-B", "IBG-Beta", "Bengaluru", False),
-        ("30000000-0000-0000-0000-000000000005", "FIX-EMP-500", "Fixture Five", "fixture.five@example.test", "IBU-C", "IBG-Gamma", "Mumbai", True),
-    ]
-    session.add_all(
-        ArunHrRoster(
-            id=row_id, employee_id=employee_id, name=name, email=email,
-            role="Associate", department="Engineering", ibu=ibu, ibg=ibg,
-            account="Fixture Account", process="Fixture Process", business_unit_code="FIX",
-            business_unit_descr="Fixture Business Unit", country="India", office_location=location,
-            supervisor_id="FIX-BHR-001", supervisor_name="Fixture BHR", tenure_months=24,
-            tenure_bucket="1-3 years", is_active=is_active, created_at=_STAMP, updated_at=_STAMP,
-        ) for row_id, employee_id, name, email, ibu, ibg, location, is_active in roster_specs
-    )
-    type_one, type_two, _retired = types
-    connections = [
-        _connect("PC-00001", type_one, "DRAFT", "INITIATE", None, None, 0),
-        _connect("PC-00002", type_one, "INITIATED", "REVIEW", "PLANNED", "TEAMS", 2),
-        _connect("PC-00003", type_two, "IN_PROGRESS", "EVIDENCE_CAPTURE", "BACKDATED", "IN_PERSON", 0),
-        _connect("PC-00004", type_two, "SCHEDULED", "REVIEW", "PLANNED", "HYBRID", 0),
-        _connect("PC-00005", type_one, "COMPLETED", "COMPLETED", "BACKDATED", "IN_PERSON", 0),
-        _connect("PC-00006", type_one, "CANCELLED", "COMPLETED", "PLANNED", "TEAMS", 0),
-    ]
-    session.add_all(connections)
-    participants = [
-        _participant("40000000-0000-0000-0000-000000000001", "PC-00002", "FIX-EMP-100", "fixture.one@example.test", "Fixture One", "VALID", "SEARCH"),
-        _participant("40000000-0000-0000-0000-000000000002", "PC-00002", "FIX-EMP-200", "fixture.two@example.test", "Fixture Two", "VALID", "UPLOAD"),
-        _participant("40000000-0000-0000-0000-000000000003", "PC-00003", "FIX-EMP-300", "fixture.three@example.test", "Fixture Three", "OUT_OF_SCOPE", "SEARCH"),
-        _participant("40000000-0000-0000-0000-000000000004", "PC-00004", "FIX-EMP-200", "fixture.two@example.test", "Fixture Two", "DUPLICATE", "UPLOAD"),
-        _participant("40000000-0000-0000-0000-000000000005", "PC-00005", "FIX-EMP-400", "fixture.four@example.test", "Fixture Four", "INACTIVE", "SEARCH"),
-        _participant("40000000-0000-0000-0000-000000000006", "PC-00001", "FIX-EMP-500", "fixture.five@example.test", "Fixture Five", "UNRESOLVED", "UPLOAD"),
-    ]
-    session.add_all(participants)
-    session.add_all(_snapshot(participant) for participant in participants)
-    upload = ArunPlanConnectFileUpload(
-        id="50000000-0000-0000-0000-000000000001", plan_connect_id="PC-00002", uploader_id=_USER_BHR,
-        file_name="synthetic-participants.xlsx", file_path="/isolated/fixture/synthetic-participants.xlsx",
-        file_size_bytes=1024, status="PARTIAL_SUCCESS", total_rows=6, processed_rows=6,
-        valid_rows=1, duplicate_rows=1, inactive_rows=1, unresolved_rows=1, out_of_scope_rows=1,
-        invalid_rows=1, parse_errors="[]", error_message=None, uploaded_at=_STAMP,
-        processing_started_at=_STAMP, processing_completed_at=_STAMP, deleted_at=None,
-    )
-    session.add(upload)
-    statuses = ["VALID", "DUPLICATE", "INACTIVE", "UNRESOLVED", "OUT_OF_SCOPE", "INVALID"]
-    session.add_all(
-        ArunParticipantUploadRow(
-            id=f"60000000-0000-0000-0000-00000000000{index}", upload_id=upload.id, row_number=index + 1,
-            input_employee_id=f"FIX-UPLOAD-{index + 1:03d}", input_email=None,
-            resolved_employee_id="FIX-EMP-200" if status == "VALID" else None,
-            validation_status=status,
-            error_code=None if status == "VALID" else status.lower(),
-            error_message=None if status == "VALID" else f"Synthetic {status.lower()} row",
-            participant_id=participants[1].id if status == "VALID" else None,
-            created_at=_STAMP,
-        ) for index, status in enumerate(statuses)
-    )
-    session.add_all([
-        ArunAuditLog(id="70000000-0000-0000-0000-000000000001", actor_id=_USER_BHR, action="CONNECT_CREATED", resource_type="connect", resource_id="PC-00002", result="SUCCESS", details="{}", created_at=_STAMP),
-        ArunAuditLog(id="70000000-0000-0000-0000-000000000002", actor_id=_USER_BHR, action="UPLOAD_VALIDATED", resource_type="upload", resource_id=upload.id, result="SUCCESS", details="{}", created_at=_STAMP),
-        ArunAuditLog(id="70000000-0000-0000-0000-000000000003", actor_id=_USER_BHR, action="SCOPE_CHECK", resource_type="participant", resource_id=participants[2].id, result="DENIED", details="{}", created_at=_STAMP),
-    ])
-
-
-def _connect(connect_id: str, connect_type: ArunConnectType, status: str, stage: str, workflow_type: str | None, meeting_mode: str | None, participant_count: int) -> ArunPlanConnectInitiation:
-    planned = workflow_type == "PLANNED"
-    meeting_date = date(2026, 11, 1) if workflow_type else None
-    start = time(10, 0) if workflow_type else None
-    end = time(10, 30) if workflow_type else None
-    return ArunPlanConnectInitiation(
-        id=connect_id, initiator_id=_USER_BHR, client_request_id=f"fixture-{connect_id}",
-        connect_type_id=connect_type.connect_type_id, connect_type_name=connect_type.name,
-        subject=f"Synthetic {connect_id}", bhr_firstname="Fixture", bhr_lastname="BHR",
-        bhr_email="bhr.fixture@example.test", bhr_employee_ibu="IBU-A", meeting_date=meeting_date,
-        start_time=start, end_time=end,
-        scheduled_from=datetime(2026, 11, 1, 10, 0) if workflow_type else None,
-        scheduled_to=datetime(2026, 11, 1, 10, 30) if workflow_type else None,
-        meeting_mode=meeting_mode, additional_emails="[]", agenda="Synthetic agenda", workflow_type=workflow_type,
-        status=status, current_stage=stage, participant_count=participant_count,
-        teams_deeplink="https://teams.example.test/fixture" if planned and status in {"INITIATED", "SCHEDULED"} else None,
-        confirmed_accuracy=status == "SCHEDULED", follow_up_days=7 if status == "SCHEDULED" else None,
-        invited_count=participant_count if status == "SCHEDULED" else 0,
-        emails_sent_at=_STAMP if status == "SCHEDULED" else None, sent_by=_USER_BHR if status == "SCHEDULED" else None,
-        row_version=1, created_at=_STAMP, updated_at=_STAMP, deleted_at=None,
-    )
-
-
-def _participant(participant_id: str, connect_id: str, employee_id: str, email: str, name: str, status: str, source: str) -> ArunPlanConnectParticipant:
-    return ArunPlanConnectParticipant(
-        id=participant_id, plan_connect_id=connect_id, employee_id=employee_id, email=email,
-        name=name, department="Engineering", role="Associate", participant_source=source, status=status,
-        invitation_status="NOT_SENT", added_by=_USER_BHR, added_at=_STAMP, created_at=_STAMP, updated_at=_STAMP,
-    )
-
-
-def _snapshot(participant: ArunPlanConnectParticipant) -> ArunParticipantSnapshot:
-    organization = {
-        "FIX-EMP-100": ("IBU-A", "IBG-Alpha", "Hyderabad"),
-        "FIX-EMP-200": ("IBU-A", "IBG-Alpha", "Chennai"),
-        "FIX-EMP-300": ("IBU-B", "IBG-Beta", "Pune"),
-        "FIX-EMP-400": ("IBU-B", "IBG-Beta", "Bengaluru"),
-        "FIX-EMP-500": ("IBU-C", "IBG-Gamma", "Mumbai"),
-    }
-    ibu, ibg, office_location = organization[participant.employee_id]
-    return ArunParticipantSnapshot(
-        id=f"80000000-0000-0000-0000-{participant.id[-12:]}", participant_id=participant.id,
-        employee_id=participant.employee_id, employee_name=participant.name, email=participant.email,
-        department=participant.department, ibu=ibu, ibg=ibg, account="Fixture Account",
-        process="Fixture Process", country="India", office_location=office_location, supervisor_id="FIX-BHR-001",
-        supervisor_name="Fixture BHR", business_unit_code="FIX", business_unit_descr="Fixture Business Unit",
-        tenure_months=24, tenure_bucket="1-3 years", role_description=participant.role,
-        source_system="HR_ROSTER", source_effective_date=_STAMP, enrichment_status="SUCCESS",
-        enrichment_error=None, snapshot_created_at=_STAMP,
-    )
+    @staticmethod
+    def _translate(row: ArunPlanConnectInitiation) -> CanonicalLifecycleConnect:
+        participants = tuple(
+            LifecycleParticipant(
+                participant_id=participant.id,
+                employee_id=participant.employee_id,
+                email=participant.email,
+                name=participant.name,
+                department=participant.department,
+                role=participant.role,
+                source=participant.participant_source,
+                status=participant.status,
+                snapshot=(
+                    LifecycleParticipantSnapshot(
+                        participant_id=participant.id,
+                        employee_id=snapshot.employee_id,
+                        employee_name=snapshot.employee_name,
+                        email=snapshot.email,
+                        department=snapshot.department,
+                        ibu=snapshot.ibu,
+                        ibg=snapshot.ibg,
+                        account=snapshot.account,
+                        process=snapshot.process,
+                        country=snapshot.country,
+                        office_location=snapshot.office_location,
+                        supervisor_id=snapshot.supervisor_id,
+                        supervisor_name=snapshot.supervisor_name,
+                        business_unit_code=snapshot.business_unit_code,
+                        business_unit_descr=snapshot.business_unit_descr,
+                        tenure_months=snapshot.tenure_months,
+                        tenure_bucket=snapshot.tenure_bucket,
+                        role_description=snapshot.role_description,
+                    )
+                    if (snapshot := next(iter(participant.snapshots), None)) is not None
+                    else None
+                ),
+            )
+            for participant in row.participants
+        )
+        return CanonicalLifecycleConnect(
+            canonical_id=row.id,
+            initiator_id=row.initiator_id,
+            connect_type_id=row.connect_type_id,
+            connect_type_name=row.connect_type_name,
+            status=row.status,
+            current_stage=row.current_stage,
+            workflow_type=row.workflow_type,
+            meeting_date=row.meeting_date,
+            start_time=row.start_time,
+            end_time=row.end_time,
+            scheduled_from=row.scheduled_from,
+            scheduled_to=row.scheduled_to,
+            meeting_mode=row.meeting_mode,
+            participant_count=row.participant_count,
+            bhr_employee_ibu=row.bhr_employee_ibu,
+            participants=participants,
+        )
