@@ -1,1 +1,1 @@
-py -c "from pathlib import Path; p=Path('app/api/routes/canonical_connects.py'); print(''.join(p.read_text(encoding='utf-8').splitlines(keepends=True)[30:115]))"
+findstr /s /n /i "LINK_STATE_ACTIVE activate_link integration_state" app\*.py
