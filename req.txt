@@ -1,1 +1,1 @@
-findstr /n /i "def resolve def get def create def link" app\services\connect_lifecycle_gateway.py app\repositories\connect_lifecycle_link_repository.py
+findstr /n /i "def get_canonical resolve_local resolve_canonical resolve_verified get_connect" app\api\routes\canonical_connects.py app\services\lifecycle_data_access.py
