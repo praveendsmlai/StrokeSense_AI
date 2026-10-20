@@ -1,1 +1,1 @@
-findstr /n /i "def map_canonical_id def _create def _find def _authorize def _validate" app\services\arun_canonical_id_mapper.py
+py -c "from pathlib import Path; p=Path('app/services/arun_canonical_id_mapper.py'); print(''.join(p.read_text(encoding='utf-8').splitlines(keepends=True)[83:189]))"
