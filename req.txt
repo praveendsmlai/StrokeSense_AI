@@ -1,247 +1,255 @@
-"""Screenshot-faithful provisional Arun lifecycle models for Phase 2B tests.
+"""Safe, deterministic fixture database for the Phase 2B Arun-schema tests.
 
-Source: ``ARUN_LIFECYCLE_SCHEMA_SPEC.md`` §§4–5.  These are test-only
-transcriptions, not verified Arun DDL; their metadata is never production metadata.
+The fixture is deliberately a separate SQLite file under a caller-provided
+temporary root.  It does not import application metadata, migrations, or a
+development database URL.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import date, datetime, time
+from pathlib import Path
+from urllib.parse import unquote, urlparse
 
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, ForeignKey, Integer, String, Text, Time, UniqueConstraint
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy import Engine, create_engine, event, inspect
+from sqlalchemy.orm import Session, sessionmaker
 
-CONNECT_STATUSES = ("DRAFT", "INITIATED", "IN_PROGRESS", "SCHEDULED", "COMPLETED", "CANCELLED")
-CONNECT_STAGES = ("INITIATE", "REVIEW", "EVIDENCE_CAPTURE", "COMPLETED")
-WORKFLOW_TYPES = ("PLANNED", "BACKDATED")
-MEETING_MODES = ("TEAMS", "HYBRID", "IN_PERSON")
-PARTICIPANT_SOURCES = ("SEARCH", "UPLOAD")
-PARTICIPANT_STATUSES = ("VALID", "INACTIVE", "DUPLICATE", "UNRESOLVED", "OUT_OF_SCOPE", "INVALID")
-UPLOAD_STATUSES = ("UPLOADED", "PROCESSING", "VALIDATED", "PARTIAL_SUCCESS", "FAILED")
-CONNECT_TYPE_STATUSES = ("ACTIVE", "INACTIVE", "RETIRED")
-USER_ROLES = ("EMPLOYEE", "BHR", "BHR_LEADER", "PLATFORM_ADMIN")
-ENRICHMENT_STATUSES = ("SUCCESS", "FAILED")
-
-
-class ArunTestBase(DeclarativeBase):
-    """Dedicated test metadata; names may coincide with production tables."""
-
-
-class ArunUser(ArunTestBase):
-    __tablename__ = "users"
-    __table_args__ = (CheckConstraint(f"role IN {USER_ROLES}", name="ck_test_users_role"),)
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    employee_id: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
-    department: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    role: Mapped[str] = mapped_column(String(32), nullable=False, default="BHR", index=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    initiations = relationship("ArunPlanConnectInitiation", back_populates="initiator")
-    uploads = relationship("ArunPlanConnectFileUpload", back_populates="uploader")
+from .models import (
+    ArunAuditLog,
+    ArunConnectType,
+    ArunHrRoster,
+    ArunParticipantSnapshot,
+    ArunParticipantUploadRow,
+    ArunPlanConnectFileUpload,
+    ArunPlanConnectInitiation,
+    ArunPlanConnectParticipant,
+    ArunTestBase,
+    ArunUser,
+)
 
 
-class ArunConnectType(ArunTestBase):
-    __tablename__ = "connect_types"
-    __table_args__ = (CheckConstraint(f"status IN {CONNECT_TYPE_STATUSES}", name="ck_test_connect_types_status"),)
-    connect_type_id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    name: Mapped[str] = mapped_column(String(150), nullable=False, unique=True, index=True)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    status: Mapped[str] = mapped_column(String(16), nullable=False, default="ACTIVE", index=True)
-    skip_attendee_list: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    default_agenda: Mapped[str | None] = mapped_column(Text, nullable=True)
-    created_by: Mapped[str] = mapped_column(String(36), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    initiations = relationship("ArunPlanConnectInitiation", back_populates="connect_type")
+class UnsafeLifecycleFixtureTarget(ValueError):
+    """Raised when a disposable fixture could target a non-temporary database."""
 
 
-class ArunHrRoster(ArunTestBase):
-    __tablename__ = "hr_roster"
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    employee_id: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
-    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, index=True)
-    role: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
-    department: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
-    ibu: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    ibg: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    account: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    process: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    business_unit_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    business_unit_descr: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    country: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    office_location: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    supervisor_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    supervisor_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    tenure_months: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    tenure_bucket: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+LIFECYCLE_TABLES = frozenset(ArunTestBase.metadata.tables)
+_STAMP = datetime(2026, 10, 15, 9, 0, 0)
+_USER_BHR = "10000000-0000-0000-0000-000000000001"
+_USER_ADMIN = "10000000-0000-0000-0000-000000000002"
 
 
-class ArunPlanConnectInitiation(ArunTestBase):
-    __tablename__ = "plan_connect_initiations"
-    __table_args__ = (
-        CheckConstraint(f"status IN {CONNECT_STATUSES}", name="ck_test_initiations_status"),
-        CheckConstraint(f"current_stage IN {CONNECT_STAGES}", name="ck_test_initiations_stage"),
-        CheckConstraint(f"workflow_type IN {WORKFLOW_TYPES}", name="ck_test_initiations_workflow"),
-        CheckConstraint(f"meeting_mode IN {MEETING_MODES}", name="ck_test_initiations_mode"),
+def assert_isolated_database_path(database_path: Path, *, allowed_root: Path) -> Path:
+    """Return a resolved disposable SQLite path or reject it before any I/O."""
+    target = database_path.resolve()
+    root = allowed_root.resolve()
+    try:
+        target.relative_to(root)
+    except ValueError as exc:
+        raise UnsafeLifecycleFixtureTarget("fixture database must be inside its temporary root") from exc
+    if target.name.lower() == "peopleconnect.db":
+        raise UnsafeLifecycleFixtureTarget("fixture database cannot be named peopleconnect.db")
+    if target.suffix.lower() not in {".db", ".sqlite", ".sqlite3"}:
+        raise UnsafeLifecycleFixtureTarget("fixture database must be a SQLite database file")
+    return target
+
+
+def sqlite_url_for(database_path: Path) -> str:
+    return f"sqlite:///{database_path.resolve().as_posix()}"
+
+
+def assert_isolated_database_url(url: str, *, allowed_root: Path) -> Path:
+    """Reject non-SQLite, in-memory, and non-temporary URLs before connection."""
+    parsed = urlparse(url)
+    if parsed.scheme != "sqlite" or not parsed.path or parsed.path in {":memory:", "/:memory:"}:
+        raise UnsafeLifecycleFixtureTarget("fixture requires a file-backed SQLite URL")
+    # SQLAlchemy turns a Windows absolute path into /C:/... in a sqlite URL.
+    return assert_isolated_database_path(Path(unquote(parsed.path.lstrip("/"))), allowed_root=allowed_root)
+
+
+@dataclass
+class ArunFixtureDatabase:
+    path: Path
+    allowed_root: Path
+    engine: Engine
+    session_factory: sessionmaker[Session]
+
+    def session(self) -> Session:
+        return self.session_factory()
+
+    def dispose(self) -> None:
+        self.engine.dispose()
+        target = assert_isolated_database_path(self.path, allowed_root=self.allowed_root)
+        if target.exists():
+            target.unlink()
+
+
+def create_seeded_fixture_database(database_path: Path, *, allowed_root: Path) -> ArunFixtureDatabase:
+    """Create a new disposable database and seed every documented lifecycle case."""
+    target = assert_isolated_database_path(database_path, allowed_root=allowed_root)
+    if target.exists():
+        raise UnsafeLifecycleFixtureTarget("fixture target already exists; refusing to overwrite it")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    url = sqlite_url_for(target)
+    assert_isolated_database_url(url, allowed_root=allowed_root)
+    engine = create_engine(url)
+
+    @event.listens_for(engine, "connect")
+    def _enable_foreign_keys(dbapi_connection, _connection_record) -> None:
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
+    ArunTestBase.metadata.create_all(engine)
+    fixture = ArunFixtureDatabase(
+        path=target,
+        allowed_root=allowed_root.resolve(),
+        engine=engine,
+        session_factory=sessionmaker(bind=engine),
     )
-    id: Mapped[str] = mapped_column(String(64), primary_key=True)
-    initiator_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    client_request_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
-    connect_type_id: Mapped[str | None] = mapped_column(ForeignKey("connect_types.connect_type_id"), nullable=True, index=True)
-    connect_type_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
-    subject: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    bhr_firstname: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    bhr_lastname: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    bhr_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    bhr_employee_ibu: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    meeting_date: Mapped[date | None] = mapped_column(Date, nullable=True)
-    start_time: Mapped[time | None] = mapped_column(Time, nullable=True)
-    end_time: Mapped[time | None] = mapped_column(Time, nullable=True)
-    scheduled_from: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    scheduled_to: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    meeting_mode: Mapped[str | None] = mapped_column(String(16), nullable=True)
-    additional_emails: Mapped[str | None] = mapped_column(Text, nullable=True)
-    agenda: Mapped[str | None] = mapped_column(Text, nullable=True)
-    workflow_type: Mapped[str | None] = mapped_column(String(16), nullable=True, index=True)
-    status: Mapped[str] = mapped_column(String(16), nullable=False, default="DRAFT", index=True)
-    current_stage: Mapped[str] = mapped_column(String(32), nullable=False, index=True)
-    participant_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    teams_deeplink: Mapped[str | None] = mapped_column(Text, nullable=True)
-    confirmed_accuracy: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    follow_up_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    invited_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    emails_sent_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    sent_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    row_version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    initiator = relationship("ArunUser", back_populates="initiations")
-    connect_type = relationship("ArunConnectType", back_populates="initiations")
-    participants = relationship("ArunPlanConnectParticipant", back_populates="initiation")
-    uploads = relationship("ArunPlanConnectFileUpload", back_populates="initiation")
+    session = fixture.session()
+    try:
+        _seed(session)
+        session.commit()
+    except Exception:
+        session.rollback()
+        fixture.dispose()
+        raise
+    finally:
+        session.close()
+    return fixture
 
 
-class ArunPlanConnectParticipant(ArunTestBase):
-    __tablename__ = "plan_connect_participants"
-    __table_args__ = (
-        UniqueConstraint("plan_connect_id", "employee_id", name="uq_test_lifecycle_participant"),
-        CheckConstraint(f"participant_source IN {PARTICIPANT_SOURCES}", name="ck_test_participant_source"),
-        CheckConstraint(f"status IN {PARTICIPANT_STATUSES}", name="ck_test_participant_status"),
+def fixture_table_names(engine: Engine) -> frozenset[str]:
+    return frozenset(inspect(engine).get_table_names())
+
+
+def _seed(session: Session) -> None:
+    """Use synthetic, deterministic values only; no current application data."""
+    users = [
+        ArunUser(id=_USER_BHR, email="bhr.fixture@example.test", name="Fixture BHR", employee_id="FIX-BHR-001", department="People", role="BHR", is_active=True, created_at=_STAMP, updated_at=_STAMP),
+        ArunUser(id=_USER_ADMIN, email="admin.fixture@example.test", name="Fixture Admin", employee_id="FIX-ADMIN-001", department="Platform", role="PLATFORM_ADMIN", is_active=True, created_at=_STAMP, updated_at=_STAMP),
+        ArunUser(id="10000000-0000-0000-0000-000000000003", email="leader.fixture@example.test", name="Fixture Leader", employee_id="FIX-LEAD-001", department="People", role="BHR_LEADER", is_active=True, created_at=_STAMP, updated_at=_STAMP),
+        ArunUser(id="10000000-0000-0000-0000-000000000004", email="employee.fixture@example.test", name="Fixture Employee", employee_id="FIX-USER-001", department="Delivery", role="EMPLOYEE", is_active=True, created_at=_STAMP, updated_at=_STAMP),
+    ]
+    types = [
+        ArunConnectType(connect_type_id="20000000-0000-0000-0000-000000000001", name="Career conversation", description="Synthetic active type", status="ACTIVE", skip_attendee_list=False, default_agenda="Career discussion", created_by=_USER_ADMIN, created_at=_STAMP, updated_by=None, updated_at=None),
+        ArunConnectType(connect_type_id="20000000-0000-0000-0000-000000000002", name="Skip-level", description="Synthetic restricted-attendee type", status="ACTIVE", skip_attendee_list=True, default_agenda="Skip-level agenda", created_by=_USER_ADMIN, created_at=_STAMP, updated_by=_USER_ADMIN, updated_at=_STAMP),
+        ArunConnectType(connect_type_id="20000000-0000-0000-0000-000000000003", name="Retired fixture type", description=None, status="RETIRED", skip_attendee_list=False, default_agenda=None, created_by=_USER_ADMIN, created_at=_STAMP, updated_by=_USER_ADMIN, updated_at=_STAMP),
+    ]
+    session.add_all(users + types)
+    roster_specs = [
+        ("30000000-0000-0000-0000-000000000001", "FIX-EMP-100", "Fixture One", "fixture.one@example.test", "IBU-A", "IBG-Alpha", "Hyderabad", True),
+        ("30000000-0000-0000-0000-000000000002", "FIX-EMP-200", "Fixture Two", "fixture.two@example.test", "IBU-A", "IBG-Alpha", "Chennai", True),
+        ("30000000-0000-0000-0000-000000000003", "FIX-EMP-300", "Fixture Three", "fixture.three@example.test", "IBU-B", "IBG-Beta", "Pune", True),
+        ("30000000-0000-0000-0000-000000000004", "FIX-EMP-400", "Fixture Four", "fixture.four@example.test", "IBU-B", "IBG-Beta", "Bengaluru", False),
+        ("30000000-0000-0000-0000-000000000005", "FIX-EMP-500", "Fixture Five", "fixture.five@example.test", "IBU-C", "IBG-Gamma", "Mumbai", True),
+    ]
+    session.add_all(
+        ArunHrRoster(
+            id=row_id, employee_id=employee_id, name=name, email=email,
+            role="Associate", department="Engineering", ibu=ibu, ibg=ibg,
+            account="Fixture Account", process="Fixture Process", business_unit_code="FIX",
+            business_unit_descr="Fixture Business Unit", country="India", office_location=location,
+            supervisor_id="FIX-BHR-001", supervisor_name="Fixture BHR", tenure_months=24,
+            tenure_bucket="1-3 years", is_active=is_active, created_at=_STAMP, updated_at=_STAMP,
+        ) for row_id, employee_id, name, email, ibu, ibg, location, is_active in roster_specs
     )
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    plan_connect_id: Mapped[str] = mapped_column(ForeignKey("plan_connect_initiations.id"), nullable=False, index=True)
-    employee_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
-    email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
-    name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    department: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    role: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    participant_source: Mapped[str] = mapped_column(String(16), nullable=False)
-    status: Mapped[str] = mapped_column(String(16), nullable=False, default="VALID", index=True)
-    invitation_status: Mapped[str] = mapped_column(String(32), nullable=False, default="NOT_SENT", index=True)
-    added_by: Mapped[str] = mapped_column(String(64), nullable=False)
-    added_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    initiation = relationship("ArunPlanConnectInitiation", back_populates="participants")
-    snapshots = relationship("ArunParticipantSnapshot", back_populates="participant")
-    upload_rows = relationship("ArunParticipantUploadRow", back_populates="participant")
-
-
-class ArunParticipantSnapshot(ArunTestBase):
-    __tablename__ = "participant_snapshots"
-    __table_args__ = (CheckConstraint(f"enrichment_status IN {ENRICHMENT_STATUSES}", name="ck_test_snapshot_enrichment"),)
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    participant_id: Mapped[str] = mapped_column(ForeignKey("plan_connect_participants.id"), nullable=False, index=True)
-    employee_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
-    employee_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    department: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    ibu: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    ibg: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    account: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    process: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    country: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    office_location: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    supervisor_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    supervisor_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    business_unit_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
-    business_unit_descr: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    tenure_months: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    tenure_bucket: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    role_description: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    source_system: Mapped[str] = mapped_column(String(64), nullable=False, default="HR_ROSTER")
-    source_effective_date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    enrichment_status: Mapped[str] = mapped_column(String(16), nullable=False)
-    enrichment_error: Mapped[str | None] = mapped_column(Text, nullable=True)
-    snapshot_created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    participant = relationship("ArunPlanConnectParticipant", back_populates="snapshots")
-
-
-class ArunPlanConnectFileUpload(ArunTestBase):
-    __tablename__ = "plan_connect_file_uploads"
-    __table_args__ = (CheckConstraint(f"status IN {UPLOAD_STATUSES}", name="ck_test_upload_status"),)
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    plan_connect_id: Mapped[str] = mapped_column(ForeignKey("plan_connect_initiations.id"), nullable=False, index=True)
-    uploader_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
-    file_path: Mapped[str] = mapped_column(String(512), nullable=False)
-    file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
-    status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
-    total_rows: Mapped[int] = mapped_column(Integer, nullable=False)
-    processed_rows: Mapped[int] = mapped_column(Integer, nullable=False)
-    valid_rows: Mapped[int] = mapped_column(Integer, nullable=False)
-    duplicate_rows: Mapped[int] = mapped_column(Integer, nullable=False)
-    inactive_rows: Mapped[int] = mapped_column(Integer, nullable=False)
-    unresolved_rows: Mapped[int] = mapped_column(Integer, nullable=False)
-    out_of_scope_rows: Mapped[int] = mapped_column(Integer, nullable=False)
-    invalid_rows: Mapped[int] = mapped_column(Integer, nullable=False)
-    parse_errors: Mapped[str] = mapped_column(Text, nullable=False, default="[]")
-    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    uploaded_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    processing_started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    processing_completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    deleted_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    initiation = relationship("ArunPlanConnectInitiation", back_populates="uploads")
-    uploader = relationship("ArunUser", back_populates="uploads")
-    rows = relationship("ArunParticipantUploadRow", back_populates="upload")
-
-
-class ArunParticipantUploadRow(ArunTestBase):
-    __tablename__ = "participant_upload_rows"
-    __table_args__ = (
-        UniqueConstraint("upload_id", "row_number", name="uq_test_lifecycle_upload_row"),
-        CheckConstraint(f"validation_status IN {PARTICIPANT_STATUSES}", name="ck_test_upload_row_status"),
+    type_one, type_two, _retired = types
+    connections = [
+        _connect("PC-00001", type_one, "DRAFT", "INITIATE", None, None, 0),
+        _connect("PC-00002", type_one, "INITIATED", "REVIEW", "PLANNED", "TEAMS", 2),
+        _connect("PC-00003", type_two, "IN_PROGRESS", "EVIDENCE_CAPTURE", "BACKDATED", "IN_PERSON", 0),
+        _connect("PC-00004", type_two, "SCHEDULED", "REVIEW", "PLANNED", "HYBRID", 0),
+        _connect("PC-00005", type_one, "COMPLETED", "COMPLETED", "BACKDATED", "IN_PERSON", 0),
+        _connect("PC-00006", type_one, "CANCELLED", "COMPLETED", "PLANNED", "TEAMS", 0),
+    ]
+    session.add_all(connections)
+    participants = [
+        _participant("40000000-0000-0000-0000-000000000001", "PC-00002", "FIX-EMP-100", "fixture.one@example.test", "Fixture One", "VALID", "SEARCH"),
+        _participant("40000000-0000-0000-0000-000000000002", "PC-00002", "FIX-EMP-200", "fixture.two@example.test", "Fixture Two", "VALID", "UPLOAD"),
+        _participant("40000000-0000-0000-0000-000000000003", "PC-00003", "FIX-EMP-300", "fixture.three@example.test", "Fixture Three", "OUT_OF_SCOPE", "SEARCH"),
+        _participant("40000000-0000-0000-0000-000000000004", "PC-00004", "FIX-EMP-200", "fixture.two@example.test", "Fixture Two", "DUPLICATE", "UPLOAD"),
+        _participant("40000000-0000-0000-0000-000000000005", "PC-00005", "FIX-EMP-400", "fixture.four@example.test", "Fixture Four", "INACTIVE", "SEARCH"),
+        _participant("40000000-0000-0000-0000-000000000006", "PC-00001", "FIX-EMP-500", "fixture.five@example.test", "Fixture Five", "UNRESOLVED", "UPLOAD"),
+    ]
+    session.add_all(participants)
+    session.add_all(_snapshot(participant) for participant in participants)
+    upload = ArunPlanConnectFileUpload(
+        id="50000000-0000-0000-0000-000000000001", plan_connect_id="PC-00002", uploader_id=_USER_BHR,
+        file_name="synthetic-participants.xlsx", file_path="/isolated/fixture/synthetic-participants.xlsx",
+        file_size_bytes=1024, status="PARTIAL_SUCCESS", total_rows=6, processed_rows=6,
+        valid_rows=1, duplicate_rows=1, inactive_rows=1, unresolved_rows=1, out_of_scope_rows=1,
+        invalid_rows=1, parse_errors="[]", error_message=None, uploaded_at=_STAMP,
+        processing_started_at=_STAMP, processing_completed_at=_STAMP, deleted_at=None,
     )
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    upload_id: Mapped[str] = mapped_column(ForeignKey("plan_connect_file_uploads.id"), nullable=False, index=True)
-    row_number: Mapped[int] = mapped_column(Integer, nullable=False)
-    input_employee_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    input_email: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    resolved_employee_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    validation_status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
-    error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
-    participant_id: Mapped[str | None] = mapped_column(ForeignKey("plan_connect_participants.id"), nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    upload = relationship("ArunPlanConnectFileUpload", back_populates="rows")
-    participant = relationship("ArunPlanConnectParticipant", back_populates="upload_rows")
+    session.add(upload)
+    statuses = ["VALID", "DUPLICATE", "INACTIVE", "UNRESOLVED", "OUT_OF_SCOPE", "INVALID"]
+    session.add_all(
+        ArunParticipantUploadRow(
+            id=f"60000000-0000-0000-0000-00000000000{index}", upload_id=upload.id, row_number=index + 1,
+            input_employee_id=f"FIX-UPLOAD-{index + 1:03d}", input_email=None,
+            resolved_employee_id="FIX-EMP-200" if status == "VALID" else None,
+            validation_status=status,
+            error_code=None if status == "VALID" else status.lower(),
+            error_message=None if status == "VALID" else f"Synthetic {status.lower()} row",
+            participant_id=participants[1].id if status == "VALID" else None,
+            created_at=_STAMP,
+        ) for index, status in enumerate(statuses)
+    )
+    session.add_all([
+        ArunAuditLog(id="70000000-0000-0000-0000-000000000001", actor_id=_USER_BHR, action="CONNECT_CREATED", resource_type="connect", resource_id="PC-00002", result="SUCCESS", details="{}", created_at=_STAMP),
+        ArunAuditLog(id="70000000-0000-0000-0000-000000000002", actor_id=_USER_BHR, action="UPLOAD_VALIDATED", resource_type="upload", resource_id=upload.id, result="SUCCESS", details="{}", created_at=_STAMP),
+        ArunAuditLog(id="70000000-0000-0000-0000-000000000003", actor_id=_USER_BHR, action="SCOPE_CHECK", resource_type="participant", resource_id=participants[2].id, result="DENIED", details="{}", created_at=_STAMP),
+    ])
 
 
-class ArunAuditLog(ArunTestBase):
-    __tablename__ = "audit_logs"
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    actor_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
-    action: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
-    resource_type: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
-    resource_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
-    result: Mapped[str] = mapped_column(String(16), nullable=False)
-    details: Mapped[str] = mapped_column(Text, nullable=False, default="{}")
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+def _connect(connect_id: str, connect_type: ArunConnectType, status: str, stage: str, workflow_type: str | None, meeting_mode: str | None, participant_count: int) -> ArunPlanConnectInitiation:
+    planned = workflow_type == "PLANNED"
+    meeting_date = date(2026, 11, 1) if workflow_type else None
+    start = time(10, 0) if workflow_type else None
+    end = time(10, 30) if workflow_type else None
+    return ArunPlanConnectInitiation(
+        id=connect_id, initiator_id=_USER_BHR, client_request_id=f"fixture-{connect_id}",
+        connect_type_id=connect_type.connect_type_id, connect_type_name=connect_type.name,
+        subject=f"Synthetic {connect_id}", bhr_firstname="Fixture", bhr_lastname="BHR",
+        bhr_email="bhr.fixture@example.test", bhr_employee_ibu="IBU-A", meeting_date=meeting_date,
+        start_time=start, end_time=end,
+        scheduled_from=datetime(2026, 11, 1, 10, 0) if workflow_type else None,
+        scheduled_to=datetime(2026, 11, 1, 10, 30) if workflow_type else None,
+        meeting_mode=meeting_mode, additional_emails="[]", agenda="Synthetic agenda", workflow_type=workflow_type,
+        status=status, current_stage=stage, participant_count=participant_count,
+        teams_deeplink="https://teams.example.test/fixture" if planned and status in {"INITIATED", "SCHEDULED"} else None,
+        confirmed_accuracy=status == "SCHEDULED", follow_up_days=7 if status == "SCHEDULED" else None,
+        invited_count=participant_count if status == "SCHEDULED" else 0,
+        emails_sent_at=_STAMP if status == "SCHEDULED" else None, sent_by=_USER_BHR if status == "SCHEDULED" else None,
+        row_version=1, created_at=_STAMP, updated_at=_STAMP, deleted_at=None,
+    )
+
+
+def _participant(participant_id: str, connect_id: str, employee_id: str, email: str, name: str, status: str, source: str) -> ArunPlanConnectParticipant:
+    return ArunPlanConnectParticipant(
+        id=participant_id, plan_connect_id=connect_id, employee_id=employee_id, email=email,
+        name=name, department="Engineering", role="Associate", participant_source=source, status=status,
+        invitation_status="NOT_SENT", added_by=_USER_BHR, added_at=_STAMP, created_at=_STAMP, updated_at=_STAMP,
+    )
+
+
+def _snapshot(participant: ArunPlanConnectParticipant) -> ArunParticipantSnapshot:
+    organization = {
+        "FIX-EMP-100": ("IBU-A", "IBG-Alpha", "Hyderabad"),
+        "FIX-EMP-200": ("IBU-A", "IBG-Alpha", "Chennai"),
+        "FIX-EMP-300": ("IBU-B", "IBG-Beta", "Pune"),
+        "FIX-EMP-400": ("IBU-B", "IBG-Beta", "Bengaluru"),
+        "FIX-EMP-500": ("IBU-C", "IBG-Gamma", "Mumbai"),
+    }
+    ibu, ibg, office_location = organization[participant.employee_id]
+    return ArunParticipantSnapshot(
+        id=f"80000000-0000-0000-0000-{participant.id[-12:]}", participant_id=participant.id,
+        employee_id=participant.employee_id, employee_name=participant.name, email=participant.email,
+        department=participant.department, ibu=ibu, ibg=ibg, account="Fixture Account",
+        process="Fixture Process", country="India", office_location=office_location, supervisor_id="FIX-BHR-001",
+        supervisor_name="Fixture BHR", business_unit_code="FIX", business_unit_descr="Fixture Business Unit",
+        tenure_months=24, tenure_bucket="1-3 years", role_description=participant.role,
+        source_system="HR_ROSTER", source_effective_date=_STAMP, enrichment_status="SUCCESS",
+        enrichment_error=None, snapshot_created_at=_STAMP,
+    )
