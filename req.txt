@@ -1,1 +1,1 @@
-py -c "from pathlib import Path; p=Path('tests/test_phase3a_http_acceptance.py'); print('\n'.join(p.read_text(encoding='utf-8').splitlines()[100:135]))"
+py -c "from pathlib import Path; p=Path('tests/test_phase3a_http_acceptance.py'); print('\n'.join(p.read_text(encoding='utf-8').splitlines()[90:103]))"
