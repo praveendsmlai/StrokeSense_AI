@@ -8,3 +8,13 @@ self.lifecycle = (
     if settings is not None
     else None
 )
+
+
+def __init__(
+    self,
+    session: Session,
+    settings=None,
+    *,
+    lifecycle_adapter=None,
+    allow_isolated_test_adapter: bool = False,
+) -> None:
