@@ -1,1 +1,19 @@
-py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT lifecycle_connect_id,local_connect_id,integration_state FROM connect_lifecycle_links').fetchall()); c.close()"
+# Verify canonical lifecycle access before returning any mapping.
+if self.lifecycle_adapter is None:
+    raise CanonicalConnectResolverError(
+        "Canonical lifecycle adapter is unavailable."
+    )
+
+if requester_id is None and requester_ibu is None:
+    raise CanonicalConnectResolverAuthorizationError(
+        "Authenticated requester scope is required."
+    )
+
+if not self.lifecycle_adapter.can_access(
+    canonical_id,
+    initiator_id=requester_id,
+    employee_ibu=requester_ibu,
+):
+    raise CanonicalConnectResolverAuthorizationError(
+        "Access denied to canonical Connect."
+    )
