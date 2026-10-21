@@ -1,1 +1,27 @@
-py -c "from pathlib import Path; p=Path('app/services/arun_canonical_id_mapper.py'); print(''.join(p.read_text(encoding='utf-8').splitlines(keepends=True)[188:273]))"
+from uuid import UUID
+from app.models.catalog import ConnectType
+
+try:
+    arun_id = str(UUID(str(canonical_connect.connect_type_id)))
+except (TypeError, ValueError):
+    raise ArunCanonicalIdMappingError("Invalid Arun Connect Type ID")
+
+type_name = (canonical_connect.connect_type_name or "").strip()
+
+if not type_name or len(type_name) > 128:
+    raise ArunCanonicalIdMappingError("Invalid Arun Connect Type name")
+
+type_code = "arun:" + arun_id
+
+default_type = self.session.query(ConnectType).filter_by(
+    code=type_code
+).one_or_none()
+
+if default_type is None:
+    default_type = ConnectType(
+        code=type_code,
+        name=type_name,
+        is_active=True,
+    )
+    self.session.add(default_type)
+    self.session.flush()
