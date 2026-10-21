@@ -1,8 +1,10 @@
-reference = self.lifecycle.gateway.resolve_local_connect(connect_id)
-print(
-    "DEBUG CONNECT:",
-    connect_id,
-    "canonical_id:", reference.lifecycle_connect_id if reference else None,
-    "state:", reference.integration_state if reference else None,
-    "expected:", "active",
+self.lifecycle = (
+    LifecycleDataAccess(
+        session,
+        settings,
+        lifecycle_adapter=lifecycle_adapter,
+        allow_isolated_test_adapter=allow_isolated_test_adapter,
+    )
+    if settings is not None
+    else None
 )
