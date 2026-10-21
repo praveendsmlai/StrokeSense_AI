@@ -1,1 +1,6 @@
-py -c "import inspect; from app.services.canonical_connect_resolver import CanonicalConnectResolver; print(inspect.getsource(CanonicalConnectResolver.activate_link_for_testing))"
+resolver.activate_link_for_testing(
+    "PC-00002",
+    test_marker="local_swagger"
+)
+session.commit()
+print("Test mapping activated and saved")
