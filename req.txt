@@ -1,3 +1,18 @@
-{
-  "content": "HR: Welcome to the PeopleConnect meeting. Today we will discuss employee concerns and action items.\nEmployee: We are facing delays in IT laptop support and need better onboarding documentation.\nHR: We will coordinate with the IT team to resolve laptop support issues within 5 working days.\nEmployee: We also request additional training on the new application.\nHR: We will schedule training within 10 working days and share updated onboarding documentation.\nHR: The IT support action will be assigned to the IT team and the training action will be assigned to the HR team."
-}
+from app.services.arun_documented_lifecycle_adapter import ArunDocumentedLifecycleAdapter
+
+
+class LocalCanonicalTestSettings(Settings):
+    app_env: str = "test"
+    lifecycle_integration_mode: str = "canonical"
+    canonical_lifecycle_contract_enabled: bool = True
+    allow_isolated_test_lifecycle_adapter: bool = True
+
+
+settings = LocalCanonicalTestSettings()
+app = create_app(settings)
+
+db = Database(settings)
+arun_session = db.session_factory()
+
+app.state.lifecycle_adapter = ArunDocumentedLifecycleAdapter(arun_session)
+app.state.allow_isolated_test_lifecycle_adapter = True
