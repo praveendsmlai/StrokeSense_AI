@@ -1,21 +1,39 @@
-from app.models.connect_lifecycle_link import ConnectLifecycleLink, LINK_STATE_ACTIVE
+@'
+import sqlite3
 
+db = sqlite3.connect("peopleconnect.db")
 
-integration_state = link_reference.integration_state
+try:
+    cols = [c[1] for c in db.execute("PRAGMA table_info(plan_connect_initiations)")]
+    source = db.execute(
+        "SELECT * FROM plan_connect_initiations WHERE id = ?",
+        ("PC-00004",)
+    ).fetchone()
 
-if self.lifecycle_adapter.is_test_only and self._allow_test_adapter():
-    link = (
-        self.session.query(ConnectLifecycleLink)
-        .filter_by(
-            lifecycle_source=LIFECYCLE_SOURCE_ARUN,
-            lifecycle_connect_id=canonical_id,
+    if not cols or source is None:
+        raise Exception("Arun table or PC-00004 not found")
+
+    for new_id in ("PC-00007", "PC-00008"):
+        if db.execute("SELECT 1 FROM plan_connect_initiations WHERE id=?", (new_id,)).fetchone():
+            print(new_id, "already exists")
+            continue
+
+        values = list(source)
+        values[cols.index("id")] = new_id
+
+        columns = ", ".join('"' + c + '"' for c in cols)
+        placeholders = ", ".join("?" for _ in cols)
+
+        db.execute(
+            f"INSERT INTO plan_connect_initiations ({columns}) VALUES ({placeholders})",
+            values
         )
-        .one()
-    )
-    link.integration_state = LINK_STATE_ACTIVE
-    self.session.flush()
-    integration_state = LINK_STATE_ACTIVE
+        print(new_id, "inserted")
 
-
-
-integration_state=integration_state,
+    db.commit()
+except:
+    db.rollback()
+    raise
+finally:
+    db.close()
+'@ | py -
