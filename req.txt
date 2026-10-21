@@ -1,6 +1,1 @@
-resolver.activate_link_for_testing(
-    "PC-00002",
-    test_marker="local_swagger"
-)
-session.commit()
-print("Test mapping activated and saved")
+py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT lifecycle_connect_id,local_connect_id,integration_state FROM connect_lifecycle_links').fetchall()); c.close()"
