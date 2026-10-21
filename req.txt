@@ -1,9 +1,1 @@
-# Persist the verified compatibility Connect and its mapping together.
-# Do not activate a pending mapping here.
-try:
-    self.session.commit()
-except Exception as exc:
-    self.session.rollback()
-    raise CanonicalConnectResolverError(
-        "Failed to persist canonical Connect mapping."
-    ) from exc
+py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT * FROM connect_lifecycle_links LIMIT 10').fetchall()); c.close()"
