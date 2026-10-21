@@ -1,1 +1,3 @@
-py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT lifecycle_connect_id, local_connect_id, integration_state FROM connect_lifecycle_links ORDER BY lifecycle_connect_id').fetchall()); c.close()"
+{
+  "content": "HR: Welcome to the PeopleConnect meeting. Today we will discuss employee concerns and action items.\nEmployee: We are facing delays in IT laptop support and need better onboarding documentation.\nHR: We will coordinate with the IT team to resolve laptop support issues within 5 working days.\nEmployee: We also request additional training on the new application.\nHR: We will schedule training within 10 working days and share updated onboarding documentation.\nHR: The IT support action will be assigned to the IT team and the training action will be assigned to the HR team."
+}
