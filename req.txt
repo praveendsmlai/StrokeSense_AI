@@ -1,19 +1,9 @@
-# Verify canonical lifecycle access before returning any mapping.
-if self.lifecycle_adapter is None:
+# Persist the verified compatibility Connect and its mapping together.
+# Do not activate a pending mapping here.
+try:
+    self.session.commit()
+except Exception as exc:
+    self.session.rollback()
     raise CanonicalConnectResolverError(
-        "Canonical lifecycle adapter is unavailable."
-    )
-
-if requester_id is None and requester_ibu is None:
-    raise CanonicalConnectResolverAuthorizationError(
-        "Authenticated requester scope is required."
-    )
-
-if not self.lifecycle_adapter.can_access(
-    canonical_id,
-    initiator_id=requester_id,
-    employee_ibu=requester_ibu,
-):
-    raise CanonicalConnectResolverAuthorizationError(
-        "Access denied to canonical Connect."
-    )
+        "Failed to persist canonical Connect mapping."
+    ) from exc
