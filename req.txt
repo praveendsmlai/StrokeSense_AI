@@ -1,1 +1,1 @@
-py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT connect_type_id, name, status FROM connect_types').fetchall()); c.close()"
+py -c "from pathlib import Path; p=Path('app/services/arun_canonical_id_mapper.py'); print(''.join(p.read_text(encoding='utf-8').splitlines(keepends=True)[188:273]))"
