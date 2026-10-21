@@ -1,4 +1,4 @@
-return CaptureService(
+return DocumentService(
     db,
     request.app.state.settings,
     lifecycle_adapter=request.app.state.lifecycle_adapter,
