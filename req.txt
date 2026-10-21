@@ -1,1 +1,28 @@
-findstr /s /n /i "LINK_STATE_ACTIVE activate_link integration_state" app\*.py
+from dev_swagger import settings
+from app.db.session import Database
+from app.services.arun_documented_lifecycle_adapter import ArunDocumentedLifecycleAdapter
+from app.services.canonical_connect_resolver import CanonicalConnectResolver
+
+db = Database(settings)
+session = db.session_factory()
+
+try:
+    adapter = ArunDocumentedLifecycleAdapter(session)
+    resolver = CanonicalConnectResolver(session, settings, adapter)
+
+    connect = adapter.get_connect("PC-00002")
+    print("Adapter found:", connect is not None)
+
+    try:
+        result = resolver.resolve_canonical_connect_id(
+            "PC-00002",
+            requester_id=connect.initiator_id,
+            requester_ibu="IBU-A",
+        )
+        print("Resolved local ID:", result)
+    except Exception as e:
+        print("ACTUAL ERROR:", type(e).__name__, str(e))
+finally:
+    session.rollback()
+    session.close()
+    db.dispose()
