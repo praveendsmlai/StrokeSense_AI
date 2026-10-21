@@ -1,1 +1,1 @@
-py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print('Arun:',c.execute('SELECT COUNT(*) FROM connect_types').fetchone()[0]); print('Praveen:',c.execute('SELECT COUNT(*) FROM connect_types_module3').fetchone()[0]); c.close()"
+py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); [(print('\n'+t),print([(x[1],x[2]) for x in c.execute('PRAGMA table_info('+t+')')])) for t in ['connect_types','connect_types_module3']]; c.close()"
