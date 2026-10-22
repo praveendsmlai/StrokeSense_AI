@@ -1,6 +1,1 @@
-return DocumentService(
-    db,
-    request.app.state.settings,
-    lifecycle_adapter=request.app.state.lifecycle_adapter,
-    allow_isolated_test_adapter=request.app.state.allow_isolated_test_lifecycle_adapter,
-)
+py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT local_connect_id, lifecycle_connect_id, lifecycle_source, integration_state FROM connect_lifecycle_links WHERE local_connect_id=5').fetchall()); c.close()"
