@@ -1,1 +1,1 @@
-py -c "from app.main import app; s=app.state.settings; print('mode:',s.lifecycle_integration_mode,'env:',s.app_env,'adapter:',type(app.state.lifecycle_adapter).__name__)"
+py -c "from app.main import app,db; from app.services.connect_lifecycle_gateway import ConnectLifecycleGateway; s=db.session_factory(); r=ConnectLifecycleGateway(s).resolve_local_connect(5); print(r); print('authoritative:',r.is_authoritative_lifecycle_link if r else None); s.close()"
