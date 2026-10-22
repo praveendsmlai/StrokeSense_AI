@@ -1,1 +1,1 @@
-py -c "import sqlite3; c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT local_connect_id, lifecycle_connect_id, lifecycle_source, integration_state FROM connect_lifecycle_links WHERE local_connect_id=5').fetchall()); c.close()"
+py -c "import sqlite3,os; print(os.path.abspath('peopleconnect.db')); c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT id FROM connects WHERE id=5').fetchall()); c.close()"
