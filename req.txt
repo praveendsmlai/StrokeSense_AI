@@ -1,1 +1,1 @@
-py -c "import sqlite3,os; print(os.path.abspath('peopleconnect.db')); c=sqlite3.connect('peopleconnect.db'); print(c.execute('SELECT id FROM connects WHERE id=5').fetchall()); c.close()"
+py -c "from app.core.config import get_settings; s=get_settings(); print('mode:',s.lifecycle_integration_mode); print('env:',s.app_env)"
