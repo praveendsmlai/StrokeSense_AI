@@ -1,1 +1,1 @@
-py -c "from app.core.config import get_settings; s=get_settings(); print('mode:',s.lifecycle_integration_mode); print('env:',s.app_env)"
+py -c "from app.main import app; s=app.state.settings; print('mode:',s.lifecycle_integration_mode,'env:',s.app_env,'adapter:',type(app.state.lifecycle_adapter).__name__)"
