@@ -1,1 +1,1 @@
-py -c "from app.main import app,db; from app.services.lifecycle_data_access import LifecycleDataAccess; s=db.session_factory(); x=LifecycleDataAccess(s,app.state.settings,lifecycle_adapter=app.state.lifecycle_adapter,allow_isolated_test_adapter=app.state.allow_isolated_test_lifecycle_adapter); print('authorized:',x._test_adapter_is_authorized); print('reference:',x.require_downstream_reference(5)); s.close()"
+py -c "import requests; r=requests.get('http://127.0.0.1:8000/openapi.json'); print('status:',r.status_code); print('app:',r.json().get('info',{}).get('title'))"
