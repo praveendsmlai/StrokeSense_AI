@@ -1,85 +1,89 @@
-# PEOPLECONNECT — FIX AND INSTALL PYTHON 3.14 DEPENDENCIES
+# PEOPLECONNECT — FIX FASTAPI SQLALCHEMY CONNECTION
 
-We are using Claude Haiku 4.5.
+The direct pyodbc SQL Server connection test has already PASSED, but FastAPI startup is failing.
 
-The existing PeopleConnect backend uses Python 3.14.3 on Windows.
+## Current Error
 
-Dependency installation failed because some versions in `backend/requirements.txt` are outdated or incompatible.
+ValueError: invalid literal for int() with base 10
 
-Your task is to fix and install all backend dependencies.
+SQLAlchemy is incorrectly interpreting the SQL Server named instance as a port.
 
-## Instructions
+## Environment
 
-1. Read the COMPLETE `backend/requirements.txt` file.
+- Windows
+- Python 3.14.3
+- FastAPI
+- SQLAlchemy 2.0.51
+- pyodbc 5.3.0
+- ODBC Driver 17
+- SQL Server Express
+- Database: PeopleConnect_Dev
+- Shared Memory protocol (`lpc:`)
+- TCP/IP disabled
 
-2. Identify all packages incompatible with Python 3.14.3.
+## Your Task
 
-3. Check compatibility between:
-   - FastAPI and Pydantic
-   - SQLAlchemy and pyodbc
-   - Azure OpenAI SDK
-   - LangChain and langchain-openai
-   - LangGraph
-   - langchain-chroma and ChromaDB
-   - Azure Communication Services
-   - Pandas and openpyxl
-   - All remaining dependencies
+1. Inspect:
+   - backend/app/core/config.py
+   - backend/app/core/database.py
+   - backend/app/main.py
+   - backend/scripts/test_sql_connection_simple.py
 
-4. Replace incompatible versions with stable, mutually compatible versions that support Python 3.14.
+2. Identify why direct pyodbc works but SQLAlchemy fails.
 
-5. Preserve the mandatory technology stack:
-   - FastAPI
-   - Microsoft SQL Server
-   - Azure OpenAI
-   - text-embedding-3-small
-   - ChromaDB
-   - LangGraph
-   - Azure Communication Services Email
+3. Fix SQLAlchemy connection configuration using a properly encoded ODBC connection string with SQLAlchemy `URL.create()` and the `odbc_connect` parameter.
 
-6. Do not remove essential dependencies to make installation succeed.
+4. Reuse the verified Shared Memory connection settings.
 
-7. Do not downgrade Python.
+5. Load credentials securely from backend/.env.
 
-8. Use a dedicated virtual environment if needed. Do not modify unrelated Python environments.
+6. Do not use hardcoded credentials or the `sa` account.
 
-9. Update `backend/requirements.txt`.
+7. Do not require a TCP/IP port.
 
-10. Install all dependencies using the appropriate environment and `py` launcher.
+8. Preserve existing connection pooling and error handling.
 
-11. Run:
+## Mandatory Verification
 
-   `py -m pip check`
+After fixing:
 
-   Use the corresponding virtual-environment interpreter for verification if a virtual environment was created.
+1. Execute a read-only SQLAlchemy connection test.
+2. Verify it connects to PeopleConnect_Dev.
+3. Start FastAPI and verify actual application startup.
+4. Verify GET /openapi.json returns HTTP 200.
+5. Verify GET /docs returns HTTP 200.
+6. Verify the health endpoint and database connectivity.
+7. Check terminal output for startup errors.
 
-12. Execute import checks for all critical libraries.
-
-13. If package installation succeeds, record the exact installed versions in a reproducible dependency lock file.
-
-14. If installation fails, diagnose the actual error and fix it. Do not claim success without verification.
-
-## Mandatory Windows rule
-
-Always use `py`, never `python` or `python -m` for Windows Python commands.
+Do not claim success based only on the Uvicorn reloader starting.
 
 ## Restrictions
 
+- Use `py` for all Windows Python commands.
+- Never use `python` or `python -m`.
 - Do not modify SQL Server tables.
-- Do not change database credentials.
+- Do not execute migrations.
+- Do not import data.
 - Do not modify Arun's schema.
 - Do not develop frontend code.
-- Do not modify application business logic.
-- Do not begin the next development phase.
-- Do not print credentials or secrets.
+- Do not implement new business APIs.
+- Never display passwords or connection strings containing credentials.
+- Do not change SQL Server network or security settings.
 
-## Final report
+Fix only the connection and startup problem.
+
+## Final Report
 
 Provide:
-1. Packages updated.
-2. Final installed versions.
-3. Installation result.
-4. `pip check` result.
-5. Critical import verification result.
-6. Any remaining compatibility problems.
 
-Stop only after completing installation and verification, or clearly documenting an unresolved blocker.
+1. Root cause.
+2. Files modified.
+3. SQLAlchemy connection test result.
+4. FastAPI startup result.
+5. Swagger/OpenAPI HTTP status.
+6. Health check result.
+7. Any remaining errors.
+
+Only report PASSED when a test actually executed successfully.
+
+Stop after verification.
