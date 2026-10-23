@@ -1,17 +1,1 @@
-Fix the Action Extraction API failure handling in PeopleConnect.
-
-Current issue:
-POST /api/v1/minutes/{minutes_id}/extract-actions returns HTTP 200 with {"actions_created":0,"status":"FAILED","details":[]}.
-
-Requirements:
-1. Investigate the actual failure cause using backend logs.
-2. If Azure OpenAI credentials are missing, return HTTP 503 with a meaningful error message.
-3. Never return HTTP 200 for provider failures.
-4. Preserve truthful FAILED/UNAVAILABLE audit records.
-5. Do not create fake actions or mark failures as successful.
-6. Add regression tests for unavailable provider and successful mocked extraction.
-7. Do not modify Arun's tables, existing data, or unrelated APIs.
-8. Use `py -m` instead of `python -m` on this Windows environment.
-9. Use requirements-lock.txt as the dependency reference; do not install outdated dependencies from requirements.txt.
-
-Report the root cause, files changed, and actual test results. Live Azure testing must remain pending until credentials are available.
+Fix the PeopleConnect Action Extraction API. Manual Swagger testing still returns HTTP 201 with {"actions_created":0,"status":"FAILED","details":[]} when Azure OpenAI credentials are missing. This is incorrect. Read the existing implementation and trace the actual return/exception paths. Ensure provider-unavailable failures return HTTP 503, never HTTP 200/201. Keep HTTP 201 only for successful action extraction. Persist truthful FAILED/UNAVAILABLE audit status and do not create fake actions. Add and RUN regression tests against the actual FastAPI route, not just mocked helpers. Verify response status and database records. Preserve Arun's tables and existing data. Only modify Praveen-owned code. Use py -m commands on Windows and requirements-lock.txt for dependencies. Restart the running backend if needed, then report exact test commands, pass/fail results, files changed, and any remaining issues. Do not claim success without test output.
