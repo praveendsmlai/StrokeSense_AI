@@ -1,1 +1,21 @@
-py -c "import requests; r=requests.get('http://127.0.0.1:8000/openapi.json'); print('status:',r.status_code); print('app:',r.json().get('info',{}).get('title'))"
+Open SQL Server Management Studio (SSMS).
+
+
+
+Right-click the database → Tasks → Generate Scripts.
+
+
+
+Select Choose specific database objects.
+
+
+
+Select all 9 tables.
+
+
+
+Click Advanced → Set Types of data to script = Schema only.
+
+
+
+Save the generated .sql file and share it.
