@@ -1,24 +1,137 @@
-# PEOPLECONNECT — NEXT TASK: CREATE AND VERIFY BHR_DATA TABLE
+# MANDATORY PEOPLECONNECT PROJECT RULES
 
-Arun's 7 SQL Server tables have been created and verified in PeopleConnect_Dev.
+Before implementation, refer to BOTH the complete PRD and Task Breakdown Excel inside `Source_document/`.
 
-Your task is ONLY to create and verify dbo.BHR_data.
+Implement ONLY tasks explicitly assigned to Praveen, including the "AI Output Generation Integration Point" task assigned to him within Arun's section.
 
-1. Read `data/BHR_data.xlsx`.
-2. Inspect `backend/scripts/02_create_bhr_authorization.sql`.
-3. Verify the expected nine BHR_data columns against the workbook and previously supplied schema.
-4. Preserve exact column names, including spaces.
-5. Connect to PeopleConnect_Dev using the existing verified SQLAlchemy/pyodbc configuration.
-6. Check whether dbo.BHR_data already exists.
-7. If absent, execute the reviewed table-creation SQL.
-8. If present, verify its schema without dropping or overwriting it.
-9. Verify the final table structure using SQL Server catalog queries.
-10. Do not import Excel records yet.
-11. Do not modify Arun's tables or original SQL script.
-12. Do not create frontend code.
-13. Use `py` for all Windows Python commands.
-14. Never print credentials or connection strings.
+Use Arun's existing 7 SQL Server tables strictly as read-only integration dependencies. Do NOT modify or rebuild Arun's tables, schema, lifecycle, workflows or APIs.
 
-Report the actual table-creation result, column names, data types, and any mismatch.
+Build ONLY the backend. API contracts must match relevant screenshots in `UI/`. Do not build a frontend.
 
-Stop after verifying dbo.BHR_data. Do not start data imports or other modules.
+Mandatory stack:
+- Python, FastAPI, SQLAlchemy, Alembic
+- Microsoft SQL Server
+- Azure OpenAI
+- Azure OpenAI text-embedding-3-small
+- ChromaDB
+- LangGraph
+- Azure Communication Services Email
+
+Employee source: `data/employee_master.xlsx`
+BHR authorization source: `data/BHR_data.xlsx`
+
+Use `py` for ALL Windows Python commands. Never use `python` or `python -m`.
+
+Preserve completed work. Never expose passwords or connection strings containing credentials. Test all changes and report actual results.
+
+# NEXT TASK — CREATE AND IMPORT EMPLOYEE MASTER
+
+Current status:
+- PeopleConnect_Dev SQL Server connection verified.
+- FastAPI and Swagger working.
+- Arun's 7 tables created.
+- dbo.BHR_data created with 9 columns.
+- One genuine BHR_data.xlsx record inserted.
+- Employee Master table NOT yet created.
+
+## Task 1 — Analyze Employee Excel
+
+1. Read `data/employee_master.xlsx` completely.
+2. Inspect all sheets and determine the actual employee master sheet.
+3. Identify every column and its Excel data type.
+4. Identify the primary employee identifier `EMPID`.
+5. Identify the `EMPLOYEE_IBU` column.
+6. Count total rows, valid employee IDs, missing IDs and duplicates.
+7. Do not invent or remove employee columns.
+
+## Task 2 — Create SQL Server Table
+
+1. Connect to the existing `PeopleConnect_Dev` database using backend/.env.
+2. Check whether an Employee Master table already exists.
+3. If absent, create `dbo.employee_master`.
+4. Include all required Excel columns, preserving original column names.
+5. Use suitable SQL Server data types.
+6. Preserve leading zeros in employee identifiers where applicable.
+7. Use `EMPID` as the employee's business identifier.
+8. Add primary-key or unique constraints only after checking data uniqueness.
+9. Manage this Praveen-owned table through an appropriate Alembic migration.
+10. Never modify Arun's 7 tables or dbo.BHR_data.
+
+## Task 3 — Import Complete Excel Data
+
+1. Create an idempotent Excel-to-SQL Server import script.
+2. Import all valid employee records from the actual workbook.
+3. Preserve original EMPIDs and EMPLOYEE_IBU values.
+4. Handle Excel blanks, dates, text, numeric cells and duplicate IDs carefully.
+5. Use transaction handling.
+6. Prevent duplicate records on reruns.
+7. Never silently overwrite existing employee data.
+8. Record rejected rows with exact reasons.
+9. Do not generate sample or dummy employees.
+10. Do not import data automatically when FastAPI starts.
+
+## Task 4 — Validate Employee Master
+
+Execute real SQL Server verification queries.
+
+Verify:
+- dbo.employee_master exists.
+- All expected columns exist.
+- Imported row count matches valid Excel records.
+- Employee IDs are preserved.
+- Duplicate employee IDs are handled.
+- EMPLOYEE_IBU values match the Excel source.
+- No unauthorized changes occurred to Arun's tables or dbo.BHR_data.
+
+## Task 5 — Check BHR Authorization Compatibility
+
+Analyze how:
+
+`dbo.BHR_data.EMPLOYEE_IBU`
+
+relates to:
+
+`dbo.employee_master.EMPLOYEE_IBU`
+
+Check whether the IBU values can be matched reliably.
+
+Do not implement login or authorization APIs yet.
+
+Do not assume the BHR identity mapping without PRD verification.
+
+Document any unmatched or inconsistent IBU values.
+
+## Strict Execution Boundary
+
+Complete Employee Master creation, import and verification ONLY.
+
+Do not:
+- Implement Arun-owned functionality.
+- Modify Arun's schema or data.
+- Build frontend code.
+- Implement other APIs.
+- Import Arun CSV files.
+- Modify BHR_data records.
+- Begin AI or RAG development.
+- Run destructive SQL.
+
+## Final Report
+
+Provide:
+
+1. Excel sheets inspected.
+2. Total Excel rows.
+3. Employee columns identified.
+4. SQL table creation status.
+5. Total records successfully imported.
+6. Rejected or duplicate records.
+7. EMPID validation.
+8. EMPLOYEE_IBU validation.
+9. BHR_data IBU compatibility findings.
+10. Actual SQL Server verification results.
+11. Files created or modified.
+12. Any remaining blockers.
+
+Do not claim success unless the real SQL Server table exists and the import has been verified.
+
+STOP after Employee Master completion.
