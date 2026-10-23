@@ -1,35 +1,52 @@
-# PEOPLECONNECT — FIX ARUN SQL SCHEMA ERROR
+# PEOPLECONNECT — CREATE ALL ARUN TABLES IN SQL SERVER
 
-We executed `backend/scripts/01_create_arun_schema.sql` in SSMS against `PeopleConnect_Dev`.
+Previous schema execution failed twice with SQL Server Error 1919.
 
-The script failed with:
+Latest error:
+Column `ibu` in `dbo.participant_snapshots` is invalid for use as an index key.
 
-Msg 1919, Level 16, Line 113
+## Your Task
 
-Column 'bhr_employee_ibu' in table 'dbo.plan_connect_initiations' is of a type invalid for use as an index key.
+1. Inspect `arun_table/script.sql` and `backend/scripts/01_create_arun_schema.sql`.
+2. Use Arun's original SQL script as the authoritative schema.
+3. Inspect ALL generated indexes for invalid columns such as VARCHAR(MAX), NVARCHAR(MAX) and TEXT.
+4. Fix invalid indexes throughout the development initialization script, not just the latest error.
+5. Preserve Arun's original column names, data types, primary keys and relationships.
+6. Do not modify Arun's original SQL script.
+7. Connect to the existing `PeopleConnect_Dev` database using the verified SQLAlchemy/pyodbc connection and credentials from `backend/.env`.
+8. Identify tables already created during previous failed executions.
+9. Safely execute the corrected initialization script against `PeopleConnect_Dev`.
+10. Create all remaining Arun tables defined in the verified schema.
+11. Never drop, truncate or overwrite existing tables or records.
+12. Do not change SQL Server security or network settings.
+13. Handle SQL Server `GO` batch separators correctly if present.
+14. If any error occurs, diagnose, fix and retry only the necessary safe operations.
+15. After execution, query SQL Server system catalog to verify every required table, column, primary key, foreign key and index.
+16. Report any missing or incompatible schema definitions instead of inventing them.
+17. Do not claim completion until actual SQL Server verification passes.
 
-The database may now contain partially created tables.
+## Important Restrictions
 
-Your task:
+- Work only in `PeopleConnect_Dev`.
+- Arun's original database must remain untouched.
+- Do not create Praveen-owned tables yet.
+- Do not import CSV or Excel data yet.
+- Do not modify frontend code.
+- Do not expose SQL passwords or connection strings.
+- Use `py` instead of `python` for all Windows Python commands.
+- Keep changes limited to database initialization scripts and necessary verification utilities.
 
-1. Inspect the original Arun SQL script in `arun_table/`.
-2. Inspect `backend/scripts/01_create_arun_schema.sql`.
-3. Identify the exact data type of `bhr_employee_ibu` and the failing index.
-4. Compare the generated schema with Arun's original schema.
-5. Do not change Arun's canonical column definitions merely to make an index work.
-6. If the generated index is unnecessary or incorrectly inferred, correct the development script accordingly.
-7. If the original schema contains an incompatible definition, report the discrepancy rather than silently changing it.
-8. Account for tables already created during the failed execution.
-9. Make the corrected initialization script safe to rerun without dropping existing tables or data.
-10. Do not execute database-changing SQL automatically.
-11. Do not modify Arun's original script.
-12. Do not modify unrelated backend code.
-13. Use `py` for all Windows Python commands.
+## Final Report
 
-Deliver:
-- Root cause.
-- Corrected development SQL script.
-- Exact changes made.
-- Instructions for safely resuming schema initialization.
+Provide:
+1. Number of Arun tables expected from the original script.
+2. Number of tables successfully created and verified.
+3. Actual table names.
+4. Existing tables safely preserved.
+5. Index errors identified and resolved.
+6. SQL verification results.
+7. Any remaining blockers.
 
-Stop after preparing the correction.
+If any required table is missing, report the exact blocker and do not mark the task complete.
+
+Stop after Arun's schema creation and verification. Do not start data imports automatically.
