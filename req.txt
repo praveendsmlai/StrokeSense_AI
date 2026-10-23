@@ -1,74 +1,24 @@
-# PEOPLECONNECT — PROMPT 02: TASK OWNERSHIP REVERIFICATION
+Fix the existing FastAPI SQL Server connection configuration.
 
-Master Prompt 01 has already been executed.
+SQL Server details:
+- Instance: TAP-5CD1520XW0\SQLEXPRESS
+- Database: PeopleConnect_Dev
+- Authentication: SQL Server Authentication
+- Shared Memory: Enabled
+- TCP/IP: Disabled
+- Named Pipes: Disabled
 
-Do NOT restart the project or repeat completed development.
+Requirements:
 
-IMPORTANT CORRECTION:
+1. Inspect backend/app/core/config.py and database.py.
+2. Configure SQLAlchemy with pyodbc to support a local SQL Server Shared Memory connection using the named instance.
+3. Do not require SQL_SERVER_PORT.
+4. Preserve the existing .env variable names.
+5. Do not expose or log SQL credentials.
+6. Do not enable TCP/IP or change SQL Server settings.
+7. Do not modify any database tables.
+8. Create a small read-only database connection test.
+9. Use `py` for all Windows Python commands, never `python`.
+10. Execute the test and report the actual connection result.
 
-The project task breakdown contains tasks grouped under Arun, but at least one task within Arun's group is also assigned to Praveen.
-
-Therefore, identifying only the 12 modules under Praveen's section is NOT sufficient.
-
-## Your task
-
-1. Open the complete task breakdown Excel file inside `Source_document/`.
-
-2. Inspect every worksheet and every relevant task row.
-
-3. Review ALL task groups, including:
-   - Praveen
-   - Arun
-   - Abhishek
-   - Shared or unclassified tasks
-
-4. Inspect task-level ownership, not just module headings.
-
-5. Identify every task where Praveen is explicitly assigned, even when the task appears under Arun's module or section.
-
-6. Check task descriptions, assigned-owner columns, responsibility columns and dependency notes.
-
-7. Identify tasks where Praveen implements backend logic but depends on Arun's database tables or lifecycle functionality.
-
-8. Do not automatically classify every task under Arun's heading as Arun-owned.
-
-9. Do not automatically assign all shared tasks to Praveen.
-
-10. Update:
-   - docs/PRAVEEN_SCOPE_MATRIX.md
-   - docs/REQUIREMENTS_TRACEABILITY.md
-   - docs/IMPLEMENTATION_STATUS.md
-
-11. Add the exact Excel sheet name and row number as evidence for every Praveen-owned task.
-
-12. Clearly distinguish:
-   - Praveen-owned tasks.
-   - Arun-owned tasks.
-   - Shared responsibilities.
-   - Praveen-owned tasks appearing under Arun's section.
-   - Unclear ownership.
-
-## Strict rules
-
-- Backend development only.
-- Do not change Arun's database schema.
-- Do not modify existing backend code.
-- Do not execute SQL scripts.
-- Do not start Phase 2.
-- Do not create frontend code.
-- Do not invent task ownership.
-- Use `py` instead of `python` for all Windows Python commands.
-
-## Final report
-
-Provide:
-
-1. Previously identified Praveen tasks.
-2. Additional Praveen tasks found under Arun's group.
-3. Exact task IDs and descriptions.
-4. Excel sheet names and row numbers.
-5. Corrected total Praveen-owned task count.
-6. Documents updated.
-7. Any ownership ambiguity requiring confirmation.
-
-Stop after completing this ownership verification.
+Only fix and verify database connectivity. Do not implement other modules.
