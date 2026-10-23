@@ -1,1 +1,35 @@
-Select-String -Path "backend\scripts\01_create_arun_schema.sql" -Pattern "DROP|DELETE|TRUNCATE|ALTER|USE |CREATE DATABASE"
+# PEOPLECONNECT — FIX ARUN SQL SCHEMA ERROR
+
+We executed `backend/scripts/01_create_arun_schema.sql` in SSMS against `PeopleConnect_Dev`.
+
+The script failed with:
+
+Msg 1919, Level 16, Line 113
+
+Column 'bhr_employee_ibu' in table 'dbo.plan_connect_initiations' is of a type invalid for use as an index key.
+
+The database may now contain partially created tables.
+
+Your task:
+
+1. Inspect the original Arun SQL script in `arun_table/`.
+2. Inspect `backend/scripts/01_create_arun_schema.sql`.
+3. Identify the exact data type of `bhr_employee_ibu` and the failing index.
+4. Compare the generated schema with Arun's original schema.
+5. Do not change Arun's canonical column definitions merely to make an index work.
+6. If the generated index is unnecessary or incorrectly inferred, correct the development script accordingly.
+7. If the original schema contains an incompatible definition, report the discrepancy rather than silently changing it.
+8. Account for tables already created during the failed execution.
+9. Make the corrected initialization script safe to rerun without dropping existing tables or data.
+10. Do not execute database-changing SQL automatically.
+11. Do not modify Arun's original script.
+12. Do not modify unrelated backend code.
+13. Use `py` for all Windows Python commands.
+
+Deliver:
+- Root cause.
+- Corrected development SQL script.
+- Exact changes made.
+- Instructions for safely resuming schema initialization.
+
+Stop after preparing the correction.
