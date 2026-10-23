@@ -1,129 +1,347 @@
-# MANDATORY PEOPLECONNECT PROJECT RULES
+# MANDATORY PEOPLECONNECT PROJECT RULES — READ FIRST
 
-Read the complete PRD and Task Breakdown Excel inside `Source_document/` before implementation. Review all relevant screenshots in `UI/`.
+Before implementing anything, read:
+
+1. Complete PRD inside `Source_document/`.
+2. Complete Task Breakdown Excel inside `Source_document/`.
+3. Relevant reference screenshots inside `UI/`.
+4. `docs/PRAVEEN_T002_AI_INTEGRATION_PLAN.md`.
+5. Existing Phase 1 completion report.
+6. Current FastAPI project, SQLAlchemy models, Alembic migrations and OpenAPI routes.
+
+These documents are the source of truth. Do not invent requirements, business rules, endpoints or database fields.
+
+## STRICT TASK OWNERSHIP
 
 Implement ONLY Praveen's 12 assigned tasks:
-- T002: AI Output Generation Integration Point.
-- T003: The 11 Praveen-owned subtasks identified in the Task Breakdown Planner.
 
-Do not implement Arun's or Abhishek's assigned functionality.
+**T002 — 1 task**
+- AI Output Generation Integration Point.
 
-Arun's existing 7 SQL Server tables are integration dependencies. Do NOT alter their schema, records, lifecycle, APIs, indexes, or business logic.
+**T003 — 11 tasks**
+1. Action Tracking & Status Management.
+2. Connect Closure Control & Workflow.
+3. Append-Only Case History.
+4. Automated Communications & Notifications.
+5. Action Reminders & Aging.
+6. Action Tracker — Unified View of All Actions.
+7. Dashboards & Role-Specific Views.
+8. Reporting & Analytics — Activity & Coverage.
+9. Theme Analysis & Insights.
+10. Administrative Configuration & Data Integration.
+11. Testing and Bug Fixing.
 
-Use only one FastAPI backend and one Microsoft SQL Server database: `PeopleConnect_Dev`.
+Do not implement Arun's or Abhishek's assigned business functionality.
 
-Technology stack: FastAPI, SQLAlchemy, Alembic, Azure OpenAI, text-embedding-3-small, ChromaDB, LangGraph, Azure Communication Services Email.
+### Arun Integration Rules
 
-Implement all AI functionality explicitly required by the PRD using real provider integration in its relevant phase. Provider credentials and live testing may be deferred where unavailable.
+- Arun owns Connect Lifecycle Management.
+- Use Arun's existing 7 SQL Server tables.
+- Never recreate or redesign those tables.
+- Never modify Arun's SQL schema, data, APIs, lifecycle or workflows.
+- Access Arun's tables through read-only database integration.
+- Use actual Connect IDs and participant snapshots.
+- Do not invent duplicate lifecycle tables or APIs.
+- Do not bypass lifecycle requirements.
 
-Backend only. Use UI screenshots for API contracts. Preserve all previously completed work.
+### Abhishek Integration Rules
 
-Use `py` for Windows Python commands. Never use `python`.
+- Abhishek owns core authentication, RBAC and organizational scope.
+- His module is currently unavailable.
+- Implement an isolated temporary DEVELOPMENT authentication adapter only for testing.
+- Do not claim this is enterprise authentication.
+- Design the adapter to be replaced by Abhishek's actual authentication implementation.
 
-Never hardcode credentials, fake identities, or bypass authorization. Do not claim tests passed without executing them.
+### Mandatory Architecture
 
-# CURRENT STATUS
+- Single FastAPI backend.
+- One Microsoft SQL Server database: `PeopleConnect_Dev`.
+- SQLAlchemy and Alembic.
+- Azure OpenAI for real AI generation.
+- Azure OpenAI `text-embedding-3-small` for embeddings.
+- ChromaDB for retrieval.
+- LangGraph for AI orchestration where required.
+- Azure Communication Services Email for notifications.
 
-- Arun's 7 SQL Server tables created; 30 CSV records imported.
-- dbo.employee_master created; 74 columns and 3 employee records.
-- dbo.BHR_data created; 9 columns and 1 record.
-- SQL Server and FastAPI connectivity previously verified.
-- T002 analysis completed.
-- Planning file: `docs/PRAVEEN_T002_AI_INTEGRATION_PLAN.md`.
+All AI features explicitly required by the PRD must have real provider integration code in their corresponding implementation phases. Credential-dependent testing may be deferred.
 
-# TASK — PHASE 1: AI DATABASE FOUNDATION
+Backend only. Do not develop or modify frontend files.
 
-First review the T002 plan against the actual PRD, current SQL Server schema and existing Alembic migrations.
+Use `py` for Windows Python commands, never `python`.
 
-Proposed Praveen-owned tables:
+Never hardcode or expose passwords, API keys, database credentials or access tokens.
 
-1. connect_minutes
-2. connect_actions
-3. connect_insights
-4. ai_generation_requests
-5. connect_input_sources
+Preserve existing work. Report actual test results rather than claiming success.
 
-Do not blindly implement the proposed design.
+---
 
-## Step 1 — Validate Existing Schema
+# CURRENT PROJECT STATUS
 
-1. Inspect all existing SQLAlchemy models and Alembic migrations.
-2. Identify the current Alembic revision.
-3. Check whether any proposed tables already exist.
-4. Verify Arun's actual Connect ID type and related columns.
-5. Verify all five proposed tables are genuinely needed.
-6. Identify overlapping fields and future T003 requirements.
-7. Use exact PRD requirements as the source of truth.
+Previously reported:
 
-## Step 2 — Implement Database Models
+- Microsoft SQL Server connection operational.
+- FastAPI foundation working.
+- Arun's 7 tables created with 30 imported records.
+- `dbo.employee_master`: 74 columns, 3 records.
+- `dbo.BHR_data`: 9 columns, 1 record.
+- Five Praveen-owned AI tables created in Phase 1.
+- Eight SQL indexes created.
+- Alembic revision 002 recorded.
+- T002 AI Integration Analysis completed.
 
-Implement validated Praveen-owned models with:
+Verify relevant current facts before modifying code.
 
-- Correct SQL Server data types.
-- Primary keys and appropriate indexes.
-- Relationships using actual Connect identifiers.
-- Draft, validation and publication states.
-- Created/updated timestamps.
-- AI model and provider metadata.
-- Audit information.
-- Append-only generation request history.
-- Appropriate source references for generated outputs.
-- Compatibility with future action tracking and reporting.
+Current datasets have different IBU values:
 
-Do not create foreign keys that reference nonexistent or incompatible columns.
+- Arun records: AMAZON, US2, INTERNAL_OPS.
+- Employee Master: ALPHABET.
+- BHR_data: ALPHABET.
 
-Do not modify Arun-owned tables.
+Do not change these values or bypass authorization to make tests pass.
 
-## Step 3 — Alembic Migration
+---
 
-1. Create a new migration after the current Alembic head.
-2. Never overwrite existing migrations.
-3. Preserve employee_master and BHR_data.
-4. Apply only Praveen-owned schema changes.
-5. Verify migration compatibility with SQL Server.
-6. Ensure migration failure does not leave partial application-owned schema changes.
-7. Do not run destructive migrations.
+# PHASE 2 — FASTAPI API SKELETON, CRUD, DEVELOPMENT LOGIN AND SWAGGER TESTING
 
-## Step 4 — Verification
+## TASK 1 — Inspect Existing Backend
 
-Execute actual SQL Server verification:
+Inspect:
+- Existing FastAPI application entry point.
+- Existing API routers.
+- Existing SQLAlchemy session.
+- All five Praveen-owned AI models.
+- Existing Alembic migrations.
+- Current authentication dependencies.
+- Existing OpenAPI paths.
+- Existing test infrastructure.
 
-- All required new tables exist.
-- Columns and data types match the approved models.
-- Primary keys and indexes are correct.
-- Relationships use the existing Arun Connect ID correctly.
-- Arun's 7 tables still contain 30 records.
-- employee_master still contains 3 records.
-- BHR_data still contains 1 record.
-- Existing FastAPI health endpoint remains functional.
-- Alembic current revision matches the new migration head.
+Identify duplicate routes, missing imports, broken dependencies or incompatible data types before implementing anything.
 
-## Strict Boundaries
+Preserve the existing project structure.
 
-Do NOT:
-- Implement API endpoints yet.
-- Add fake authentication.
-- Implement Azure OpenAI integration yet.
-- Create mock outputs.
-- Modify any Arun-owned table.
-- Implement T003 business workflows.
-- Change frontend files.
-- Add sample data without explicit requirement.
+## TASK 2 — DEVELOPMENT AUTHENTICATION ADAPTER
 
-## Final Report
+Abhishek's authentication module is unavailable.
+
+Implement a separate, temporary development authentication adapter so Praveen's APIs can be tested through Swagger.
+
+Requirements:
+
+1. Create a replaceable authentication provider interface.
+2. Implement a development-only provider.
+3. Use explicitly provisioned local test identities.
+4. Use securely hashed development passwords.
+5. Use short-lived signed access tokens.
+6. Authenticate users through a development login endpoint.
+7. Support Swagger OAuth2 password authentication if compatible with the existing architecture.
+8. Never trust arbitrary role, employee ID or IBU request headers.
+9. Resolve test roles and IBU scopes server-side.
+10. Use `dbo.BHR_data` for real BHR-to-IBU mappings.
+11. Use `dbo.employee_master` for existing employee details.
+12. Do not assume Excel contains valid login passwords.
+13. Do not create fake employees or modify source records.
+14. Do not modify Abhishek-owned authentication code.
+15. Do not modify Arun-owned tables.
+
+Security requirements:
+
+- Explicit development-only feature flag.
+- Development provider disabled by default.
+- Allow development adapter only in explicitly configured local development mode.
+- Bind development authentication to loopback access.
+- Never enable it in staging or production.
+- Reject startup if development authentication is enabled outside permitted local configuration.
+- Never expose credentials or tokens in logs.
+- Return 401 for unauthenticated requests.
+- Return 403 for authenticated but unauthorized requests.
+- Do not use authentication bypasses.
+
+Provide a clear migration path for replacing this adapter with Abhishek's real authentication module.
+
+## TASK 3 — DEVELOPMENT TEST ROLES
+
+Support only roles authorized by the PRD and Task Breakdown.
+
+For testing, include appropriate development identities for:
+
+- BHR.
+- BHR Leader, subject to PRD-defined scope.
+- Participant.
+- Platform Admin, if required by the PRD.
+
+BHR and BHR Leader must be treated as permitted Connect creators within their authorized scope when integrating with existing lifecycle contracts.
+
+Do not implement Arun's Connect creation APIs.
+
+Enforce:
+
+- BHR can access only authorized IBU data.
+- BHR Leader permissions must follow the PRD.
+- Participants can access only permitted Connect data and their own actions.
+- Administrator permissions must follow the PRD.
+- Authentication and authorization must be separate concerns.
+
+The current ALPHABET employee dataset does not match Arun's sample Connect IBUs.
+
+Do not use unrestricted administrative access to hide this mismatch.
+
+Document scenarios that cannot be tested until correctly scoped identity and Connect data are available.
+
+## TASK 4 — PYDANTIC REQUEST AND RESPONSE SCHEMAS
+
+Implement schemas for T002:
+
+- AI generation requests.
+- Minutes drafts.
+- Action suggestions.
+- AI insights.
+- Draft editing.
+- Validation and approval.
+- Publication status.
+- AI generation history.
+
+Use actual database fields.
+
+Add input validation for:
+
+- Connect ID.
+- Required content.
+- Output types.
+- Status transitions.
+- Ownership.
+- Duplicate requests.
+- Invalid or missing records.
+
+Never expose SQLAlchemy internal objects directly.
+
+## TASK 5 — IMPLEMENT T002 FASTAPI ENDPOINTS
+
+Refer to the approved T002 plan and actual PRD/UI contracts.
+
+Implement the required endpoints for:
+
+1. Requesting AI-generated minutes.
+2. Listing minutes.
+3. Retrieving a minutes draft.
+4. Editing a draft.
+5. Validating/reviewing AI output.
+6. Publishing an approved output.
+7. Retrieving AI-extracted action suggestions.
+8. Retrieving AI-generated insights.
+9. Retrieving generation audit history.
+
+The final method/path names must follow the PRD and UI requirements.
+
+Do not implement duplicate routes.
+
+If real Azure OpenAI generation is not implemented yet, generation requests must return an explicit unavailable/not-implemented response rather than fabricated output.
+
+Do not create fake actions, minutes or insights.
+
+Editing and publication must use server-side authorization checks.
+
+## TASK 6 — SQL SERVER CRUD INTEGRATION
+
+Use existing SQLAlchemy models and database sessions.
+
+Requirements:
+
+- Read Arun's actual Connect records.
+- Persist Praveen-owned AI records only.
+- Support safe create/read/update operations.
+- Enforce transaction boundaries.
+- Handle duplicate requests.
+- Implement appropriate optimistic concurrency or conflict handling.
+- Preserve generated-output version/history requirements.
+- Keep append-only AI generation history immutable.
+- Validate lifecycle eligibility before publishing.
+- Never mutate Arun-owned data.
+- Never publish unvalidated AI output.
+
+T003 action tracking and closure business logic must remain outside Phase 2.
+
+## TASK 7 — SWAGGER INTEGRATION
+
+Ensure:
+
+1. FastAPI starts successfully.
+2. `/docs` loads.
+3. `/openapi.json` returns HTTP 200.
+4. The development login mechanism integrates with Swagger authentication.
+5. Protected APIs require valid tokens.
+6. Endpoint request schemas are visible.
+7. Endpoint response schemas are visible.
+8. HTTP status codes are documented.
+
+Swagger should support manual API testing using the temporary development authentication adapter.
+
+## TASK 8 — BACKEND TESTING
+
+Execute actual tests for:
+
+### Authentication
+- Valid development login.
+- Invalid credentials.
+- Expired token.
+- Missing token.
+- Invalid token.
+- Role-based access denial.
+- Cross-IBU access denial.
+- Development authentication disabled outside permitted mode.
+
+### API validation
+- Invalid Connect ID.
+- Missing required fields.
+- Invalid status transition.
+- Unauthorized draft editing.
+- Unauthorized publication.
+- Attempted publication before validation.
+- Azure OpenAI provider not configured.
+
+### Database
+- Five Praveen AI tables remain available.
+- Arun's seven tables preserve the existing 30 records.
+- Employee Master preserves 3 records.
+- BHR_data preserves 1 record.
+- Transactions rollback properly on failures.
+- Append-only history cannot be silently rewritten.
+
+### Integration
+- Existing FastAPI health endpoint works.
+- OpenAPI routes load successfully.
+- Existing endpoints are not broken.
+
+Use isolated fixtures or rollback-safe transactions for tests. Never mutate the real imported Arun records as test data.
+
+If any test requires an authorized Connect that does not exist in the current dataset, report it as blocked. Do not forge authorization.
+
+## TASK 9 — FINAL REPORT
 
 Provide:
 
-1. Actual previous and new Alembic revisions.
-2. Approved table names.
-3. Columns and primary keys.
-4. Relationships.
-5. SQL Server migration execution results.
-6. SQL Server verification query results.
-7. Before/after row counts for existing tables.
-8. Files created or modified.
-9. Any schema mismatch or blocker.
+1. Existing routes discovered.
+2. New endpoints implemented, method and path.
+3. Development login endpoint.
+4. Authentication adapter design.
+5. Supported development test roles.
+6. SQLAlchemy CRUD implementation.
+7. SQL Server operations tested.
+8. Tests executed with actual pass/fail results.
+9. Swagger/OpenAPI verification.
+10. Files created and modified.
+11. Existing data preservation results.
+12. Integration blockers.
+13. Features deferred to Phase 3.
 
-If a requirement cannot be verified, stop the affected change and report the blocker instead of inventing a workaround.
+Clearly distinguish:
 
-STOP after Phase 1 database foundation completion.
+- Implemented and verified.
+- Implemented but not tested.
+- Blocked by external dependency.
+- Not yet implemented.
+
+Do not claim full implementation or production-ready authentication.
+
+STOP after completing Phase 2.
+
+Do not begin Phase 3 Azure OpenAI generation unless explicitly instructed.
