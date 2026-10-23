@@ -1,24 +1,37 @@
-Fix the existing FastAPI SQL Server connection configuration.
+# PEOPLECONNECT — FIX SQL LOGIN CONFIGURATION
 
-SQL Server details:
-- Instance: TAP-5CD1520XW0\SQLEXPRESS
-- Database: PeopleConnect_Dev
-- Authentication: SQL Server Authentication
-- Shared Memory: Enabled
-- TCP/IP: Disabled
-- Named Pipes: Disabled
+The SQL Server Shared Memory connection test failed with error 18456.
 
-Requirements:
+The test output shows that the application is incorrectly using the `sa` login.
 
-1. Inspect backend/app/core/config.py and database.py.
-2. Configure SQLAlchemy with pyodbc to support a local SQL Server Shared Memory connection using the named instance.
-3. Do not require SQL_SERVER_PORT.
-4. Preserve the existing .env variable names.
-5. Do not expose or log SQL credentials.
-6. Do not enable TCP/IP or change SQL Server settings.
-7. Do not modify any database tables.
-8. Create a small read-only database connection test.
-9. Use `py` for all Windows Python commands, never `python`.
-10. Execute the test and report the actual connection result.
+The correct SQL Server login is already configured in `backend/.env`.
 
-Only fix and verify database connectivity. Do not implement other modules.
+Your task:
+
+1. Inspect `backend/.env`, `backend/app/core/config.py`, `backend/app/core/database.py` and `backend/scripts/test_sql_connection_simple.py`.
+
+2. Find why the connection test is using the default `sa` account instead of `SQL_SERVER_USER` from `.env`.
+
+3. Fix environment variable loading so the test and FastAPI database configuration consistently use the credentials from `backend/.env`.
+
+4. Do not change the SQL Server username or password.
+
+5. Preserve the existing Shared Memory (`lpc:`) connection.
+
+6. Do not require a TCP/IP port.
+
+7. Never print or expose credentials, including masked connection strings that reveal usernames unnecessarily.
+
+8. Execute a read-only test:
+
+   SELECT DB_NAME() AS database_name, SYSTEM_USER AS login_name;
+
+9. Verify the returned database is `PeopleConnect_Dev`.
+
+10. Use `py` for all Windows Python commands, never `python`.
+
+11. Do not create database tables, import records, run migrations or modify unrelated files.
+
+Report whether authentication and SQL query execution actually succeeded.
+
+Stop after verification.
