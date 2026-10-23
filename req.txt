@@ -1,64 +1,126 @@
 # MANDATORY PEOPLECONNECT PROJECT RULES
 
-Before implementation, read BOTH the complete PRD and Task Breakdown Excel inside `Source_document/`.
+Before starting, read BOTH the complete PRD and Task Breakdown Excel inside `Source_document/`. Review relevant screenshots in `UI/`.
 
-Implement ONLY tasks explicitly assigned to Praveen, including the "AI Output Generation Integration Point" assigned to Praveen within Arun's section.
+**Scope: Implement ONLY Praveen's 12 assigned tasks:**
+- T002: AI Output Generation Integration Point.
+- T003: Action Tracking & Status Management, Connect Closure Control & Workflow, Append-Only Case History, Automated Communications & Notifications, Action Reminders & Aging, Unified Action Tracker, Dashboards & Role-Specific Views, Reporting & Analytics, Theme Analysis & Insights, Administrative Configuration & Data Integration, Testing & Bug Fixing.
 
-Arun's existing 7 SQL Server tables are integration dependencies. Do not modify Arun's schema, APIs, lifecycle, workflows or business logic.
+**Ownership boundaries:**
+- Use Arun's existing 7 SQL Server tables as read-only integration dependencies.
+- Never modify Arun's schema, existing data, APIs, lifecycle, or workflows.
+- Do not implement Abhishek's authentication/RBAC foundation; identify required integration contracts instead.
+- Do not duplicate existing functionality.
 
-Backend only. Use `UI/` screenshots to derive API requirements. Do not develop frontend code.
+**Architecture:**
+- Single FastAPI backend using Microsoft SQL Server `PeopleConnect_Dev`.
+- SQLAlchemy and Alembic for Praveen-owned tables only.
+- Existing `dbo.employee_master` and `dbo.BHR_data` for authorized employee/IBU mappings.
+- Azure OpenAI for real AI generation, `text-embedding-3-small`, ChromaDB, LangGraph, and Azure Communication Services Email as required by the PRD.
+- Backend only; derive required API contracts from the UI screenshots.
+- No fake data, dummy providers or hardcoded authorization.
+- Implement FR-24/FR-25/FR-26 exactly when reporting development begins.
 
-Technology stack: FastAPI, SQL Server, Azure OpenAI, text-embedding-3-small, ChromaDB, LangGraph and Azure Communication Services Email.
+**Execution rules:**
+- Claude model: Haiku 4.5. Work in small, focused tasks.
+- Always use `py` for Windows Python commands, never `python`.
+- Use existing files and code before creating new ones.
+- Never display credentials or secrets.
+- Test changes against actual code and SQL Server.
+- Report verified results separately from assumptions.
 
-Employee data: `data/employee_master.xlsx`.
-BHR authorization: `data/BHR_data.xlsx`.
+# CURRENT VERIFIED PROJECT STATUS
 
-Always use `py` for Windows Python commands, never `python`.
+Claude previously reported:
+- FastAPI foundation and SQL Server connection working.
+- Arun's 7 tables created, containing 30 imported CSV records.
+- `dbo.employee_master`: 74 columns, 3 imported employees.
+- `dbo.BHR_data`: 9 columns, 1 actual Excel record.
+- Arun sample IBUs: AMAZON, US2, INTERNAL_OPS.
+- Employee and BHR IBU: ALPHABET.
+- No Praveen-owned functional API module implemented yet.
 
-Preserve completed work. Use real SQL Server data. Never print credentials. Verify actual results.
+Treat these as previously reported results; confirm relevant details using read-only queries.
 
-# NEXT TASK — IMPORT ARUN CSV DATA
+# TASK 01 — AI OUTPUT GENERATION INTEGRATION ANALYSIS
 
-Current status:
-- Arun's 7 SQL Server tables created and verified.
-- dbo.BHR_data created with 1 Excel record.
-- dbo.employee_master created with 74 columns and 3 employees.
-- SQL Server and FastAPI connectivity verified.
+Analyze ONLY Praveen's T002 task:
 
-## Task
+"AI Output Generation Integration Point — Create backend integration points for AI-generated outputs (minutes, actions, insights)."
 
-1. Inspect all CSV exports in `arun_table/`.
-2. Read Arun's original `arun_table/script.sql` for schema reference.
-3. Identify the correct CSV-to-table mappings.
-4. Inspect existing `backend/scripts/import_arun_data.py`.
-5. Validate columns, SQL data types, primary keys and dependencies.
-6. Check existing row counts before import.
-7. Treat CSV files as source data for the existing development tables, not as permission to redesign Arun's module.
-8. Preserve all original IDs, timestamps and status values.
-9. Detect duplicate records and invalid references.
-10. Do not generate fake or missing records.
-11. Only insert validated missing records into the seven existing Arun development tables.
-12. Do not update or delete existing Arun records.
-13. Use transactions and safe rollback on errors.
-14. Ensure rerunning the import does not create duplicates.
-15. Do not change the seven table schemas, indexes or constraints.
-16. Compare SQL Server row counts against accepted CSV records after import.
-17. Verify representative records and referential consistency.
-18. Do not change Employee Master or BHR_data.
-19. Do not implement Arun-owned business functionality.
+Step 1 — Requirements
 
-## Final Report
+Read relevant PRD sections and the exact Task Breakdown row.
 
-Provide:
-- Seven tables and CSV mappings.
-- CSV record counts.
-- Existing SQL record counts.
-- Inserted, skipped and rejected records.
-- Any missing or duplicate IDs.
-- Import errors and fixes.
-- Final SQL Server row counts.
-- Verification results.
+Identify:
+- Required AI outputs.
+- Meeting transcript/manual notes inputs.
+- Review, edit, validation and publication requirements.
+- Permissions and authorized IBU scope.
+- Dependencies on Arun's lifecycle.
 
-Do not claim successful import without actual SQL Server queries.
+Step 2 — Existing Database
 
-Stop after completing and verifying Arun's development CSV data import.
+Inspect Arun's 7 SQL Server tables using read-only queries.
+
+Identify:
+- Canonical Connect ID and current lifecycle state.
+- Available participant and employee fields.
+- Existing relationships and evidence references.
+- Missing inputs that require Arun-owned integration contracts.
+
+Do not invent table columns or modify Arun's data.
+
+Step 3 — AI Architecture
+
+Propose how Praveen's service will use:
+- Azure OpenAI for minutes, actions and insights.
+- LangGraph for orchestration where justified by the PRD.
+- SQL Server for generated drafts and review history.
+- ChromaDB and embeddings only where retrieval is required.
+
+Include unavailable-provider behavior and human approval boundaries.
+
+Step 4 — API Contract
+
+Prepare a table specifying:
+- HTTP method.
+- API endpoint.
+- Purpose.
+- Request fields.
+- Response fields.
+- Role/IBU access.
+- Required database tables.
+- Related PRD requirement.
+- UI screenshot reference.
+
+Check existing FastAPI routes to prevent duplication.
+
+Step 5 — Integration Risks
+
+Explicitly identify:
+- Arun versus Praveen ownership boundaries.
+- Missing evidence/transcript APIs.
+- IBU mismatch between current sample datasets.
+- Missing RBAC authentication contracts.
+- Any blocked end-to-end test scenarios.
+
+# REQUIRED OUTPUT
+
+Create `docs/PRAVEEN_T002_AI_INTEGRATION_PLAN.md` containing:
+
+1. Exact task scope.
+2. PRD requirement references.
+3. Arun SQL dependencies.
+4. Proposed Praveen-owned tables.
+5. Exact backend API contracts.
+6. AI workflow design.
+7. Authorization requirements.
+8. Integration gaps and blockers.
+9. Small implementation steps.
+
+Do not implement APIs, create database tables, run migrations or modify application code in this prompt.
+
+Finish by reporting the recommended first implementation step.
+
+STOP after completing the analysis and plan.
