@@ -1,10 +1,4 @@
-MANDATORY PEOPLECONNECT RULES:
-Read the complete PRD and Task Breakdown Excel in Source_document/ before making changes. Work only on Praveen-owned tasks. Use Arun's existing SQL Server tables without changing Arun's schema, data or lifecycle code. Preserve all working APIs. Azure credentials are unavailable, so do not introduce fake AI outputs.
-
-You started the FastAPI server. The Generate Minutes API returned HTTP 201, but GET /api/v1/connects/PC-00001/minutes?status=DRAFT&limit=10&offset=0 returns HTTP 500.
-
-Find the exact traceback from the running server. Diagnose and fix the issue only in Praveen-owned code.
-
-Then retest the same API using SQL Server PeopleConnect_Dev and a valid JWT token.
-
-Report the root cause, files changed, actual HTTP response, and whether the previously created draft minutes record is returned. Do not claim success without executing the test.
+{
+  "draft_content": "Meeting Minutes - Q4 Customer Onboarding Review\n\n1. Discussion: Azure Communication Services email integration completed.\n2. Issue: User provisioning and validation failures identified.\n3. Action: Michael Chen will resolve the provisioning issue by Wednesday.\n4. Action: Sarah Johnson will coordinate security approval by Friday.\n5. Decision: Production deployment will proceed only after testing and security approval.",
+  "status": "DRAFT"
+}
