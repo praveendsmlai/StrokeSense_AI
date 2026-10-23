@@ -1,4 +1,4 @@
 {
-  "draft_content": "Meeting Minutes - Q4 Customer Onboarding Review\n\n1. Discussion: Azure Communication Services email integration completed.\n2. Issue: User provisioning and validation failures identified.\n3. Action: Michael Chen will resolve the provisioning issue by Wednesday.\n4. Action: Sarah Johnson will coordinate security approval by Friday.\n5. Decision: Production deployment will proceed only after testing and security approval.",
-  "status": "DRAFT"
+  "published_content": "TEST ONLY - Manually reviewed Q4 Customer Onboarding Meeting Minutes. Discussion: Email integration progress and provisioning issues. Action: Resolve provisioning issues. Decision: Production deployment requires successful testing and security approval.",
+  "send_email": false
 }
