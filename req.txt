@@ -1,37 +1,85 @@
-# PEOPLECONNECT — FIX SQL LOGIN CONFIGURATION
+# PEOPLECONNECT — FIX AND INSTALL PYTHON 3.14 DEPENDENCIES
 
-The SQL Server Shared Memory connection test failed with error 18456.
+We are using Claude Haiku 4.5.
 
-The test output shows that the application is incorrectly using the `sa` login.
+The existing PeopleConnect backend uses Python 3.14.3 on Windows.
 
-The correct SQL Server login is already configured in `backend/.env`.
+Dependency installation failed because some versions in `backend/requirements.txt` are outdated or incompatible.
 
-Your task:
+Your task is to fix and install all backend dependencies.
 
-1. Inspect `backend/.env`, `backend/app/core/config.py`, `backend/app/core/database.py` and `backend/scripts/test_sql_connection_simple.py`.
+## Instructions
 
-2. Find why the connection test is using the default `sa` account instead of `SQL_SERVER_USER` from `.env`.
+1. Read the COMPLETE `backend/requirements.txt` file.
 
-3. Fix environment variable loading so the test and FastAPI database configuration consistently use the credentials from `backend/.env`.
+2. Identify all packages incompatible with Python 3.14.3.
 
-4. Do not change the SQL Server username or password.
+3. Check compatibility between:
+   - FastAPI and Pydantic
+   - SQLAlchemy and pyodbc
+   - Azure OpenAI SDK
+   - LangChain and langchain-openai
+   - LangGraph
+   - langchain-chroma and ChromaDB
+   - Azure Communication Services
+   - Pandas and openpyxl
+   - All remaining dependencies
 
-5. Preserve the existing Shared Memory (`lpc:`) connection.
+4. Replace incompatible versions with stable, mutually compatible versions that support Python 3.14.
 
-6. Do not require a TCP/IP port.
+5. Preserve the mandatory technology stack:
+   - FastAPI
+   - Microsoft SQL Server
+   - Azure OpenAI
+   - text-embedding-3-small
+   - ChromaDB
+   - LangGraph
+   - Azure Communication Services Email
 
-7. Never print or expose credentials, including masked connection strings that reveal usernames unnecessarily.
+6. Do not remove essential dependencies to make installation succeed.
 
-8. Execute a read-only test:
+7. Do not downgrade Python.
 
-   SELECT DB_NAME() AS database_name, SYSTEM_USER AS login_name;
+8. Use a dedicated virtual environment if needed. Do not modify unrelated Python environments.
 
-9. Verify the returned database is `PeopleConnect_Dev`.
+9. Update `backend/requirements.txt`.
 
-10. Use `py` for all Windows Python commands, never `python`.
+10. Install all dependencies using the appropriate environment and `py` launcher.
 
-11. Do not create database tables, import records, run migrations or modify unrelated files.
+11. Run:
 
-Report whether authentication and SQL query execution actually succeeded.
+   `py -m pip check`
 
-Stop after verification.
+   Use the corresponding virtual-environment interpreter for verification if a virtual environment was created.
+
+12. Execute import checks for all critical libraries.
+
+13. If package installation succeeds, record the exact installed versions in a reproducible dependency lock file.
+
+14. If installation fails, diagnose the actual error and fix it. Do not claim success without verification.
+
+## Mandatory Windows rule
+
+Always use `py`, never `python` or `python -m` for Windows Python commands.
+
+## Restrictions
+
+- Do not modify SQL Server tables.
+- Do not change database credentials.
+- Do not modify Arun's schema.
+- Do not develop frontend code.
+- Do not modify application business logic.
+- Do not begin the next development phase.
+- Do not print credentials or secrets.
+
+## Final report
+
+Provide:
+1. Packages updated.
+2. Final installed versions.
+3. Installation result.
+4. `pip check` result.
+5. Critical import verification result.
+6. Any remaining compatibility problems.
+
+Stop only after completing installation and verification, or clearly documenting an unresolved blocker.
