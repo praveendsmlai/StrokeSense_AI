@@ -1,4 +1,35 @@
-{
-  "published_content": "TEST ONLY - Manually reviewed Q4 Customer Onboarding Meeting Minutes. Discussion: Email integration progress and provisioning issues. Action: Resolve provisioning issues. Decision: Production deployment requires successful testing and security approval.",
-  "send_email": false
-}
+USE PeopleConnect_Dev;
+GO
+
+INSERT INTO dbo.connect_actions (
+    id,
+    plan_connect_id,
+    connect_minutes_id,
+    action_title,
+    action_description,
+    owner_employee_id,
+    owner_email,
+    status,
+    priority,
+    due_date,
+    created_at,
+    updated_at
+)
+VALUES (
+    CONVERT(VARCHAR(36), NEWID()),
+    'PC-00001',
+    'f1a04762-fafd-423c-95a8-32c558aa2085',
+    'TEST - Resolve provisioning issue',
+    'Test action for Swagger API status update.',
+    NULL,
+    NULL,
+    'OPEN',
+    'MEDIUM',
+    '2026-11-05',
+    SYSDATETIMEOFFSET(),
+    SYSDATETIMEOFFSET()
+);
+
+SELECT id, plan_connect_id, action_title, status
+FROM dbo.connect_actions
+WHERE action_title = 'TEST - Resolve provisioning issue';
