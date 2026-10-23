@@ -1,21 +1,1124 @@
-Open SQL Server Management Studio (SSMS).
+# PEOPLECONNECT — MASTER PROMPT 01
+# COMPLETE BACKEND REBUILD — PRAVEEN'S ASSIGNED TASKS
+
+You are a senior enterprise Python backend architect, Microsoft SQL Server engineer and Agentic AI developer.
+
+We are rebuilding the PeopleConnect application's backend from scratch.
+
+You must analyze the complete project requirements, task ownership documents, UI screenshots, employee master and Arun's exported database tables before implementing functionality.
+
+**This is the FIRST prompt for this new project. Do not assume any previous development phases have been completed.**
+
+Your responsibility is to develop ONLY the functionality assigned to Praveen.
+
+Arun owns the Connect initiation and lifecycle modules defined in the project task breakdown. We need his database tables for integration, but we must not rebuild his owned workflows.
+
+IMPORTANT — Python Commands on Windows
+
+Always use py instead of python for all Python commands.
+
+Examples:
+- py -m pip install -r requirements.txt
+- py -m pytest
+- py -m alembic upgrade head
+- py -m uvicorn app.main:app --reload
+Never use python or python -m in terminal commands.
 
 
+## 1. STRICT PROJECT REQUIREMENTS
 
-Right-click the database → Tasks → Generate Scripts.
+1. Develop ONLY the backend.
+2. Use Python and FastAPI.
+3. Do NOT develop a frontend.
+4. Do NOT create React, Vite, HTML, CSS or UI components.
+5. Use UI screenshots strictly for designing backend API contracts.
+6. Implement ONLY Praveen's assigned tasks.
+7. Use Microsoft SQL Server from the beginning.
+8. Reconstruct Arun's tables in our local SQL Server development database using his CSV/Excel exports.
+9. Create Praveen-owned database tables as required.
+10. Use a single SQL Server relational database.
+11. Do not create duplicate Connect master tables.
+12. Do not modify Arun's original database.
+13. Do not implement Arun-owned APIs or business workflows.
+14. Implement real AI provider integration code.
+15. Implement real database-backed APIs.
+16. Do not generate fake business data or mock production API responses.
+17. Ensure every relevant backend API is testable through FastAPI Swagger.
+18. Implement in small, verifiable phases.
 
+## 2. MANDATORY TECHNOLOGY STACK
 
+Use the following technologies.
 
-Select Choose specific database objects.
+### Backend
+- Python
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- Alembic
+- Pytest
 
+### Relational database
+- Microsoft SQL Server
+- SQLAlchemy MSSQL dialect
+- pyodbc
+- Microsoft ODBC Driver 18 for SQL Server, where available
 
+Do NOT use SQLite, PostgreSQL or MySQL as a fallback.
 
-Select all 9 tables.
+### AI
+- Azure OpenAI ONLY
+- Configurable Azure OpenAI chat deployment
 
+### Embeddings
+- Azure OpenAI `text-embedding-3-small`
+- Configurable Azure embedding deployment name
 
+### Vector database
+- ChromaDB ONLY
 
-Click Advanced → Set Types of data to script = Schema only.
+### RAG orchestration
+- LangGraph
 
+### Email reminders
+- Azure Communication Services Email
 
+### Approved supporting libraries
+Use compatible packages as appropriate:
 
-Save the generated .sql file and share it.
+- openai
+- langchain-openai
+- langchain-chroma
+- chromadb
+- langgraph
+- azure-communication-email
+- azure-identity
+- pandas
+- openpyxl
+- sqlalchemy
+- pyodbc
+- alembic
+- pytest
+- httpx
+
+Do not replace the mandatory providers with alternatives.
+
+Do not hardcode credentials.
+
+## 3. PROJECT INPUT FOLDERS
+
+The project root contains the following source folders:
+
+peopleconnect/
+    Source_document/
+    data/
+    UI/
+    arun_table/
+
+Inspect these folders recursively.
+
+Verify actual filenames before accessing them.
+
+### 3.1 Source_document/
+
+Contains:
+- Complete PeopleConnect PRD.
+- Functional requirements.
+- Project task breakdown.
+- Module ownership.
+- Business rules.
+- User roles and permissions.
+- Acceptance criteria.
+- Supporting specifications.
+
+Read every relevant document.
+
+Determine exactly:
+- Which tasks belong to Praveen.
+- Which tasks belong to Arun.
+- Which tasks depend on Arun's tables.
+- Which APIs are required.
+- Which AI capabilities are required.
+- Which notifications are required.
+- Which reports and dashboards are required.
+
+Use revised FR-01 through FR-28 requirements wherever supplied.
+
+Pay particular attention to:
+- FR-24 reporting dimensions, filters and date presets.
+- FR-25 valid denominators and percentage calculations.
+- FR-26 action analytics and exact metric definitions.
+
+Do not invent requirements.
+
+Do not implement Arun-owned functionality merely because it appears in the PRD.
+
+### 3.2 data/
+
+Contains the employee master:
+
+`data/employee_master.xlsx`
+
+Read the actual workbook.
+
+Inspect:
+- Sheet names.
+- Column names.
+- Employee identifiers.
+- Employee IBU information.
+- Employee attributes.
+- Missing values.
+- Duplicate records.
+- Data types.
+
+The expected employee identifier is EMPID, but verify it.
+
+The important authorization-related column is:
+
+`EMPLOYEE_IBU`
+
+Do not invent additional employee attributes.
+
+IMPORTANT:
+
+Do NOT use `IBU_Mapping_sheet.xlsx`.
+
+The previous IBU Mapping Excel approach has been replaced by the SQL Server table `dbo.BHR_data`.
+
+### 3.3 UI/
+
+Contains screenshots of the intended PeopleConnect user interface.
+
+These screenshots are for BACKEND API DESIGN ONLY.
+
+Do not create frontend code.
+
+For each screenshot, identify:
+- Screen name.
+- Business operation.
+- Table columns.
+- Form fields.
+- Search controls.
+- Filters.
+- Dropdowns.
+- Buttons.
+- Pagination.
+- Sorting.
+- Dashboard metrics.
+- Charts.
+- Drill-down operations.
+- Download/export operations.
+- Edit and validation actions.
+- Approval and rejection actions.
+
+Translate every Praveen-owned UI operation into the required backend API contract.
+
+Document:
+- Endpoint.
+- HTTP method.
+- Query parameters.
+- Request body.
+- Response JSON.
+- Required role.
+- IBU restrictions.
+- Source database tables.
+- Validation rules.
+- Error behavior.
+
+Do not build arbitrary APIs that cannot support the referenced screens.
+
+### 3.4 arun_table/
+
+Contains CSV/Excel exports of Arun's existing Microsoft SQL Server tables.
+
+Arun has already created these tables in his SQL Server environment, but SQL CREATE TABLE scripts are not available.
+
+We need local development copies of his tables in our own SQL Server database.
+
+Previously identified table names include:
+
+1. plan_connect_initiations
+2. plan_connect_participants
+3. participant_snapshots
+4. plan_connect_file_uploads
+5. participant_upload_rows
+6. connect_types
+7. hr_roster
+8. users
+9. audit_logs
+
+Verify all table names against the actual exports.
+
+Inspect:
+- Column names.
+- Sample values.
+- Null values.
+- Identifier formats.
+- Potential primary keys.
+- Potential foreign keys.
+- Dates and timestamps.
+- Workflow status fields.
+- Relationships.
+- Duplicate records.
+- Data quality problems.
+
+CSV/Excel exports do not guarantee complete database schema definitions.
+
+Clearly distinguish verified fields from inferred keys, types and relationships.
+
+## 4. MICROSOFT SQL SERVER DATABASE SETUP
+
+Create one development relational database:
+
+`PeopleConnect_Dev`
+
+Use Microsoft SQL Server.
+
+Do not use SQLite.
+
+Before database creation or modification:
+- Verify the configured server and database.
+- Confirm the target is the intended local development environment.
+- Check whether the database and tables already exist.
+- Never drop or overwrite existing tables automatically.
+- Never modify Arun's original database.
+- Do not perform destructive operations against an unverified target.
+
+If SQL Server access is unavailable, generate the required configuration and initialization scripts and clearly report the execution blocker.
+
+### 4.1 Arun table reconstruction
+
+Analyze the files in `arun_table/`.
+
+Generate provisional SQL Server CREATE TABLE scripts for the nine verified Arun tables.
+
+Requirements:
+- Preserve original column names.
+- Preserve original identifiers.
+- Use conservative SQL Server data types.
+- Handle nullable values.
+- Avoid data truncation.
+- Document inferred primary keys and relationships.
+- Do not enforce speculative constraints that could reject valid exports.
+- Do not create duplicate Connect master tables.
+
+Create local development tables only if they do not already exist.
+
+Import all supplied records.
+
+Validate:
+- Imported row counts.
+- Duplicate handling.
+- Identifier preservation.
+- Referential consistency.
+- Import failures.
+
+Make import scripts repeatable.
+
+Do not run imports automatically every time FastAPI starts.
+
+Keep Arun development schema reconstruction separate from Praveen-owned Alembic migrations.
+
+The reconstructed schema is provisional until compared with Arun's actual SQL Server schema.
+
+### 4.2 Known Arun schema considerations
+
+Previously identified field names requiring preservation include:
+- scheduled_from
+- scheduled_to
+- tenure_months
+- tenure_bucket
+- file_name
+- file_path
+- total_rows
+- processed_rows
+- upload_id
+- input_employee_id
+- input_employee_email
+
+Verify these against actual exports.
+
+Do not invent columns such as connect_id, facilitator_employee_id or lifecycle_status where they are not present.
+
+Praveen's tables must reference the appropriate Arun Connect identifiers.
+
+## 5. EMPLOYEE MASTER TABLE
+
+Read:
+
+`data/employee_master.xlsx`
+
+Create an Employee Master table in SQL Server using verified workbook columns.
+
+Import the records.
+
+Implement:
+- Employee identifier validation.
+- Duplicate detection.
+- Idempotent imports.
+- Data type validation.
+- Import audit.
+- Error reporting.
+- Row-count verification.
+
+Preserve the actual employee attributes.
+
+Use `EMPLOYEE_IBU` as the employee affiliation field.
+
+Do not generate dummy employees.
+
+## 6. BHR_DATA TABLE — MANDATORY CHANGE
+
+This replaces the earlier `IBU_Mapping_sheet.xlsx` approach completely.
+
+Create and use:
+
+`dbo.BHR_data`
+
+The table must have the columns shown in the provided SQL Server screenshot.
+
+### Required columns
+
+| Column name | Development SQL type | Nullable |
+|---|---|---|
+| SETID | NVARCHAR(MAX) | YES |
+| EMPLOYEE_IBU | NVARCHAR(MAX) | YES |
+| EMPLID | INT | YES |
+| SECTOR | NVARCHAR(MAX) | YES |
+| LOCATION | NVARCHAR(MAX) | YES |
+| SELECT_FLAG | NVARCHAR(MAX) | YES |
+| TM_PRIMARY_HRSPOC | NVARCHAR(MAX) | YES |
+| BHR NAME | NVARCHAR(MAX) | YES |
+| BHR Email | NVARCHAR(MAX) | YES |
+
+The screenshot displays SQL Server `text` types. For the newly created development table, use `NVARCHAR(MAX)` instead of deprecated `text`.
+
+Preserve the exact column names, including spaces in `[BHR NAME]` and `[BHR Email]`.
+
+No primary key or foreign key is established by the screenshot.
+
+Do not invent such constraints.
+
+Use this development DDL:
+
+IF OBJECT_ID(N'dbo.BHR_data', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.BHR_data
+    (
+        [SETID] NVARCHAR(MAX) NULL,
+        [EMPLOYEE_IBU] NVARCHAR(MAX) NULL,
+        [EMPLID] INT NULL,
+        [SECTOR] NVARCHAR(MAX) NULL,
+        [LOCATION] NVARCHAR(MAX) NULL,
+        [SELECT_FLAG] NVARCHAR(MAX) NULL,
+        [TM_PRIMARY_HRSPOC] NVARCHAR(MAX) NULL,
+        [BHR NAME] NVARCHAR(MAX) NULL,
+        [BHR Email] NVARCHAR(MAX) NULL
+    );
+END;
+
+Do not modify an existing `dbo.BHR_data` table.
+
+If BHR_data records are available as a CSV/Excel export or through an authorized SQL Server connection, import or access them using a safe, documented process.
+
+Do not fabricate BHR records.
+
+If no records are available, document the blocker and do not grant access by default.
+
+### 6.1 BHR authorization behavior
+
+Use `dbo.BHR_data` for BHR-related IBU authorization according to the actual business rules.
+
+The required employee visibility rule is:
+
+A verified user's authorized IBU values must be matched against Employee Master's `EMPLOYEE_IBU` values.
+
+However, do not assume the precise login identity mapping without verification.
+
+Analyze:
+- EMPLID
+- EMPLOYEE_IBU
+- BHR NAME
+- BHR Email
+- TM_PRIMARY_HRSPOC
+- SELECT_FLAG
+- SECTOR
+- LOCATION
+
+Determine:
+- How authenticated users map to BHR records.
+- How BHRs are assigned to IBUs.
+- Whether multiple IBU assignments are supported.
+- Whether SELECT_FLAG affects active authorization.
+- Whether roles such as BHR Leader receive broader visibility.
+- How unmapped users are handled.
+
+Do not assume EMPLID represents the logged-in BHR.
+
+Do not assume BHR Email is the authentication identity unless confirmed.
+
+Do not assume SELECT_FLAG meanings.
+
+Implement authorization using verified identity claims and approved mappings.
+
+Fail closed when authorization cannot be established.
+
+### 6.2 Apply authorization to APIs
+
+Enforce IBU restrictions on relevant:
+- Employee APIs.
+- Meeting APIs.
+- Document APIs.
+- Transcript APIs.
+- Action APIs.
+- Dashboard APIs.
+- Reporting APIs.
+- Insights APIs.
+- Trends APIs.
+- Knowledge Base APIs.
+- Copilot APIs.
+- Export APIs.
+
+Do not rely on frontend filtering.
+
+Reject unauthorized cross-IBU requests.
+
+Previously confirmed RBAC:
+- BHR may create Connects within authorized scope.
+- BHR Leader may create Connects within authorized scope.
+
+Respect these business permissions without rebuilding Arun's Connect creation module.
+
+Use Source_document to determine all other role permissions.
+
+## 7. AUTHENTICATION AND ACCESS CONTROL
+
+Implement the authentication mechanism specified by the PRD.
+
+Do not confuse authentication with IBU authorization.
+
+Authentication establishes verified user identity.
+
+BHR_data determines applicable authorization scope after the identity is established.
+
+Never trust a client-submitted EMPID, role, email or IBU as proof of identity.
+
+Do not invent administrator passwords or hardcoded login credentials.
+
+If the identity provider is not specified, document the dependency and build the authorization components so they can accept verified identity claims from the approved mechanism.
+
+Apply server-side role and IBU checks consistently.
+
+## 8. PRAVEEN'S BACKEND TASKS
+
+Inspect the task breakdown and implement only Praveen-owned features.
+
+Expected candidate areas include:
+
+- Meeting Management.
+- Document Management.
+- Transcript Management.
+- AI meeting processing.
+- AI summaries.
+- Minutes of Meeting generation.
+- Discussion points.
+- Concerns.
+- Themes.
+- Sentiment analysis.
+- AI insight generation.
+- Action Management.
+- Action status history.
+- SLA rules.
+- Reminders.
+- Escalations.
+- Notifications.
+- Dashboard APIs.
+- Reporting.
+- Insights.
+- Trends.
+- Knowledge Base.
+- Copilot.
+- Praveen-owned administration.
+
+These are candidates only.
+
+The supplied task breakdown determines actual ownership.
+
+Do not implement Arun-owned Connect initiation, participant selection, scheduling or lifecycle workflows.
+
+## 9. UI-COMPATIBLE BACKEND API DESIGN
+
+For every Praveen-owned UI screenshot, create exact API contracts.
+
+Include:
+- Screen name.
+- Requirement reference.
+- UI action.
+- HTTP method.
+- Endpoint.
+- Request body.
+- Query parameters.
+- Response schema.
+- Authorization.
+- Database dependency.
+- Validation.
+- Expected errors.
+- Pagination and filtering.
+
+For example, Action Management APIs must support the actual owner, status, priority, Connect and date filters visible in the screenshots.
+
+Dashboard APIs must return the exact metrics and chart-ready data needed by the referenced screens.
+
+Transcript APIs must support the actual upload, processing, review and validation operations required by the PRD and screenshots.
+
+Do not build frontend pages.
+
+Do not use mock dashboard values.
+
+Document the API contracts before implementation.
+
+## 10. AZURE OPENAI
+
+Use Azure OpenAI as the only LLM provider.
+
+Use a configurable chat deployment.
+
+Use the Azure OpenAI embedding model:
+
+`text-embedding-3-small`
+
+Support environment-based configuration:
+
+AZURE_OPENAI_ENDPOINT
+
+AZURE_OPENAI_API_KEY
+
+AZURE_OPENAI_API_VERSION
+
+AZURE_OPENAI_CHAT_DEPLOYMENT
+
+AZURE_OPENAI_EMBEDDING_DEPLOYMENT
+
+AZURE_OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+
+The configured deployment name may differ from the underlying model name.
+
+Implement:
+- Real Azure OpenAI calls.
+- Structured output.
+- Prompt templates.
+- Output validation.
+- Timeouts.
+- Safe retries.
+- Exception handling.
+- Usage tracking where available.
+- Audit records.
+- Persistence of generated results.
+
+Do not call public OpenAI endpoints.
+
+Do not hardcode credentials.
+
+Do not substitute fake AI results if Azure OpenAI is unavailable.
+
+Return explicit configuration/provider errors.
+
+## 11. AI MEETING INTELLIGENCE
+
+Implement relevant PRD-defined functionality, including where assigned:
+
+- Transcript processing.
+- Meeting summarization.
+- Minutes of Meeting generation.
+- Action extraction.
+- Concern extraction.
+- Decision extraction.
+- Theme identification.
+- Sentiment analysis.
+- Insight generation.
+- Action owner and due-date extraction.
+
+Persist results in SQL Server.
+
+Associate records with Arun's actual Connect identifiers.
+
+Implement human review, editing, validation, rejection and publication controls according to the PRD.
+
+Do not publish AI-generated results without required human approval.
+
+## 12. CHROMADB
+
+Use ChromaDB ONLY for vector storage.
+
+Use Azure OpenAI `text-embedding-3-small` embeddings.
+
+Implement:
+- Document text extraction.
+- Chunking.
+- Embedding generation.
+- Persistent vector indexing.
+- Semantic retrieval.
+- Document metadata.
+- Update and deletion handling.
+- Reindexing.
+- Stable chunk identifiers.
+
+SQL Server remains the source of truth for business records and permissions.
+
+Use server-side authorization filters in vector retrieval.
+
+Do not expose documents outside the user's authorized IBU or role scope.
+
+Prevent incompatible embedding dimensions from being mixed in the same collection.
+
+Do not substitute FAISS, Pinecone or another vector database.
+
+## 13. LANGGRAPH RAG
+
+Use LangGraph for RAG orchestration.
+
+Implement real StateGraph workflows.
+
+Expected processing flow:
+
+START
+→ Authenticate and authorize user
+→ Validate question
+→ Resolve permitted document scope
+→ Generate Azure OpenAI query embedding
+→ Retrieve authorized ChromaDB chunks
+→ Validate retrieved sources
+→ Build grounded context
+→ Invoke Azure OpenAI chat deployment
+→ Validate response
+→ Return answer with source references
+→ END
+
+Include:
+- Typed graph state.
+- Retrieval nodes.
+- Conditional routing.
+- Error handling.
+- Source references.
+- Permission filtering.
+- Grounded no-answer behavior.
+
+LangChain integration packages may be used, but RAG orchestration must use LangGraph.
+
+Do not create unsupported source citations.
+
+Use LangGraph-based RAG for Knowledge Base and Copilot operations where required.
+
+## 14. ACTION MANAGEMENT, SLA AND REMINDERS
+
+Implement Praveen-owned Action Management APIs.
+
+According to verified requirements, support relevant:
+- Action creation.
+- Action retrieval.
+- Action updates.
+- Owner assignment.
+- Due-date validation.
+- Status transitions.
+- Status history.
+- SLA calculations.
+- Overdue detection.
+- Escalations.
+- Reminders.
+- Action reporting.
+
+Use SQL Server.
+
+Associate actions with the correct employee and Connect records.
+
+Respect authorized IBU scope.
+
+Do not invent workflow statuses or rules.
+
+## 15. AZURE COMMUNICATION SERVICES EMAIL
+
+Use Azure Communication Services Email for notification delivery.
+
+Use the official Python SDK:
+
+`azure-communication-email`
+
+Support approved authentication using:
+- ACS connection string, or
+- ACS endpoint with Microsoft Entra ID credentials.
+
+Configuration may include:
+
+ACS_CONNECTION_STRING
+
+ACS_ENDPOINT
+
+ACS_SENDER_ADDRESS
+
+ACS_EMAIL_ENABLED=false
+
+AZURE_TENANT_ID
+
+AZURE_CLIENT_ID
+
+AZURE_CLIENT_SECRET
+
+Do not require both authentication methods simultaneously.
+
+Implement PRD-defined:
+- Action assignment emails.
+- Due-date reminders.
+- Overdue reminders.
+- SLA breach notifications.
+- Escalation emails.
+- Follow-up notifications.
+
+ACS sends emails but does not define when reminders should run.
+
+Implement a durable reminder scheduling and dispatch process.
+
+Use SQL Server for:
+- Scheduled reminders.
+- Recipients.
+- Notification status.
+- Attempts.
+- Errors.
+- Idempotency keys.
+- Audit logs.
+
+Prevent duplicate notifications.
+
+Handle retries safely.
+
+Do not send real emails by default.
+
+Only enable email delivery after approved ACS configuration.
+
+Do not claim inbox delivery from successful submission alone.
+
+## 16. DASHBOARD, REPORTING, INSIGHTS AND TRENDS
+
+Implement backend APIs only.
+
+Use SQL Server for deterministic reporting calculations.
+
+Use actual Arun Connect data and Praveen-owned operational records.
+
+Do not fabricate metrics.
+
+Enforce authorized IBU scope.
+
+Follow exact PRD requirements.
+
+### FR-24
+
+Implement:
+- Reporting dimensions.
+- Date presets.
+- Filters.
+- Date-range semantics.
+- IBU-scoped reporting.
+
+### FR-25
+
+Implement:
+- Valid denominators.
+- Percentage formulas.
+- Missing-value rules.
+- Aggregation consistency.
+
+### FR-26
+
+Implement:
+- Action analytics.
+- Status metrics.
+- SLA metrics.
+- Owner-level metrics.
+- Due-date metrics.
+- Other explicitly defined dimensions.
+
+Do not invent calculations.
+
+Keep Insights and Trends logically separate if required by the UI screenshots.
+
+Return chart-ready JSON responses.
+
+## 17. KNOWLEDGE BASE AND COPILOT
+
+Implement Praveen-owned Knowledge Base and Copilot backend functionality where required.
+
+Use:
+
+Azure OpenAI
++
+text-embedding-3-small
++
+ChromaDB
++
+LangGraph
+
+Relevant capabilities may include:
+- Document ingestion.
+- Knowledge article retrieval.
+- Document indexing.
+- Semantic search.
+- Authorized question answering.
+- RAG-generated responses.
+- Source citations.
+- Conversation history where required.
+- Document update and deletion.
+
+Use SQL Server for relational records, access permissions and conversation metadata.
+
+Never retrieve or expose unauthorized employee or document data.
+
+## 18. PROJECT STRUCTURE
+
+Create the backend structure:
+
+peopleconnect/
+    Source_document/
+    data/
+    UI/
+    arun_table/
+    docs/
+    backend/
+        app/
+            api/
+            core/
+            db/
+            models/
+            schemas/
+            repositories/
+            services/
+            security/
+            ai/
+                azure_openai/
+                embeddings/
+                chroma/
+                langgraph/
+                rag/
+            notifications/
+                azure_communication/
+                scheduler/
+            utils/
+            main.py
+        alembic/
+        scripts/
+        tests/
+        requirements.txt
+        .env.example
+
+Do not create a frontend application.
+
+Use one FastAPI service and one SQL Server relational database.
+
+ChromaDB remains the separate vector store.
+
+## 19. TESTING REQUIREMENTS
+
+Implement Pytest tests for relevant functionality.
+
+Include:
+- SQL Server connectivity.
+- Arun CSV imports.
+- Arun table relationships.
+- Employee imports.
+- BHR_data schema.
+- BHR-based authorization.
+- Missing BHR mappings.
+- Unauthorized cross-IBU access.
+- Meeting APIs.
+- Transcript APIs.
+- AI output validation.
+- Chroma indexing.
+- LangGraph state transitions.
+- RAG authorization.
+- Action Management.
+- SLA calculations.
+- ACS notification behavior.
+- Dashboard calculations.
+- FR-24.
+- FR-25.
+- FR-26.
+- API response schemas.
+
+Use mocks only inside isolated automated tests.
+
+Production code must use real integrations.
+
+Expose relevant API endpoints in Swagger:
+
+http://127.0.0.1:8000/docs
+
+Do not claim tests passed without running them.
+
+Do not claim live Azure or SQL Server integrations passed when actual connections were unavailable.
+
+## 20. REQUIRED DOCUMENTATION
+
+Create:
+
+docs/PRAVEEN_SCOPE_MATRIX.md
+
+docs/ARUN_PROVISIONAL_SCHEMA.md
+
+docs/ARUN_TABLE_RELATIONSHIPS.md
+
+docs/EMPLOYEE_BHR_ACCESS_DESIGN.md
+
+docs/UI_TO_API_MAPPING.md
+
+docs/API_CONTRACTS.md
+
+docs/API_INVENTORY.md
+
+docs/TECHNOLOGY_ARCHITECTURE.md
+
+docs/DATABASE_DESIGN.md
+
+docs/BACKEND_IMPLEMENTATION_PLAN.md
+
+docs/REQUIREMENTS_TRACEABILITY.md
+
+docs/ENVIRONMENT_DEPENDENCIES.md
+
+docs/IMPLEMENTATION_STATUS.md
+
+Clearly distinguish verified requirements from assumptions.
+
+Do not document an unavailable resource as operational.
+
+## 21. DEVELOPMENT PHASES
+
+### PHASE 0 — SOURCE ANALYSIS
+
+Inspect:
+- Source_document/
+- data/employee_master.xlsx
+- UI/
+- arun_table/
+
+Analyze all relevant requirements, screenshots and exported data.
+
+Prepare the ownership matrix, provisional schema, BHR authorization design and screenshot-to-API mapping.
+
+### PHASE 1 — SQL SERVER AND BACKEND FOUNDATION
+
+Implement:
+- FastAPI structure.
+- SQL Server connection configuration.
+- Safe development database initialization.
+- Arun table reconstruction scripts.
+- Arun CSV import scripts.
+- Employee Master SQL Server import.
+- dbo.BHR_data development table.
+- BHR_data import if authorized source records are available.
+- Authorization foundation.
+- Relevant backend models.
+- Alembic setup for Praveen-owned tables.
+- Basic health and verified database-backed APIs.
+- Initial tests.
+
+### PHASE 2 — MEETINGS, DOCUMENTS AND TRANSCRIPTS
+
+Implement Praveen-owned operational APIs.
+
+### PHASE 3 — AZURE OPENAI
+
+Implement required AI generation, extraction, persistence, review and validation.
+
+### PHASE 4 — CHROMADB AND LANGGRAPH
+
+Implement vector indexing, semantic retrieval, Knowledge Base and RAG workflows.
+
+### PHASE 5 — ACTIONS AND ACS NOTIFICATIONS
+
+Implement Action Management, SLA, reminders and escalations.
+
+### PHASE 6 — DASHBOARD AND REPORTING
+
+Implement Dashboard, Reporting, Insights, Trends and exact FR-24/25/26 calculations.
+
+### PHASE 7 — REMAINING PRAVEEN TASKS
+
+Complete remaining Knowledge Base, Copilot and other assigned backend modules.
+
+### PHASE 8 — END-TO-END API VERIFICATION
+
+Validate API contracts, database integration, authentication, authorization, AI workflows and reporting.
+
+## 22. FIRST EXECUTION BOUNDARY
+
+THIS IS THE FIRST CLAUDE CODE PROMPT.
+
+Complete PHASE 0 and the independently executable portions of PHASE 1 only.
+
+Do not proceed to Phase 2 automatically.
+
+Your immediate tasks:
+
+1. Inspect the actual project folder structure.
+2. Read all relevant Source_document files.
+3. Analyze Praveen and Arun task ownership.
+4. Analyze all UI screenshots.
+5. Read employee_master.xlsx.
+6. Inspect Arun CSV/Excel exports.
+7. Document the provisional Arun database schema.
+8. Design dbo.BHR_data exactly as specified.
+9. Design employee-to-BHR IBU authorization.
+10. Prepare the screenshot-to-API mapping.
+11. Generate the complete Praveen-owned API inventory.
+12. Generate safe SQL Server development initialization scripts.
+13. Create the FastAPI backend foundation.
+14. Implement SQL Server configuration.
+15. Implement available data import functionality.
+16. Implement the initial authorization foundation.
+17. Add and execute relevant tests where possible.
+18. Document any missing configuration or data.
+19. Prepare the next implementation steps.
+
+Use the actual local Python environment.
+
+Do not assume a particular Python launcher, virtual environment or operating system setup without inspecting the environment.
+
+Before database modifications, verify that the target is the intended development database.
+
+Never drop or overwrite existing tables.
+
+If BHR_data source records are unavailable, create the table definition but do not invent mappings or grant unrestricted access.
+
+If SQL Server is unavailable, prepare executable integration code but report the actual blocker.
+
+Do not build frontend code.
+
+Do not start Phase 2 automatically.
+
+## 23. FINAL EXECUTION REPORT
+
+After Phase 0 and Phase 1 work, report:
+
+1. Files and documents inspected.
+2. Confirmed Praveen-owned modules.
+3. Arun-owned dependencies.
+4. Arun tables found.
+5. Provisional schema findings.
+6. Employee Master columns and row count.
+7. dbo.BHR_data table status.
+8. BHR authorization assumptions and verified rules.
+9. UI screenshots analyzed.
+10. Proposed backend API inventory.
+11. SQL Server database creation status.
+12. Arun table creation and import status.
+13. Employee Master import status.
+14. BHR_data import status.
+15. Backend files created.
+16. Commands executed.
+17. Tests passed, failed or blocked.
+18. Environment or provider configuration blockers.
+19. Remaining Phase 1 work.
+20. Recommended next implementation slice.
+
+Never claim a database table, import, API or integration works without verifying it.
+
+START NOW WITH PHASE 0 AND PHASE 1 ONLY.
