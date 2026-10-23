@@ -1,35 +1,407 @@
-USE PeopleConnect_Dev;
-GO
+# PEOPLECONNECT — PHASE 3: AZURE OPENAI INTEGRATION
 
-INSERT INTO dbo.connect_actions (
-    id,
-    plan_connect_id,
-    connect_minutes_id,
-    action_title,
-    action_description,
-    owner_employee_id,
-    owner_email,
-    status,
-    priority,
-    due_date,
-    created_at,
-    updated_at
-)
-VALUES (
-    CONVERT(VARCHAR(36), NEWID()),
-    'PC-00001',
-    'f1a04762-fafd-423c-95a8-32c558aa2085',
-    'TEST - Resolve provisioning issue',
-    'Test action for Swagger API status update.',
-    NULL,
-    NULL,
-    'OPEN',
-    'MEDIUM',
-    '2026-11-05',
-    SYSDATETIMEOFFSET(),
-    SYSDATETIMEOFFSET()
-);
+## MANDATORY PROJECT RULES — READ FIRST
 
-SELECT id, plan_connect_id, action_title, status
-FROM dbo.connect_actions
-WHERE action_title = 'TEST - Resolve provisioning issue';
+Before making any changes:
+
+1. Read BOTH the complete PRD and Task Breakdown Excel inside `Source_document/`. These are the primary sources of truth.
+2. Identify only the tasks assigned to **Praveen** in the Task Breakdown Excel. Do not implement tasks assigned to Arun Kumar or Abhishek.
+3. Review the relevant UI reference screenshots in `UI/`. Backend APIs and response structures must support the actual UI requirements.
+4. Use the existing Arun-owned SQL Server tables as the source of lifecycle, Connect, participant, and organizational data. Do not recreate, rename, migrate, or modify Arun's tables, records, APIs, or lifecycle logic.
+5. Continue from the existing Phase 1 and Phase 2 implementation. Do not rebuild the project or create duplicate APIs, database models, or services.
+6. Use **one FastAPI backend and one SQL Server database**, `PeopleConnect_Dev`. Do not introduce another application database or microservice.
+7. Preserve existing employee master, BHR_data, Arun-owned records, Praveen-owned tables, and Alembic migration history.
+8. Use `requirements-lock.txt` as the primary reference for installed dependency versions. Do not blindly install from the older `requirements.txt`. Inspect the actual environment and update dependency files consistently when necessary.
+9. Azure OpenAI and Azure Communication Services credentials are currently unavailable. Implement actual provider integration code with environment-based configuration, but do not require real credentials to complete offline development and tests.
+10. Never hardcode credentials, tokens, passwords, API keys, or connection strings.
+11. Do not use fake AI output, placeholder minutes, fabricated insights, or simulated success as production behaviour.
+12. The existing development-only authentication is temporary. Preserve it for local testing, but do not replace Abhishek's assigned authentication/RBAC implementation.
+13. BHR and BHR Leader must both be supported according to their authorized scope, including Connect creation where applicable. Admin and Participant permissions must follow the PRD.
+14. Maintain append-only history, auditability, authorized IBU scope, human review, and secure data handling.
+15. Keep all existing functional APIs backward-compatible unless a security or correctness defect requires a documented change.
+
+## MANDATORY — TECH MAHINDRA WINDOWS ENVIRONMENT
+
+1. Always use `py` instead of `python` for all Python commands.
+2. Use `py -m pip` for package installation.
+3. Use `py -m pytest` for testing.
+4. Use `py -m alembic` for database migrations.
+5. Use `py -m uvicorn app.main:app --host 127.0.0.1 --port 8000` to start FastAPI.
+6. Never assume the `python` command works in this environment.
+7. Verify the active Python interpreter and virtual environment before executing commands.
+8. Use `requirements-lock.txt` as the dependency version reference instead of the outdated `requirements.txt`.
+9. Do not modify Arun-owned code, tables, or lifecycle logic.
+
+Apply these rules throughout Phase 3 implementation and testing.
+
+## CURRENT VERIFIED PROJECT STATUS
+
+- SQL Server database: `PeopleConnect_Dev`.
+- Arun's seven SQL Server tables were created and populated with 30 CSV records.
+- `dbo.employee_master` has 74 columns and three imported employee records.
+- `dbo.BHR_data` exists and contains the imported BHR mapping record.
+- Phase 1 created five Praveen-owned tables:
+  - `connect_minutes`
+  - `connect_actions`
+  - `connect_insights`
+  - `ai_generation_requests`
+  - `connect_input_sources`
+- Phase 2 added FastAPI models, request/response schemas, development authentication, JWT authorization, and nine T002 APIs.
+- Swagger HTTPBearer authorization is working.
+- All nine APIs underwent first-round manual Swagger testing.
+- Minutes generation currently creates a placeholder draft rather than a real AI output.
+- Extract Actions currently returns zero actions with `PENDING_REVIEW`.
+- AI history currently records `SUCCESS` even where real provider generation did not occur.
+- Azure provider credentials are not available.
+
+Inspect and independently verify the actual code and database state instead of assuming every earlier completion report is accurate.
+
+## PHASE 3 OBJECTIVE
+
+Implement the complete **real Azure OpenAI integration layer** for Praveen-owned AI Output Generation Integration Point (T002), including meeting-minute generation, action extraction, insights generation, human review compatibility, provider failure handling, audit logging, and automated offline testing.
+
+Do not begin other T003 modules in this phase.
+
+## TASK 1 — EXISTING CODE AND REQUIREMENT ANALYSIS
+
+Inspect the existing:
+
+- FastAPI entry point and routers
+- Database connection and SQLAlchemy sessions
+- Five Praveen-owned SQL Server models
+- Existing Alembic migrations
+- Nine T002 API implementations
+- Pydantic request and response schemas
+- Development authentication and IBU authorization
+- Existing tests
+- Relevant PRD requirements and UI workflows
+
+Identify the exact implementation points for Azure OpenAI without duplicating functionality.
+
+Produce a concise gap analysis before applying code changes.
+
+## TASK 2 — AZURE OPENAI CLIENT INTEGRATION
+
+Implement a real Azure OpenAI provider client using the installed, supported Azure OpenAI SDK interface.
+
+Configuration must come from environment variables, including:
+
+- `AZURE_OPENAI_ENDPOINT`
+- `AZURE_OPENAI_API_KEY`
+- `AZURE_OPENAI_API_VERSION`
+- `AZURE_OPENAI_DEPLOYMENT`
+
+Support Azure identity-based authentication if permitted by the deployed environment and supported by the selected SDK.
+
+Implement:
+
+- Provider configuration validation
+- Request and response handling
+- Configurable timeouts
+- Bounded retries with exponential backoff for transient failures
+- Explicit handling of rate limits, authentication errors, timeouts, malformed responses, and service outages
+- Structured logging without exposing sensitive transcript or credential data
+- Provider dependency injection for unit testing
+
+Do not silently switch to an unapproved public LLM provider.
+
+Use the deployment configured in the environment, not a hardcoded model name.
+
+## TASK 3 — REAL MEETING MINUTES GENERATION
+
+Update the existing endpoint:
+
+`POST /api/v1/connects/{connect_id}/generate-minutes`
+
+The endpoint must:
+
+1. Authenticate the user and enforce role and IBU authorization.
+2. Verify that the Connect exists in Arun's SQL Server lifecycle tables.
+3. Read the authorized Connect context, available evidence, and metadata.
+4. Support transcript and manual-note input according to the existing API contract and PRD.
+5. Retrieve already uploaded evidence through existing storage references where applicable.
+6. Treat transcript and other user-provided material as untrusted input, not executable instructions.
+7. Validate input size, required evidence, and supported content types.
+8. Send the appropriate sanitized and authorized input to Azure OpenAI.
+9. Generate meaningful, structured meeting minutes grounded only in the provided meeting evidence.
+10. Preserve discussion points, decisions, owners, follow-ups, and unresolved concerns.
+11. Avoid hallucinating attendees, decisions, dates, or commitments.
+12. Validate the structured model output before database persistence.
+13. Store generated output in `connect_minutes` with `DRAFT` status.
+14. Record provider and audit metadata where available.
+15. Return the existing API response contract, extending it only where necessary and backward-compatible.
+
+**Never automatically publish generated minutes.**
+
+A human reviewer must explicitly validate and approve the draft before publication.
+
+If Azure OpenAI is not configured, return a clear controlled provider-unavailable response. Do not create fake AI minutes or report AI generation as successful.
+
+## TASK 4 — ACTION EXTRACTION
+
+Update:
+
+`POST /api/v1/minutes/{minutes_id}/extract-actions`
+
+Implement actual Azure OpenAI-based action extraction from authorized meeting minutes.
+
+Extract:
+
+- Action title
+- Description
+- Responsible owner, only when supported by the evidence
+- Due date, only when explicitly available or established by approved business rules
+- Priority, based on defined business rules
+- Source evidence
+- Confidence score, when meaningfully supported
+
+Validate owners against authorized employee information before assignment.
+
+Do not invent employee IDs, owners, or due dates.
+
+Respect `auto_assign_owners`.
+
+If `auto_assign_owners=false`, do not automatically assign extracted actions to employees.
+
+Persist extracted action candidates according to the PRD's human-validation workflow, keeping them pending review rather than immediately activating unapproved actions.
+
+Prevent accidental duplication on retries or repeated extraction.
+
+Use `connect_actions` and relevant Praveen-owned structures without modifying Arun's tables.
+
+Do not mark extraction as successful when no provider call took place.
+
+Preserve the distinction between:
+
+- Provider execution success
+- Zero genuine actions extracted
+- Actions pending human review
+- Provider unavailable
+- Extraction failed
+
+## TASK 5 — AI INSIGHTS GENERATION
+
+Implement actual AI-driven insight extraction where required by the PRD and the existing T002 integration.
+
+Use authorized meeting evidence to identify:
+
+- Themes
+- Concerns
+- Employee feedback patterns
+- Sentiment, where supported by evidence
+- Follow-up recommendations
+- Emerging organizational issues
+- Other PRD-required insights
+
+Store results in `connect_insights`.
+
+Do not invent sentiment or unsupported conclusions.
+
+Return meaningful structured information for:
+
+`GET /api/v1/connects/{connect_id}/insights`
+
+Maintain IBU authorization and apply any PRD-required restrictions to sensitive or aggregated employee insights.
+
+Do not invent new public endpoints unless necessary to fulfil a documented requirement. Document any additions.
+
+## TASK 6 — HUMAN VALIDATION AND PUBLICATION SAFETY
+
+Preserve and strengthen the existing minute review workflow.
+
+Existing endpoints include:
+
+- `GET /api/v1/connects/{connect_id}/minutes`
+- `PATCH /api/v1/minutes/{minutes_id}`
+- `POST /api/v1/minutes/{minutes_id}/publish`
+
+Requirements:
+
+- All AI-generated outputs initially remain drafts.
+- Authorized reviewers can edit drafts.
+- Published minutes cannot be silently modified through the draft API.
+- Publish requires explicit authorized human approval.
+- Preserve original AI output and review history where required.
+- Enforce validation before status becomes `PUBLISHED`.
+- Prevent unauthorized publishing.
+- Preserve publication timestamps and identity.
+- Do not automatically send emails from this phase.
+- Keep notification integration deferred until ACS credentials and the appropriate T003 implementation phase are available.
+
+Do not accidentally publish placeholder or unreviewed AI content.
+
+## TASK 7 — AI REQUEST AUDIT LOGGING
+
+Fix the existing `ai_generation_requests` behaviour.
+
+Current issue: Some history entries show `SUCCESS` even when Azure OpenAI generation was never performed.
+
+Implement truthful execution states appropriate to the existing database and API contracts, including:
+
+- Requested
+- Processing
+- Success
+- Provider unavailable
+- Failed
+- Validation failed
+
+Distinguish provider execution outcome from human review status.
+
+Store metadata when available:
+
+- Request ID
+- Connect ID
+- Request type
+- Authenticated user
+- Provider and deployment
+- Input token count
+- Output token count
+- Processing duration
+- Estimated cost only when calculable from documented configuration
+- Execution timestamp
+- Safe error metadata
+
+Do not fabricate usage or cost values.
+
+Preserve append-only audit requirements. Never overwrite or delete historical request events to conceal failures.
+
+Do not rewrite old misleading audit entries without an approved migration and documented correction strategy.
+
+Ensure that `GET /api/v1/connects/{connect_id}/ai-history` retrieves accurate history.
+
+## TASK 8 — PROVIDER-UNAVAILABLE BEHAVIOUR
+
+Because Azure credentials are currently unavailable, the application must remain startable and existing non-AI APIs operational.
+
+When AI generation is requested without valid provider configuration:
+
+- Return an explicit controlled error, preferably HTTP 503 where appropriate.
+- Explain that Azure OpenAI configuration is unavailable.
+- Avoid exposing secrets or internal infrastructure information.
+- Do not create fabricated minutes, actions, or insights.
+- Record the failure or unavailable attempt according to the audit design.
+- Preserve existing persisted data.
+- Do not interfere with existing SQL Server CRUD operations.
+
+Implement provider health/configuration checks without exposing credentials.
+
+## TASK 9 — DATABASE AND MIGRATIONS
+
+Inspect whether the current five Praveen-owned tables can support all Phase 3 data requirements.
+
+If additional columns or Praveen-owned supporting tables are genuinely necessary:
+
+1. Explain why.
+2. Create a new, correctly chained Alembic revision.
+3. Follow the existing migration history.
+4. Preserve existing data.
+5. Apply only approved Praveen-owned schema changes.
+6. Verify the resulting schema in SQL Server.
+
+Do not create duplicate tables.
+
+Do not modify Arun's tables, schema, constraints, or lifecycle records.
+
+Do not reset or drop the existing database.
+
+Do not run destructive migrations.
+
+## TASK 10 — SECURITY AND DATA PROTECTION
+
+Implement:
+
+- JWT authentication
+- Role authorization
+- IBU-based data scoping
+- Validation of Connect access
+- Participant access restrictions
+- Protection against cross-IBU data leakage
+- Safe processing of transcript input
+- Protection against prompt injection
+- Secure error responses
+- No secrets in logs or API responses
+- Appropriate transcript size limits
+- Safe handling of personally identifiable employee information
+
+Keep Abhishek's future authentication integration boundary clearly separated.
+
+## TASK 11 — OFFLINE AUTOMATED TESTING
+
+Implement meaningful tests using dependency-injected or mocked Azure OpenAI provider responses.
+
+Mocks are allowed only inside automated tests, never as production AI output.
+
+Test:
+
+1. Valid structured minute generation
+2. Invalid model output
+3. Empty transcript
+4. Unauthorized request
+5. Cross-IBU access rejection
+6. Missing Azure credentials
+7. Provider authentication failure
+8. Provider timeout
+9. Provider rate limiting
+10. Malformed provider response
+11. Action extraction
+12. Zero-action extraction
+13. Duplicate extraction protection
+14. Owner validation and approval
+15. Insight generation
+16. Draft editing
+17. Explicit approval and publication
+18. Published record immutability
+19. AI audit history
+20. No fabricated success without a provider call
+21. SQL Server persistence and transaction rollback
+22. Regression testing for all nine Phase 2 APIs
+
+Do not call real Azure OpenAI during offline tests.
+
+Run the actual tests and report their results accurately.
+
+## TASK 12 — FINAL VERIFICATION AND REPORT
+
+After implementation:
+
+1. Verify all existing nine T002 endpoints remain available in Swagger.
+2. Verify FastAPI starts successfully without Azure credentials.
+3. Verify SQL Server connectivity.
+4. Verify existing Arun data and employee master records are preserved.
+5. Verify no unintended changes occurred to Arun-owned files or tables.
+6. Run focused Phase 3 tests.
+7. Run available backend regression tests.
+8. Record actual passed, failed, and skipped tests.
+9. Inspect code for remaining placeholder AI responses and fake-success paths.
+10. Report any issues that cannot be tested without Azure credentials.
+
+Create:
+
+`docs/PHASE3_AZURE_OPENAI_COMPLETION_REPORT.md`
+
+Include:
+
+- Files created
+- Files modified
+- Existing APIs updated
+- Actual provider integration implemented
+- Database migrations applied, if any
+- Test commands and test results
+- Current Azure configuration status
+- Deferred live verification checklist
+- Remaining blockers
+- Confirmation that Arun-owned tables and lifecycle logic were not modified
+
+## STRICT COMPLETION CRITERIA
+
+Do not report Phase 3 as fully tested if live Azure credentials are unavailable.
+
+The acceptable final status is:
+
+**IMPLEMENTATION COMPLETE — OFFLINE TESTED — LIVE AZURE VERIFICATION PENDING**
+
+Only claim this status if the code and offline tests actually satisfy the requirements.
+
+Do not proceed to Phase 4 or T003 work.
+
+Implement Phase 3 now, and provide a truthful final report.
