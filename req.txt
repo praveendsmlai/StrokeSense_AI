@@ -1,137 +1,64 @@
 # MANDATORY PEOPLECONNECT PROJECT RULES
 
-Before implementation, refer to BOTH the complete PRD and Task Breakdown Excel inside `Source_document/`.
+Before implementation, read BOTH the complete PRD and Task Breakdown Excel inside `Source_document/`.
 
-Implement ONLY tasks explicitly assigned to Praveen, including the "AI Output Generation Integration Point" task assigned to him within Arun's section.
+Implement ONLY tasks explicitly assigned to Praveen, including the "AI Output Generation Integration Point" assigned to Praveen within Arun's section.
 
-Use Arun's existing 7 SQL Server tables strictly as read-only integration dependencies. Do NOT modify or rebuild Arun's tables, schema, lifecycle, workflows or APIs.
+Arun's existing 7 SQL Server tables are integration dependencies. Do not modify Arun's schema, APIs, lifecycle, workflows or business logic.
 
-Build ONLY the backend. API contracts must match relevant screenshots in `UI/`. Do not build a frontend.
+Backend only. Use `UI/` screenshots to derive API requirements. Do not develop frontend code.
 
-Mandatory stack:
-- Python, FastAPI, SQLAlchemy, Alembic
-- Microsoft SQL Server
-- Azure OpenAI
-- Azure OpenAI text-embedding-3-small
-- ChromaDB
-- LangGraph
-- Azure Communication Services Email
+Technology stack: FastAPI, SQL Server, Azure OpenAI, text-embedding-3-small, ChromaDB, LangGraph and Azure Communication Services Email.
 
-Employee source: `data/employee_master.xlsx`
-BHR authorization source: `data/BHR_data.xlsx`
+Employee data: `data/employee_master.xlsx`.
+BHR authorization: `data/BHR_data.xlsx`.
 
-Use `py` for ALL Windows Python commands. Never use `python` or `python -m`.
+Always use `py` for Windows Python commands, never `python`.
 
-Preserve completed work. Never expose passwords or connection strings containing credentials. Test all changes and report actual results.
+Preserve completed work. Use real SQL Server data. Never print credentials. Verify actual results.
 
-# NEXT TASK — CREATE AND IMPORT EMPLOYEE MASTER
+# NEXT TASK — IMPORT ARUN CSV DATA
 
 Current status:
-- PeopleConnect_Dev SQL Server connection verified.
-- FastAPI and Swagger working.
-- Arun's 7 tables created.
-- dbo.BHR_data created with 9 columns.
-- One genuine BHR_data.xlsx record inserted.
-- Employee Master table NOT yet created.
+- Arun's 7 SQL Server tables created and verified.
+- dbo.BHR_data created with 1 Excel record.
+- dbo.employee_master created with 74 columns and 3 employees.
+- SQL Server and FastAPI connectivity verified.
 
-## Task 1 — Analyze Employee Excel
+## Task
 
-1. Read `data/employee_master.xlsx` completely.
-2. Inspect all sheets and determine the actual employee master sheet.
-3. Identify every column and its Excel data type.
-4. Identify the primary employee identifier `EMPID`.
-5. Identify the `EMPLOYEE_IBU` column.
-6. Count total rows, valid employee IDs, missing IDs and duplicates.
-7. Do not invent or remove employee columns.
-
-## Task 2 — Create SQL Server Table
-
-1. Connect to the existing `PeopleConnect_Dev` database using backend/.env.
-2. Check whether an Employee Master table already exists.
-3. If absent, create `dbo.employee_master`.
-4. Include all required Excel columns, preserving original column names.
-5. Use suitable SQL Server data types.
-6. Preserve leading zeros in employee identifiers where applicable.
-7. Use `EMPID` as the employee's business identifier.
-8. Add primary-key or unique constraints only after checking data uniqueness.
-9. Manage this Praveen-owned table through an appropriate Alembic migration.
-10. Never modify Arun's 7 tables or dbo.BHR_data.
-
-## Task 3 — Import Complete Excel Data
-
-1. Create an idempotent Excel-to-SQL Server import script.
-2. Import all valid employee records from the actual workbook.
-3. Preserve original EMPIDs and EMPLOYEE_IBU values.
-4. Handle Excel blanks, dates, text, numeric cells and duplicate IDs carefully.
-5. Use transaction handling.
-6. Prevent duplicate records on reruns.
-7. Never silently overwrite existing employee data.
-8. Record rejected rows with exact reasons.
-9. Do not generate sample or dummy employees.
-10. Do not import data automatically when FastAPI starts.
-
-## Task 4 — Validate Employee Master
-
-Execute real SQL Server verification queries.
-
-Verify:
-- dbo.employee_master exists.
-- All expected columns exist.
-- Imported row count matches valid Excel records.
-- Employee IDs are preserved.
-- Duplicate employee IDs are handled.
-- EMPLOYEE_IBU values match the Excel source.
-- No unauthorized changes occurred to Arun's tables or dbo.BHR_data.
-
-## Task 5 — Check BHR Authorization Compatibility
-
-Analyze how:
-
-`dbo.BHR_data.EMPLOYEE_IBU`
-
-relates to:
-
-`dbo.employee_master.EMPLOYEE_IBU`
-
-Check whether the IBU values can be matched reliably.
-
-Do not implement login or authorization APIs yet.
-
-Do not assume the BHR identity mapping without PRD verification.
-
-Document any unmatched or inconsistent IBU values.
-
-## Strict Execution Boundary
-
-Complete Employee Master creation, import and verification ONLY.
-
-Do not:
-- Implement Arun-owned functionality.
-- Modify Arun's schema or data.
-- Build frontend code.
-- Implement other APIs.
-- Import Arun CSV files.
-- Modify BHR_data records.
-- Begin AI or RAG development.
-- Run destructive SQL.
+1. Inspect all CSV exports in `arun_table/`.
+2. Read Arun's original `arun_table/script.sql` for schema reference.
+3. Identify the correct CSV-to-table mappings.
+4. Inspect existing `backend/scripts/import_arun_data.py`.
+5. Validate columns, SQL data types, primary keys and dependencies.
+6. Check existing row counts before import.
+7. Treat CSV files as source data for the existing development tables, not as permission to redesign Arun's module.
+8. Preserve all original IDs, timestamps and status values.
+9. Detect duplicate records and invalid references.
+10. Do not generate fake or missing records.
+11. Only insert validated missing records into the seven existing Arun development tables.
+12. Do not update or delete existing Arun records.
+13. Use transactions and safe rollback on errors.
+14. Ensure rerunning the import does not create duplicates.
+15. Do not change the seven table schemas, indexes or constraints.
+16. Compare SQL Server row counts against accepted CSV records after import.
+17. Verify representative records and referential consistency.
+18. Do not change Employee Master or BHR_data.
+19. Do not implement Arun-owned business functionality.
 
 ## Final Report
 
 Provide:
+- Seven tables and CSV mappings.
+- CSV record counts.
+- Existing SQL record counts.
+- Inserted, skipped and rejected records.
+- Any missing or duplicate IDs.
+- Import errors and fixes.
+- Final SQL Server row counts.
+- Verification results.
 
-1. Excel sheets inspected.
-2. Total Excel rows.
-3. Employee columns identified.
-4. SQL table creation status.
-5. Total records successfully imported.
-6. Rejected or duplicate records.
-7. EMPID validation.
-8. EMPLOYEE_IBU validation.
-9. BHR_data IBU compatibility findings.
-10. Actual SQL Server verification results.
-11. Files created or modified.
-12. Any remaining blockers.
+Do not claim successful import without actual SQL Server queries.
 
-Do not claim success unless the real SQL Server table exists and the import has been verified.
-
-STOP after Employee Master completion.
+Stop after completing and verifying Arun's development CSV data import.
