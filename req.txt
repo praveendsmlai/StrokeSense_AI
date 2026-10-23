@@ -1,126 +1,129 @@
 # MANDATORY PEOPLECONNECT PROJECT RULES
 
-Before starting, read BOTH the complete PRD and Task Breakdown Excel inside `Source_document/`. Review relevant screenshots in `UI/`.
+Read the complete PRD and Task Breakdown Excel inside `Source_document/` before implementation. Review all relevant screenshots in `UI/`.
 
-**Scope: Implement ONLY Praveen's 12 assigned tasks:**
+Implement ONLY Praveen's 12 assigned tasks:
 - T002: AI Output Generation Integration Point.
-- T003: Action Tracking & Status Management, Connect Closure Control & Workflow, Append-Only Case History, Automated Communications & Notifications, Action Reminders & Aging, Unified Action Tracker, Dashboards & Role-Specific Views, Reporting & Analytics, Theme Analysis & Insights, Administrative Configuration & Data Integration, Testing & Bug Fixing.
+- T003: The 11 Praveen-owned subtasks identified in the Task Breakdown Planner.
 
-**Ownership boundaries:**
-- Use Arun's existing 7 SQL Server tables as read-only integration dependencies.
-- Never modify Arun's schema, existing data, APIs, lifecycle, or workflows.
-- Do not implement Abhishek's authentication/RBAC foundation; identify required integration contracts instead.
-- Do not duplicate existing functionality.
+Do not implement Arun's or Abhishek's assigned functionality.
 
-**Architecture:**
-- Single FastAPI backend using Microsoft SQL Server `PeopleConnect_Dev`.
-- SQLAlchemy and Alembic for Praveen-owned tables only.
-- Existing `dbo.employee_master` and `dbo.BHR_data` for authorized employee/IBU mappings.
-- Azure OpenAI for real AI generation, `text-embedding-3-small`, ChromaDB, LangGraph, and Azure Communication Services Email as required by the PRD.
-- Backend only; derive required API contracts from the UI screenshots.
-- No fake data, dummy providers or hardcoded authorization.
-- Implement FR-24/FR-25/FR-26 exactly when reporting development begins.
+Arun's existing 7 SQL Server tables are integration dependencies. Do NOT alter their schema, records, lifecycle, APIs, indexes, or business logic.
 
-**Execution rules:**
-- Claude model: Haiku 4.5. Work in small, focused tasks.
-- Always use `py` for Windows Python commands, never `python`.
-- Use existing files and code before creating new ones.
-- Never display credentials or secrets.
-- Test changes against actual code and SQL Server.
-- Report verified results separately from assumptions.
+Use only one FastAPI backend and one Microsoft SQL Server database: `PeopleConnect_Dev`.
 
-# CURRENT VERIFIED PROJECT STATUS
+Technology stack: FastAPI, SQLAlchemy, Alembic, Azure OpenAI, text-embedding-3-small, ChromaDB, LangGraph, Azure Communication Services Email.
 
-Claude previously reported:
-- FastAPI foundation and SQL Server connection working.
-- Arun's 7 tables created, containing 30 imported CSV records.
-- `dbo.employee_master`: 74 columns, 3 imported employees.
-- `dbo.BHR_data`: 9 columns, 1 actual Excel record.
-- Arun sample IBUs: AMAZON, US2, INTERNAL_OPS.
-- Employee and BHR IBU: ALPHABET.
-- No Praveen-owned functional API module implemented yet.
+Implement all AI functionality explicitly required by the PRD using real provider integration in its relevant phase. Provider credentials and live testing may be deferred where unavailable.
 
-Treat these as previously reported results; confirm relevant details using read-only queries.
+Backend only. Use UI screenshots for API contracts. Preserve all previously completed work.
 
-# TASK 01 — AI OUTPUT GENERATION INTEGRATION ANALYSIS
+Use `py` for Windows Python commands. Never use `python`.
 
-Analyze ONLY Praveen's T002 task:
+Never hardcode credentials, fake identities, or bypass authorization. Do not claim tests passed without executing them.
 
-"AI Output Generation Integration Point — Create backend integration points for AI-generated outputs (minutes, actions, insights)."
+# CURRENT STATUS
 
-Step 1 — Requirements
+- Arun's 7 SQL Server tables created; 30 CSV records imported.
+- dbo.employee_master created; 74 columns and 3 employee records.
+- dbo.BHR_data created; 9 columns and 1 record.
+- SQL Server and FastAPI connectivity previously verified.
+- T002 analysis completed.
+- Planning file: `docs/PRAVEEN_T002_AI_INTEGRATION_PLAN.md`.
 
-Read relevant PRD sections and the exact Task Breakdown row.
+# TASK — PHASE 1: AI DATABASE FOUNDATION
 
-Identify:
-- Required AI outputs.
-- Meeting transcript/manual notes inputs.
-- Review, edit, validation and publication requirements.
-- Permissions and authorized IBU scope.
-- Dependencies on Arun's lifecycle.
+First review the T002 plan against the actual PRD, current SQL Server schema and existing Alembic migrations.
 
-Step 2 — Existing Database
+Proposed Praveen-owned tables:
 
-Inspect Arun's 7 SQL Server tables using read-only queries.
+1. connect_minutes
+2. connect_actions
+3. connect_insights
+4. ai_generation_requests
+5. connect_input_sources
 
-Identify:
-- Canonical Connect ID and current lifecycle state.
-- Available participant and employee fields.
-- Existing relationships and evidence references.
-- Missing inputs that require Arun-owned integration contracts.
+Do not blindly implement the proposed design.
 
-Do not invent table columns or modify Arun's data.
+## Step 1 — Validate Existing Schema
 
-Step 3 — AI Architecture
+1. Inspect all existing SQLAlchemy models and Alembic migrations.
+2. Identify the current Alembic revision.
+3. Check whether any proposed tables already exist.
+4. Verify Arun's actual Connect ID type and related columns.
+5. Verify all five proposed tables are genuinely needed.
+6. Identify overlapping fields and future T003 requirements.
+7. Use exact PRD requirements as the source of truth.
 
-Propose how Praveen's service will use:
-- Azure OpenAI for minutes, actions and insights.
-- LangGraph for orchestration where justified by the PRD.
-- SQL Server for generated drafts and review history.
-- ChromaDB and embeddings only where retrieval is required.
+## Step 2 — Implement Database Models
 
-Include unavailable-provider behavior and human approval boundaries.
+Implement validated Praveen-owned models with:
 
-Step 4 — API Contract
+- Correct SQL Server data types.
+- Primary keys and appropriate indexes.
+- Relationships using actual Connect identifiers.
+- Draft, validation and publication states.
+- Created/updated timestamps.
+- AI model and provider metadata.
+- Audit information.
+- Append-only generation request history.
+- Appropriate source references for generated outputs.
+- Compatibility with future action tracking and reporting.
 
-Prepare a table specifying:
-- HTTP method.
-- API endpoint.
-- Purpose.
-- Request fields.
-- Response fields.
-- Role/IBU access.
-- Required database tables.
-- Related PRD requirement.
-- UI screenshot reference.
+Do not create foreign keys that reference nonexistent or incompatible columns.
 
-Check existing FastAPI routes to prevent duplication.
+Do not modify Arun-owned tables.
 
-Step 5 — Integration Risks
+## Step 3 — Alembic Migration
 
-Explicitly identify:
-- Arun versus Praveen ownership boundaries.
-- Missing evidence/transcript APIs.
-- IBU mismatch between current sample datasets.
-- Missing RBAC authentication contracts.
-- Any blocked end-to-end test scenarios.
+1. Create a new migration after the current Alembic head.
+2. Never overwrite existing migrations.
+3. Preserve employee_master and BHR_data.
+4. Apply only Praveen-owned schema changes.
+5. Verify migration compatibility with SQL Server.
+6. Ensure migration failure does not leave partial application-owned schema changes.
+7. Do not run destructive migrations.
 
-# REQUIRED OUTPUT
+## Step 4 — Verification
 
-Create `docs/PRAVEEN_T002_AI_INTEGRATION_PLAN.md` containing:
+Execute actual SQL Server verification:
 
-1. Exact task scope.
-2. PRD requirement references.
-3. Arun SQL dependencies.
-4. Proposed Praveen-owned tables.
-5. Exact backend API contracts.
-6. AI workflow design.
-7. Authorization requirements.
-8. Integration gaps and blockers.
-9. Small implementation steps.
+- All required new tables exist.
+- Columns and data types match the approved models.
+- Primary keys and indexes are correct.
+- Relationships use the existing Arun Connect ID correctly.
+- Arun's 7 tables still contain 30 records.
+- employee_master still contains 3 records.
+- BHR_data still contains 1 record.
+- Existing FastAPI health endpoint remains functional.
+- Alembic current revision matches the new migration head.
 
-Do not implement APIs, create database tables, run migrations or modify application code in this prompt.
+## Strict Boundaries
 
-Finish by reporting the recommended first implementation step.
+Do NOT:
+- Implement API endpoints yet.
+- Add fake authentication.
+- Implement Azure OpenAI integration yet.
+- Create mock outputs.
+- Modify any Arun-owned table.
+- Implement T003 business workflows.
+- Change frontend files.
+- Add sample data without explicit requirement.
 
-STOP after completing the analysis and plan.
+## Final Report
+
+Provide:
+
+1. Actual previous and new Alembic revisions.
+2. Approved table names.
+3. Columns and primary keys.
+4. Relationships.
+5. SQL Server migration execution results.
+6. SQL Server verification query results.
+7. Before/after row counts for existing tables.
+8. Files created or modified.
+9. Any schema mismatch or blocker.
+
+If a requirement cannot be verified, stop the affected change and report the blocker instead of inventing a workaround.
+
+STOP after Phase 1 database foundation completion.
