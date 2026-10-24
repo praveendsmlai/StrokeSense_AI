@@ -1,90 +1,103 @@
-# PEOPLECONNECT — CRITICAL: FIX 3 API ISSUES PERMANENTLY
+# PEOPLECONNECT — PHASE 4: AZURE COMMUNICATION SERVICES INTEGRATION
 
-This is the THIRD attempt to resolve these issues. Previous fixes were reported as COMPLETE, but manual Swagger testing continued to fail.
+Implement production-oriented email notification functionality using Azure Communication Services (ACS).
 
-Do not claim success merely because code compiles, unit tests pass, or a report was generated.
+## Mandatory Rules
+- Work ONLY on Praveen's assigned Module 3 and notification-related tasks.
+- DO NOT modify Arun's lifecycle code or database tables.
+- Preserve existing MS SQL Server tables and data.
+- Use existing database models and APIs wherever possible.
+- Use `py -m` instead of `python` on Tech Mahindra Windows.
+- Use existing `requirements-lock.txt` for dependencies.
+- Do not introduce mock email delivery into production.
+- Do not claim successful delivery without provider confirmation.
+- Preserve JWT authentication, RBAC and IBU-based access controls.
 
-## ISSUE 1 — Action Extraction API
+## Requirements
 
-POST `/api/v1/minutes/{minutes_id}/extract-actions`
+### 1. ACS Integration
+Implement a real Azure Communication Services email provider.
 
-Current problems:
-- Previously returned HTTP 201 with `status: FAILED`.
-- After changes, returned HTTP 422 with `actions_created: 0` and `status: FAILED`.
-- Azure credentials are currently unavailable.
+Support:
+- ACS connection string authentication.
+- Microsoft Entra ID authentication where supported.
+- Configurable sender email address.
+- Environment-based configuration.
+- Secure credential handling.
 
-Required:
-- Trace the complete execution path, including provider configuration, `ai_response.success`, exception handling, and HTTP response creation.
-- Missing/unavailable Azure provider must return HTTP 503.
-- Return HTTP 201 only after successful extraction and database persistence.
-- Do not incorrectly use HTTP 422 for provider connection failures.
-- Preserve accurate failure audit records.
-- Never insert fabricated actions.
+### 2. Email Notifications
+Implement and integrate notifications for:
+- Published meeting minutes.
+- Action item assignment.
+- Action status updates where required.
+- Upcoming action due dates.
+- Overdue actions.
+- SLA breaches.
+- Escalations.
 
-## ISSUE 2 — Insights Generation API
+### 3. Email Templates
+Create configurable templates containing relevant Connect details, action owner, due date, status and escalation information.
 
-POST `/api/v1/connects/{connect_id}/insights`
+### 4. Reminder Automation
+Implement scheduled reminder processing based on existing SLA and escalation rules.
 
-Current actual response:
-- HTTP 201
-- `insights_created: 0`
-- `status: FAILED`
-- `error: Failed to connect to Azure OpenAI`
+Prevent duplicate notifications using idempotency keys.
 
-Required:
-- Identify the exact cause of HTTP 201 being returned despite AI failure.
-- Fix all provider-error response paths.
-- Missing/unavailable Azure provider must return HTTP 503.
-- HTTP 201 only when generation and persistence succeed.
-- Preserve accurate audit records and prevent fake insights.
+### 5. Delivery Tracking
+Track:
+- Notification ID
+- Recipient
+- Notification type
+- Provider message ID
+- Delivery status
+- Retry count
+- Error details
+- Created and sent timestamps
 
-## ISSUE 3 — AI History API
+Use existing notification tables where compatible. Do not create duplicate tables unnecessarily.
 
-GET `/api/v1/connects/{connect_id}/ai-history`
+### 6. API Integration
+Inspect existing notification APIs first.
 
-Current actual response:
-- HTTP 500 Internal Server Error
+Reuse or extend them only where functionality is missing. Preserve existing API contracts unless changes are necessary and documented.
 
-Required:
-- Inspect the complete backend traceback.
-- Identify the failing SQL query, ORM mapping, response schema, or serialization logic.
-- Fix the actual root cause.
-- Verify against existing SQL Server records.
-- Return HTTP 200 with real history records, including failed AI requests.
-- Ensure pagination works.
-- Do not hide database errors by returning an empty list.
+### 7. Error Handling
+Handle missing ACS credentials, authentication failures, timeouts, throttling and delivery failures.
 
-## MANDATORY DEBUGGING AND VERIFICATION
+Never mark an email as SENT unless ACS confirms acceptance. Track delivery confirmation separately.
 
-1. First inspect existing code and identify the exact root cause of each issue.
-2. Identify which process is actually serving port 8000. Check the process command line and working directory.
-3. Ensure the running server is using the latest modified code. Restart only the verified project server when necessary. Do not kill unrelated processes.
-4. Confirm the application is connected to the intended `PeopleConnect_Dev` SQL Server database.
-5. Do not modify Arun's lifecycle code, tables, schemas, or existing records.
-6. Modify only Praveen-owned AI/API components and related tests.
-7. Preserve JWT authentication, RBAC, IBU scoping, and existing working APIs.
-8. Use `py -m` instead of `python` on this Tech Mahindra Windows system.
-9. Use `requirements-lock.txt` as the dependency source, not the outdated `requirements.txt`. Do not unnecessarily reinstall packages.
-10. Azure credentials are NOT available. Do not invent credentials, hardcode secrets, or claim live Azure integration was tested.
-11. Use mocks only for isolated automated tests, never to fabricate successful Swagger responses.
-12. Run regression tests and verify HTTP status codes and response bodies against the actual running application.
-13. For AI History, verify the real SQL Server records are returned.
-14. Verify that failed AI operations are correctly recorded in AI History.
-15. Do not perform unnecessary database migrations or create duplicate APIs.
+### 8. Testing
+Perform offline tests using controlled provider mocks.
 
-## REQUIRED FINAL OUTPUT
+Verify:
+- API authentication and authorization.
+- Email payload generation.
+- Retry behaviour.
+- Reminder scheduling.
+- Duplicate prevention.
+- Delivery status persistence.
+- Existing backend regression tests.
 
-Provide a concise verification table containing:
+Live ACS testing can remain pending until Tech Mahindra provides credentials.
 
-- API method and URL
-- Exact root cause
-- Files and code paths changed
-- Automated test results
-- Actual HTTP status from the running backend
-- Actual response body (without secrets)
-- SQL Server verification results
-- Remaining limitations
+## Final Report
+Provide:
+1. Existing functionality reused.
+2. New functionality implemented.
+3. Files modified.
+4. APIs added or modified.
+5. Tests executed and results.
+6. ACS configuration requirements.
+7. Pending live integration tests.
 
-If any issue remains unresolved, explicitly mark it FAILED or BLOCKED and explain why.
+Do not modify unrelated modules.
 
-**STOP after fixing and verifying these three issues. Do not start Phase 4. Do not claim COMPLETE without evidence from the running backend.**
+Do not report production readiness without successful live provider verification.
+
+## Deferred Issues
+The following Phase 3 issues are intentionally deferred until final project testing:
+- Extract Actions: HTTP 422 instead of expected 503.
+- Generate Insights: HTTP 201 with FAILED response.
+- AI History: HTTP 500.
+
+Do not attempt to fix these during Phase 4.
