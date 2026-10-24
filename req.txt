@@ -1,11 +1,24 @@
-Verify regression impact of the T003-4 atomic transaction fix.
+# PEOPLECONNECT — T003-4 ACTION HISTORY API BUG FIX
 
-Read the PRD, Task Breakdown Excel and UI reference images from the source document folder. Use them as the source of truth, not assumptions.
+Fix the confirmed HTTP 500 error in:
 
-Check publish_minutes, extract_actions, update_action and close_connect for transaction correctness, rollback safety, history persistence and unchanged API contracts.
+GET /api/v1/actions/{action_id}/history
 
-Run relevant existing regression tests using `py -m pytest`. Verify that business data and history entries commit together, and both roll back on failure. Check for duplicate history entries.
+Action ID: C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2
 
-Do not modify Arun's lifecycle code, Abhishek's authentication code or existing production data. Do not touch the deferred Phase 3 issues.
+Actual: HTTP 500 — "Failed to retrieve history".
 
-Report actual tests passed, failed and skipped, remaining risks, and whether any previously working functionality was affected. Do not claim production readiness without evidence.
+**Mandatory instructions:**
+
+1. Read the PRD, Task Breakdown Excel and UI reference images from the source document folder. These are the source of truth for API behavior and response structure. Do not invent requirements.
+2. Inspect the actual backend traceback and identify the exact root cause before changing code.
+3. Fix the action history API using the existing MS SQL Server `PeopleConnect_Dev` database and `change_history` table.
+4. Handle nullable fields and actions with no history correctly. Return HTTP 200 with an empty history list when appropriate.
+5. Preserve RBAC, IBU scoping, pagination and append-only history behavior.
+6. Do not modify Arun's lifecycle code/tables or Abhishek's authentication code.
+7. Do not modify the working Connect History API or unrelated functionality.
+8. Use `py -m` for all Python commands.
+9. Run focused tests and regression tests. Do not modify tests merely to hide defects.
+10. Do not touch deferred Phase 3 issues.
+
+Implement the fix now. Report the root cause, exact files changed, test results and remaining limitations. Do not claim Swagger success without an actual API response.
