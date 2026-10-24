@@ -1,16 +1,85 @@
-Fix the backend startup error in `app/models/action_models.py`, line 25.
+# PEOPLECONNECT — T003-1: FIX ACTION CREATION HTTP 500
 
-Error: `SyntaxError: positional argument follows keyword argument`.
+## Objective
+Fix `POST /api/v1/actions` returning HTTP 500 during manual Swagger testing.
 
-Correct the SQLAlchemy `Column()` argument ordering while preserving the existing database schema and foreign key.
+**Actual backend error:**
+```text
+Foreign key associated with column 'pm_actions.connect_id'
+could not find table 'dbo.plan_connect_initiations'
+```
 
-**Mandatory rules:**
-- Modify only Praveen's code.
-- Do not modify Arun's lifecycle code or tables.
-- Do not change or recreate SQL Server tables.
-- Preserve all existing APIs, RBAC, IBU scoping and history tracking.
-- Use `py -m` for every Python command. Never use `python` or `python -m`.
-- Verify syntax and imports, then start the backend using `py -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
-- Do not claim success unless the backend actually starts without errors.
+## Tasks
 
-Fix this issue only. Report the exact changes and startup result.
+1. Inspect `app/models/action_models.py`, SQLAlchemy Base, metadata registration, model imports, and existing lifecycle mappings.
+2. Identify and fix the foreign key metadata resolution issue correctly.
+3. Reuse existing Arun lifecycle table definitions where possible, without modifying them.
+4. Preserve `dbo.pm_actions` with all 17 existing columns.
+5. Do not remove database foreign key constraints or bypass business validation to hide the error.
+6. Verify both:
+   - Standalone action creation with `connect_id = null`.
+   - Connect-linked action creation with a valid existing Connect ID.
+7. Ensure T003-4 change history and action creation use one atomic database transaction.
+8. Verify existing PUT action update functionality remains unaffected.
+9. Run focused tests and verify FastAPI starts without errors.
+10. Report the exact root cause, changed files, commands executed, and actual test results.
+
+## MANDATORY RULES — STRICTLY FOLLOW
+
+**1. PYTHON COMMANDS — HIGHEST PRIORITY**
+
+This is the Tech Mahindra Windows environment.
+
+- ALWAYS use `py -m` for Python module execution.
+- NEVER use `python`, `python -m`, or `python3`.
+- Examples:
+  - `py -m pytest`
+  - `py -m pip install`
+  - `py -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
+  - `py -m compileall app`
+- Do not switch Python interpreters or create environments without permission.
+
+**2. ARUN'S CODE AND TABLES — STRICTLY READ-ONLY**
+
+- Work ONLY on Praveen's assigned Module 3 code.
+- DO NOT modify Arun's lifecycle source files, SQLAlchemy models, migrations, tables, constraints, indexes, or data.
+- DO NOT create duplicate lifecycle tables or mappings.
+- DO NOT execute INSERT, UPDATE, DELETE, ALTER, DROP, or TRUNCATE against Arun-owned tables.
+- Reading Arun's existing tables and model definitions for integration is allowed.
+- If the fix requires changing Arun-owned code or schema, STOP and report the blocker instead of making the change.
+
+**3. DATABASE SAFETY**
+
+- Database: `PeopleConnect_Dev` (Microsoft SQL Server).
+- Preserve existing data and schemas.
+- Do not recreate `dbo.pm_actions`.
+- Do not execute destructive migrations.
+- Do not change database constraints without approval.
+- Do not create unnecessary tables or duplicate models.
+
+**4. API AND SECURITY**
+
+- Preserve existing JWT authentication.
+- Preserve RBAC, action ownership checks, and IBU-based authorization.
+- Preserve existing API request and response contracts.
+- Do not modify unrelated APIs.
+- Do not introduce mock data into production code.
+- Maintain proper transaction rollback on failures.
+
+**5. TESTING AND REPORTING**
+
+- Use `py -m` for ALL Python commands.
+- Test the actual affected code, including SQLAlchemy metadata resolution.
+- Confirm backend startup using the correct command.
+- Run relevant regression tests.
+- Do not claim production readiness from unit tests alone.
+- Do not claim Swagger testing passed. I will manually verify the API in Swagger.
+- Do not mark T003-1 COMPLETE until the actual endpoint succeeds.
+
+## Expected Result
+
+`POST /api/v1/actions` should create an action successfully without SQLAlchemy foreign key metadata errors.
+
+The action must persist in `dbo.pm_actions`, with its T003-4 history record saved atomically.
+
+**IMPORTANT: Fix only the actual problem. Do not modify Arun's lifecycle implementation or unrelated PeopleConnect functionality.**
