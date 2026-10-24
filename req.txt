@@ -1,1 +1,23 @@
-py -m pytest tests\test_task_5_6_implementation.py::TestTask56SchedulerJobs::test_scheduler_jobs_registered -vv --tb=short
+Fix the confirmed Task 6 Python syntax error.
+
+File: `backend/app/tasks/reminder_tasks.py`, line 81.
+
+Error: `SyntaxError: 'await' outside async function`.
+
+Review all three scheduled jobs and correct async/sync execution consistently with APScheduler and the existing NotificationService. Do not merely remove `await` or suppress the error.
+
+Mandatory:
+- Work ONLY on Praveen's Task 6.
+- Preserve approved PRD, Task Breakdown, FR-14 and UI requirements.
+- Do not modify Arun's lifecycle code/tables or Abhishek's authentication.
+- Use actual `PeopleConnect_Dev` SQL Server data.
+- Create and verify SQL Server migrations if genuinely required.
+- Use `py -m` on Tech Mahindra Windows.
+- Do not touch the deferred Phase 3 issues.
+- Preserve existing notification APIs and business logic.
+
+First verify Python syntax and imports, then run:
+
+`py -m pytest tests\test_task_5_6_implementation.py -q -ra`
+
+Report actual test results and any remaining failures. Do not claim completion unless all 14 tests pass and scheduler startup succeeds.
