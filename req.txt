@@ -1,102 +1,225 @@
-# PEOPLECONNECT — COMPLETE PRAVEEN TASK IMPLEMENTATION AUDIT
+# PEOPLECONNECT — T003-3: CONNECT CLOSURE CONTROL & WORKFLOW
 
-Perform a complete TASK-WISE implementation verification of the PeopleConnect project.
+## OBJECTIVE
 
-## MANDATORY INSTRUCTIONS
+Complete Praveen's assigned task **T003-3: Connect Closure Control & Workflow**, strictly according to the original project requirements.
 
-1. First locate and read the original Task Breakdown Excel from the **Source Documents** folder. Do not rely on previous Claude summaries.
-2. Read the complete ownership column. Include EVERY task assigned to **Praveen** in T002 and T003, including **AI Output Generation Integration Point** and Testing and Bug Fixing.
-3. Use the approved PRD, FR-01 to FR-28, Task Breakdown Excel, and original UI reference screenshots from Source Documents.
-4. **All API designs and API contracts must match the original UI screenshots**, including every button, field, filter, action, workflow, and reporting requirement. Identify missing or mismatched APIs.
-5. Audit ONLY Praveen's assigned tasks. Do not count Arun Kumar's or Abhishek's tasks as Praveen's.
-6. Do NOT modify Arun's lifecycle code or his nine tables. Do NOT modify Abhishek's authentication code.
-7. Use existing canonical lifecycle data and one MS SQL Server database: `PeopleConnect_Dev`.
-8. Preserve JWT, RBAC, BHR/BHR Leader permissions, and IBU scoping.
-9. Use `py -m` for all Python commands on Tech Mahindra Windows; NEVER `python` or `python -m`.
-10. Inspect real code, registered FastAPI routes, Swagger/OpenAPI, services, SQL Server tables, migrations, and tests.
-11. Do not assume an API is implemented simply because Swagger shows it.
-12. Mark a task COMPLETE only with sufficient working implementation and verification evidence. Otherwise mark PARTIAL, PENDING, BLOCKED, or NOT VERIFIED.
-13. If Praveen's assigned functionality requires additional tables, report which tables are missing. Create them later through safe migrations only when implementation is explicitly authorized. Never duplicate existing tables.
-14. Do not implement any functionality during this audit. **Verification only.**
-15. Keep previously deferred Phase 3 API issues separate and do not fix them now.
-16. Azure OpenAI and ACS live testing remains pending until credentials are available. Do not call untested integrations production-ready.
-17. Do not create another 36-hour implementation plan. Perform the actual task-by-task verification now.
+This is an actual implementation task, not just an analysis or planning exercise.
 
-## VERIFICATION PROCESS
+**IMPORTANT: Do not implement functionality based on assumptions, invented API routes, suggested business rules, or generic industry practices. The approved project documents are the only source of truth for functional requirements.**
 
-### Step 1 — Read Source Documents
+## 1. MANDATORY SOURCE DOCUMENT VERIFICATION
 
-Locate and inspect:
-- Original Task Breakdown Excel
-- Approved PRD and functional requirements
-- UI reference screenshots
-- Existing API specifications, where available
+Before modifying any code, read and analyze:
 
-Extract every Praveen-owned task, preserving its exact original task name, description, owner, workstream, and row identifier.
+1. The original Task Breakdown Excel inside `Source_document/` (or the actual source documents directory).
+2. The complete approved PeopleConnect PRD, including FR-01 through FR-28.
+3. All relevant original UI reference images inside `UI/`.
+4. Existing backend APIs, schemas, services, models, and registered Swagger/OpenAPI routes.
+5. The actual Microsoft SQL Server schema in `PeopleConnect_Dev`.
 
-Explicitly verify the ownership of **AI Output Generation Integration Point** and T002 Testing and Bug Fixing.
+Identify the exact T003-3 task description, assigned owner, functional requirements, dependencies, and expected UI behavior.
 
-### Step 2 — Verify Existing Implementation
+Do not rely exclusively on previous Claude reports or summaries.
 
-For each Praveen-assigned task, inspect:
-- Actual backend code and functional logic
-- Full API methods and endpoint paths
-- Whether each API is registered in Swagger
-- Request/response schemas against the UI
-- Required database tables and columns
-- Correct SQL Server persistence and retrieval
-- Access permissions and validation
-- Unit/integration test results
-- Manual Swagger verification evidence
+If the documents contradict any instruction or example in this prompt, follow the approved documents for functional behavior while preserving the ownership and safety restrictions below.
 
-Classify the task as COMPLETE, PARTIAL, PENDING, BLOCKED, or NOT VERIFIED.
+If a required document cannot be found or a UI detail cannot be read, report that specific gap. Do not invent the missing requirement.
 
-### Step 3 — Identify Missing Functionality
+## 2. STRICT TASK OWNERSHIP
 
-For EVERY incomplete Praveen task, document:
-- Exactly what is already implemented
-- What functionality is missing
-- Missing or incompatible APIs
-- Missing tables or migrations
-- UI workflows not supported
-- Untested or failing functionality
-- Dependencies on existing Arun lifecycle data
+- All 12 T003 task rows belong to Praveen, as identified in the Task Breakdown.
+- Praveen also owns the T002 AI Output Generation Integration Point and the assigned T002 Testing & Bug Fixing task.
+- Work ONLY on **Praveen's T003-3** during this execution.
+- Do not implement other Praveen tasks prematurely.
+- Do NOT modify, rebuild, replace, or delete Arun's lifecycle code, APIs, models, or nine lifecycle tables.
+- Do NOT modify Abhishek's authentication code.
+- Reuse Arun's existing lifecycle functionality and canonical data wherever T003-3 requires integration.
+- Do not create duplicate lifecycle tables or competing lifecycle implementations.
+- Preserve existing JWT authentication, RBAC, BHR/BHR Leader permissions, IBU-based access controls, and audit requirements.
 
-Pay special attention to AI output generation, actions, notifications, reminders, dashboards, reporting, theme analysis, and administration.
+## 3. MANDATORY UI-FIRST API DESIGN
 
-### Step 4 — Final Task Completion Report
+**This rule is compulsory for every implementation decision.**
 
-Provide this exact table:
+Study the original UI screenshots associated with T003-3.
 
-| Task No. | T002/T003 | Task Name | Assigned To | Implementation Status | Existing APIs | Missing APIs/Features | Database Status | Testing Status |
-|---|---|---|---|---|---|---|---|---|
+Identify:
 
-Then provide:
+- Every relevant screen and navigation flow.
+- Buttons and user actions.
+- Required input fields and validations.
+- Status indicators and displayed information.
+- Confirmation flows and error messages.
+- Data needed from existing backend services.
 
-**TOTAL PRAVEEN TASKS:** X  
-**COMPLETE:** X  
-**PARTIAL:** X  
-**PENDING:** X  
-**BLOCKED:** X  
-**NOT VERIFIED:** X  
+For each UI requirement, determine whether an existing API already supports it.
 
-Counts must match the exact Excel ownership rows.
+**Design APIs and request/response contracts strictly according to the original UI requirements and PRD.**
 
-Finally provide:
+Do not invent endpoint names, HTTP methods, extra UI options, statuses, filters, or business rules.
 
-1. Complete list of implemented Praveen tasks with code/API evidence.
-2. Complete list of pending and partially implemented tasks.
-3. Missing Swagger endpoints required by the original UI screenshots.
-4. Database gaps.
-5. Deferred issues.
-6. **The exact next Praveen-assigned task to work on**, based on dependencies.
+Reuse or extend existing Praveen-owned APIs where appropriate. Create new APIs only when genuinely necessary.
 
-## IMPORTANT
+Do not modify frontend code.
 
-We are moving **TASK-WISE, NOT PHASE-WISE**.
+## 4. IMPLEMENT T003-3 ACCORDING TO THE SOURCE DOCUMENTS
 
-Do not modify code or database during verification.
+Read the exact T003-3 scope from the Task Breakdown and implement all of its applicable requirements.
 
-Do not claim 100% completion without implementation and testing evidence.
+Verify and implement, only where explicitly supported by the PRD and UI:
 
-Finish with the complete task matrix and exact implementation counts, not just a summary or future plan.
+- Connect closure eligibility and validation.
+- Dependencies between Connect closure and associated actions.
+- Required authorization and approval controls.
+- Closure workflow integration with existing lifecycle functionality.
+- Required auditability and historical tracking.
+- Required UI-facing status and validation responses.
+- Any other functionality explicitly assigned under T003-3.
+
+Use the exact action statuses, Connect statuses, closure rules, permissions, and validation criteria documented in the approved requirements.
+
+Do not assume that all actions must have a particular status unless the approved business rules require it.
+
+Do not change Arun's lifecycle transition logic. If an integration requires a change within Arun-owned code, identify the exact dependency and report it as BLOCKED rather than changing his implementation.
+
+**Do not silently skip any T003-3 requirement.**
+
+## 5. SQL SERVER IMPLEMENTATION — MANDATORY
+
+Database: **Microsoft SQL Server — `PeopleConnect_Dev`**
+
+Before implementing database logic:
+
+1. Inspect existing tables and actual column definitions.
+2. Identify which existing tables support T003-3.
+3. Reuse existing Praveen-owned tables and authorized Arun lifecycle data.
+4. Identify any genuinely missing Praveen-owned database structures.
+
+If additional tables, columns, indexes, or constraints are necessary for Praveen's T003-3 requirements:
+
+- Create appropriate SQLAlchemy models where needed.
+- Create safe, SQL Server-compatible migrations.
+- Execute migrations against the correct development database.
+- Verify that required tables and columns physically exist.
+- Verify the corresponding APIs work with real SQL Server records.
+- Preserve all existing data.
+
+Never modify Arun-owned lifecycle tables or invent duplicate lifecycle structures.
+
+**Creating only Python models without creating required SQL Server tables is NOT acceptable.**
+
+## 6. IMPLEMENTATION QUALITY
+
+- Preserve the existing single-backend architecture.
+- Reuse existing services, APIs, dependencies, and database sessions.
+- Preserve `requirements-lock.txt` unless a justified dependency change is required.
+- No fake API responses, hardcoded success results, mock production data, or placeholder business logic.
+- No unnecessary public endpoints.
+- No unrelated refactoring.
+- Protect existing actions, notifications, reminders, AI output generation, history, and reporting functionality.
+- Ensure errors and status responses are consistent with actual business outcomes.
+- Follow the established transaction and audit patterns.
+
+## 7. TECH MAHINDRA WINDOWS ENVIRONMENT
+
+Use **`py -m`** for all Python commands.
+
+Examples:
+
+- `py -m pytest`
+- `py -m pip`
+- `py -m uvicorn`
+
+Never use `python` or `python -m`.
+
+## 8. ACTUAL VERIFICATION
+
+After implementation:
+
+1. Verify all applicable T003-3 requirements against the Task Breakdown and PRD.
+2. Confirm every required API is registered in Swagger/OpenAPI.
+3. Verify API request and response schemas against relevant UI screenshots.
+4. Run focused automated tests and relevant regression tests.
+5. Verify SQL Server queries, relationships, and persistence.
+6. Test authorized and unauthorized access.
+7. Check the required closure validations and audit behavior.
+8. Ensure unrelated APIs remain functional.
+9. Clearly separate mocked test evidence from actual SQL Server integration evidence.
+
+Use rollback-safe test data. Do not destructively modify existing business records.
+
+Do not claim successful manual Swagger testing unless it was actually performed.
+
+## 9. PRESERVE DEFERRED ISSUES
+
+Do not investigate or modify these previously deferred issues:
+
+- Extract Actions returning HTTP 422.
+- Generate Insights returning HTTP 201 with FAILED status.
+- AI History returning HTTP 500.
+
+These will be addressed during final project testing.
+
+Live Azure OpenAI and ACS verification remains pending until credentials are available.
+
+## 10. MANDATORY FINAL REPORT
+
+Provide:
+
+**A. Source Verification**
+- Exact Task Breakdown row and description.
+- Confirmed Praveen ownership.
+- Applicable FR references.
+- Relevant UI screenshot filenames.
+
+**B. Requirement-to-Implementation Matrix**
+
+Task Requirement | UI Reference | API/Service | SQL Server Table | Implementation Status | Testing Evidence
+
+**C. Actual Code Changes**
+- Files created.
+- Files modified.
+- Existing APIs reused.
+- New APIs introduced, with justification.
+
+**D. Database Verification**
+- Existing tables reused.
+- New structures created, if required.
+- Migration execution results.
+- SQL Server schema verification.
+
+**E. Test Results**
+- Actual commands executed.
+- Passed, failed, and skipped test counts.
+- Remaining technical or integration issues.
+
+**F. Final Task Status**
+
+Classify T003-3 as one of:
+
+- COMPLETE — implemented and verified against available requirements.
+- PARTIAL — some requirements remain missing or unverified.
+- BLOCKED — an external ownership or infrastructure dependency prevents completion.
+
+Explain precisely why.
+
+## FINAL NON-NEGOTIABLE RULES
+
+**Source Documents → Exact Praveen Task → PRD Requirements → Original UI Images → Existing APIs → SQL Server Implementation → Testing.**
+
+No assumptions.
+
+No invented requirements.
+
+No missing assigned functionality.
+
+No modifications to Arun's or Abhishek's code.
+
+No unnecessary APIs.
+
+No missing SQL Server migrations.
+
+No false completion claims.
+
+**Start implementing the verified missing T003-3 functionality now. Do not stop after generating another implementation plan. Do not begin T003-4 or any other task.**
