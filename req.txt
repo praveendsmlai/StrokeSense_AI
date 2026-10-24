@@ -1,27 +1,11 @@
-# PEOPLECONNECT — T003-4: MISSING CLOSED HISTORY EVENT FIX
+Verify regression impact of the T003-4 atomic transaction fix.
 
-Fix the confirmed integration defect.
+Read the PRD, Task Breakdown Excel and UI reference images from the source document folder. Use them as the source of truth, not assumptions.
 
-**Evidence:**
-- `PC-00002` was successfully closed through `PUT /api/v1/connects/{connect_id}/close`.
-- SQL Server confirms `plan_connect_initiations.status = 'CLOSED'`.
-- However, `dbo.change_history` contains zero records for `plan_connect_id = 'PC-00002' AND event_type = 'CLOSED'`.
+Check publish_minutes, extract_actions, update_action and close_connect for transaction correctness, rollback safety, history persistence and unchanged API contracts.
 
-**Instructions:**
-1. Inspect `connect_closure_endpoints.py`, `history_service.py`, actual database schema and existing tests.
-2. Identify why a successful Connect closure did not persist its history event.
-3. Implement reliable, transactionally consistent history recording for successful closures, using the event type defined in the existing schema.
-4. Record the real authenticated user, closure reason, Connect ID, previous status, new status and timestamp as supported by the PRD and existing schema.
-5. Never create closure history for a failed or blocked closure.
-6. Prevent duplicate closure events on repeated requests.
-7. Add regression tests and verify the actual SQL Server persistence behavior. Do not insert fabricated audit events to pass verification.
+Run relevant existing regression tests using `py -m pytest`. Verify that business data and history entries commit together, and both roll back on failure. Check for duplicate history entries.
 
-**Mandatory Rules:**
-- Use PRD, source-folder Task Breakdown Excel, and original UI reference images as the authoritative sources for API design and behavior. Do not invent requirements or APIs.
-- Work only on Praveen's assigned tasks.
-- Do not modify Arun's lifecycle implementation or Abhishek's authentication implementation.
-- Preserve existing MS SQL Server data, JWT, RBAC and IBU scoping.
-- Use `py -m` for every Python command on Tech Mahindra Windows.
-- Do not touch deferred Phase 3 issues.
-- Do not claim completion based only on unit tests; distinguish code verification from live Swagger/SQL verification.
-- Report exact files modified, root cause, test results and remaining gaps.
+Do not modify Arun's lifecycle code, Abhishek's authentication code or existing production data. Do not touch the deferred Phase 3 issues.
+
+Report actual tests passed, failed and skipped, remaining risks, and whether any previously working functionality was affected. Do not claim production readiness without evidence.
