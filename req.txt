@@ -1,225 +1,32 @@
-# PEOPLECONNECT — T003-3: CONNECT CLOSURE CONTROL & WORKFLOW
-
-## OBJECTIVE
-
-Complete Praveen's assigned task **T003-3: Connect Closure Control & Workflow**, strictly according to the original project requirements.
-
-This is an actual implementation task, not just an analysis or planning exercise.
-
-**IMPORTANT: Do not implement functionality based on assumptions, invented API routes, suggested business rules, or generic industry practices. The approved project documents are the only source of truth for functional requirements.**
-
-## 1. MANDATORY SOURCE DOCUMENT VERIFICATION
-
-Before modifying any code, read and analyze:
-
-1. The original Task Breakdown Excel inside `Source_document/` (or the actual source documents directory).
-2. The complete approved PeopleConnect PRD, including FR-01 through FR-28.
-3. All relevant original UI reference images inside `UI/`.
-4. Existing backend APIs, schemas, services, models, and registered Swagger/OpenAPI routes.
-5. The actual Microsoft SQL Server schema in `PeopleConnect_Dev`.
-
-Identify the exact T003-3 task description, assigned owner, functional requirements, dependencies, and expected UI behavior.
-
-Do not rely exclusively on previous Claude reports or summaries.
-
-If the documents contradict any instruction or example in this prompt, follow the approved documents for functional behavior while preserving the ownership and safety restrictions below.
-
-If a required document cannot be found or a UI detail cannot be read, report that specific gap. Do not invent the missing requirement.
-
-## 2. STRICT TASK OWNERSHIP
-
-- All 12 T003 task rows belong to Praveen, as identified in the Task Breakdown.
-- Praveen also owns the T002 AI Output Generation Integration Point and the assigned T002 Testing & Bug Fixing task.
-- Work ONLY on **Praveen's T003-3** during this execution.
-- Do not implement other Praveen tasks prematurely.
-- Do NOT modify, rebuild, replace, or delete Arun's lifecycle code, APIs, models, or nine lifecycle tables.
-- Do NOT modify Abhishek's authentication code.
-- Reuse Arun's existing lifecycle functionality and canonical data wherever T003-3 requires integration.
-- Do not create duplicate lifecycle tables or competing lifecycle implementations.
-- Preserve existing JWT authentication, RBAC, BHR/BHR Leader permissions, IBU-based access controls, and audit requirements.
-
-## 3. MANDATORY UI-FIRST API DESIGN
-
-**This rule is compulsory for every implementation decision.**
-
-Study the original UI screenshots associated with T003-3.
-
-Identify:
-
-- Every relevant screen and navigation flow.
-- Buttons and user actions.
-- Required input fields and validations.
-- Status indicators and displayed information.
-- Confirmation flows and error messages.
-- Data needed from existing backend services.
-
-For each UI requirement, determine whether an existing API already supports it.
-
-**Design APIs and request/response contracts strictly according to the original UI requirements and PRD.**
-
-Do not invent endpoint names, HTTP methods, extra UI options, statuses, filters, or business rules.
-
-Reuse or extend existing Praveen-owned APIs where appropriate. Create new APIs only when genuinely necessary.
-
-Do not modify frontend code.
-
-## 4. IMPLEMENT T003-3 ACCORDING TO THE SOURCE DOCUMENTS
-
-Read the exact T003-3 scope from the Task Breakdown and implement all of its applicable requirements.
-
-Verify and implement, only where explicitly supported by the PRD and UI:
-
-- Connect closure eligibility and validation.
-- Dependencies between Connect closure and associated actions.
-- Required authorization and approval controls.
-- Closure workflow integration with existing lifecycle functionality.
-- Required auditability and historical tracking.
-- Required UI-facing status and validation responses.
-- Any other functionality explicitly assigned under T003-3.
-
-Use the exact action statuses, Connect statuses, closure rules, permissions, and validation criteria documented in the approved requirements.
-
-Do not assume that all actions must have a particular status unless the approved business rules require it.
-
-Do not change Arun's lifecycle transition logic. If an integration requires a change within Arun-owned code, identify the exact dependency and report it as BLOCKED rather than changing his implementation.
-
-**Do not silently skip any T003-3 requirement.**
-
-## 5. SQL SERVER IMPLEMENTATION — MANDATORY
-
-Database: **Microsoft SQL Server — `PeopleConnect_Dev`**
-
-Before implementing database logic:
-
-1. Inspect existing tables and actual column definitions.
-2. Identify which existing tables support T003-3.
-3. Reuse existing Praveen-owned tables and authorized Arun lifecycle data.
-4. Identify any genuinely missing Praveen-owned database structures.
-
-If additional tables, columns, indexes, or constraints are necessary for Praveen's T003-3 requirements:
-
-- Create appropriate SQLAlchemy models where needed.
-- Create safe, SQL Server-compatible migrations.
-- Execute migrations against the correct development database.
-- Verify that required tables and columns physically exist.
-- Verify the corresponding APIs work with real SQL Server records.
-- Preserve all existing data.
-
-Never modify Arun-owned lifecycle tables or invent duplicate lifecycle structures.
-
-**Creating only Python models without creating required SQL Server tables is NOT acceptable.**
-
-## 6. IMPLEMENTATION QUALITY
-
-- Preserve the existing single-backend architecture.
-- Reuse existing services, APIs, dependencies, and database sessions.
-- Preserve `requirements-lock.txt` unless a justified dependency change is required.
-- No fake API responses, hardcoded success results, mock production data, or placeholder business logic.
-- No unnecessary public endpoints.
-- No unrelated refactoring.
-- Protect existing actions, notifications, reminders, AI output generation, history, and reporting functionality.
-- Ensure errors and status responses are consistent with actual business outcomes.
-- Follow the established transaction and audit patterns.
-
-## 7. TECH MAHINDRA WINDOWS ENVIRONMENT
-
-Use **`py -m`** for all Python commands.
-
-Examples:
-
-- `py -m pytest`
-- `py -m pip`
-- `py -m uvicorn`
-
-Never use `python` or `python -m`.
-
-## 8. ACTUAL VERIFICATION
-
-After implementation:
-
-1. Verify all applicable T003-3 requirements against the Task Breakdown and PRD.
-2. Confirm every required API is registered in Swagger/OpenAPI.
-3. Verify API request and response schemas against relevant UI screenshots.
-4. Run focused automated tests and relevant regression tests.
-5. Verify SQL Server queries, relationships, and persistence.
-6. Test authorized and unauthorized access.
-7. Check the required closure validations and audit behavior.
-8. Ensure unrelated APIs remain functional.
-9. Clearly separate mocked test evidence from actual SQL Server integration evidence.
-
-Use rollback-safe test data. Do not destructively modify existing business records.
-
-Do not claim successful manual Swagger testing unless it was actually performed.
-
-## 9. PRESERVE DEFERRED ISSUES
-
-Do not investigate or modify these previously deferred issues:
-
-- Extract Actions returning HTTP 422.
-- Generate Insights returning HTTP 201 with FAILED status.
-- AI History returning HTTP 500.
-
-These will be addressed during final project testing.
-
-Live Azure OpenAI and ACS verification remains pending until credentials are available.
-
-## 10. MANDATORY FINAL REPORT
-
-Provide:
-
-**A. Source Verification**
-- Exact Task Breakdown row and description.
-- Confirmed Praveen ownership.
-- Applicable FR references.
-- Relevant UI screenshot filenames.
-
-**B. Requirement-to-Implementation Matrix**
-
-Task Requirement | UI Reference | API/Service | SQL Server Table | Implementation Status | Testing Evidence
-
-**C. Actual Code Changes**
-- Files created.
-- Files modified.
-- Existing APIs reused.
-- New APIs introduced, with justification.
-
-**D. Database Verification**
-- Existing tables reused.
-- New structures created, if required.
-- Migration execution results.
-- SQL Server schema verification.
-
-**E. Test Results**
-- Actual commands executed.
-- Passed, failed, and skipped test counts.
-- Remaining technical or integration issues.
-
-**F. Final Task Status**
-
-Classify T003-3 as one of:
-
-- COMPLETE — implemented and verified against available requirements.
-- PARTIAL — some requirements remain missing or unverified.
-- BLOCKED — an external ownership or infrastructure dependency prevents completion.
-
-Explain precisely why.
-
-## FINAL NON-NEGOTIABLE RULES
-
-**Source Documents → Exact Praveen Task → PRD Requirements → Original UI Images → Existing APIs → SQL Server Implementation → Testing.**
-
-No assumptions.
-
-No invented requirements.
-
-No missing assigned functionality.
-
-No modifications to Arun's or Abhishek's code.
-
-No unnecessary APIs.
-
-No missing SQL Server migrations.
-
-No false completion claims.
-
-**Start implementing the verified missing T003-3 functionality now. Do not stop after generating another implementation plan. Do not begin T003-4 or any other task.**
+# PEOPLECONNECT — T003-3 CLOSURE STATUS API BUG FIX
+
+Fix the confirmed HTTP 500 error in:
+
+GET /api/v1/connects/{connect_id}/closure-status
+
+**Confirmed traceback:**
+- File: backend/app/api/connect_closure_endpoints.py
+- Line 136: `PendingAction(**action)`
+- Pydantic validation fails because `owner_employee_id=None`, but the response schema expects a string.
+
+**Required implementation:**
+1. Inspect the actual API implementation and Pydantic schemas.
+2. Allow nullable owner fields in the response schema wherever the SQL Server database permits NULL.
+3. Do not insert fake employee IDs or modify existing action records.
+4. Ensure actions with missing owners are still counted as pending and block closure.
+5. Verify using existing connect `PC-00001`, which has an `IN_PROGRESS` action with NULL owner fields.
+6. Add regression tests for NULL owner fields and closure blocking.
+7. Run relevant tests and verify the endpoint through the existing FastAPI application.
+8. Report actual results, including any remaining failures.
+
+**MANDATORY RULES:**
+- Use the approved PRD, Task Breakdown Excel, and original UI reference screenshots from the source documents folder as the source of truth for requirements, API contracts, and behavior. Do not substitute your own assumptions or design suggestions.
+- Work only on Praveen's assigned implementation.
+- Do not modify Arun's lifecycle code or nine lifecycle tables.
+- Do not modify Abhishek's authentication implementation.
+- Preserve existing SQL Server data in `PeopleConnect_Dev`.
+- Preserve existing JWT, RBAC, and IBU scoping.
+- Use `py -m` for Python commands on Tech Mahindra Windows.
+- Do not touch the three deferred Phase 3 issues.
+- Implement the fix, not just a plan.
+- Do not claim completion without test evidence.
