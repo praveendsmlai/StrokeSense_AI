@@ -1,15 +1,132 @@
-Fix the Phase 4 SQL Server database schema issue.
+# PEOPLECONNECT — PHASE 4 SCOPE VERIFICATION & GAP COMPLETION
 
-GET /api/v1/notification-preferences returns HTTP 500 because dbo.notification_preferences does not exist in PeopleConnect_Dev.
+**Objective:** Verify the existing Phase 4 Azure Communication Services (ACS) notification implementation against Praveen's assigned tasks, approved PRD, Task Breakdown Excel, and UI screenshots. Fix only confirmed gaps within Praveen's scope.
 
-1. Inspect existing notification models and database configuration.
-2. Identify all Phase 4 notification tables missing from SQL Server.
-3. Create a safe, SQL Server-compatible migration for only the missing notification tables, matching the existing models exactly.
-4. Preserve existing records and avoid duplicate table creation.
-5. Do not modify Arun's 9 lifecycle tables, models, or APIs.
-6. Do not modify unrelated Module 3 tables.
-7. Use `py -m` instead of `python` on Windows.
-8. Run database and API verification using the actual PeopleConnect_Dev SQL Server database.
-9. Do not report success unless the tables exist and GET /api/v1/notification-preferences returns HTTP 200.
+## 1. Mandatory Source Documents
 
-Show the SQL changes, migration results, and actual API response.
+Before making any code changes, inspect:
+
+- `Source_document/` — PRD, FR-01–FR-28 requirements and Task Breakdown Excel.
+- `UI/` — all relevant approved UI screenshots.
+- Existing backend APIs, SQLAlchemy models, services, migrations and configuration.
+- Existing MS SQL Server database `PeopleConnect_Dev`.
+
+Identify Praveen's 12 assigned tasks from the Task Breakdown. Do not assume ownership from API names.
+
+## 2. Strict Ownership Rules
+
+- Work ONLY on Praveen's assigned tasks, including his authorized integration points.
+- DO NOT develop, modify, recreate or replace Arun's lifecycle modules, APIs, tables, models or business logic.
+- DO NOT modify Abhishek's authentication module.
+- Use Arun's existing lifecycle tables as the source of truth when Praveen's functionality needs Connect or participant information.
+- Do not create duplicate lifecycle tables or unnecessary adapter layers.
+- Preserve existing data, JWT authentication, RBAC and IBU-level authorization.
+- Do not implement frontend changes.
+
+## 3. UI-to-API Compliance Audit
+
+For every Phase 4 notification requirement within Praveen's scope:
+
+1. Identify the relevant PRD/Task Breakdown requirement.
+2. Identify the corresponding approved UI screen, field, button or workflow.
+3. Identify the existing backend API and request/response contract.
+4. Verify that the API uses actual SQL Server data.
+5. Identify missing, mismatched or unnecessary functionality.
+6. Reuse existing APIs wherever possible.
+7. Implement only confirmed missing functionality.
+
+Do not invent additional features or APIs without requirement evidence.
+
+## 4. Verify Phase 4 Functionality
+
+Audit the following only where required by Praveen's assigned tasks and approved requirements:
+
+- Published minutes email notifications.
+- Action assignment and status notifications.
+- Upcoming action due-date reminders.
+- Overdue action reminders.
+- SLA breach notifications and escalations.
+- Recipient identification from real employee/participant/ownership data.
+- Notification preferences, if required.
+- Email templates and required business context.
+- Scheduler or background job mechanism for automatic reminders.
+- Idempotency and duplicate email prevention.
+- Retry handling and truthful delivery statuses.
+- Notification history, logging and audit trail.
+- Correct ACS email provider integration.
+
+**Important:** Verify whether reminders and escalations actually execute automatically. Merely having database fields or notification API endpoints does not count as implementation.
+
+## 5. SQL Server Verification
+
+Use the actual `PeopleConnect_Dev` database.
+
+Phase 4 currently has:
+
+- `dbo.email_notifications`
+- `dbo.notification_preferences`
+
+Verify these tables against the models and requirements.
+
+If any additional Praveen-owned tables or columns are genuinely required:
+
+- Create a safe SQL Server-compatible migration.
+- Execute and verify it against the development database.
+- Preserve existing data and schema.
+- Never modify Arun's lifecycle tables.
+- Do not report database completion without checking actual table existence.
+
+## 6. Azure Integration Rules
+
+- Use real ACS provider integration code.
+- Do not use mock delivery in production code.
+- Mocked providers are permitted only in isolated automated tests.
+- ACS credentials are not yet available for live testing.
+- Clearly distinguish notification record creation, ACS acceptance and confirmed delivery.
+- Do not mark an email as delivered without provider evidence.
+- Preserve existing ACS configuration and secure credential handling.
+
+## 7. Environment and Testing
+
+Tech Mahindra Windows environment:
+
+- Use `py -m` for Python commands.
+- Never use `python` or `python -m`.
+- Follow the existing `requirements-lock.txt`.
+- Do not introduce unnecessary dependencies.
+
+Run focused tests for all confirmed Phase 4 requirements.
+
+Verify actual SQL Server integration and API behavior. Do not claim that mocked unit tests prove live ACS delivery.
+
+## 8. Preserve Deferred Phase 3 Issues
+
+Do NOT investigate or fix these issues during this task:
+
+- Extract Actions returning HTTP 422 instead of appropriate provider-unavailable handling.
+- Generate Insights returning HTTP 201 with FAILED status.
+- AI History returning HTTP 500.
+
+These will be addressed during final project testing.
+
+## 9. Required Final Report
+
+Provide a precise report containing:
+
+1. Praveen-owned Phase 4 requirements identified from source documents.
+2. Requirement → UI screen → API → SQL Server table mapping.
+3. Already implemented and verified functionality.
+4. Missing functionality discovered.
+5. Exact changes made to Praveen-owned files.
+6. SQL Server migration and verification evidence.
+7. Automated test results.
+8. Items pending live Azure credentials.
+9. Any unresolved gaps.
+
+**Do not declare Phase 4 complete if required functionality remains missing.**
+
+**Do not modify Arun's or Abhishek's modules.**
+
+**Do not start Phase 5.**
+
+If source documents or UI screenshots cannot be accessed, explicitly list the missing evidence and mark affected mappings UNVERIFIED rather than inventing requirements.
