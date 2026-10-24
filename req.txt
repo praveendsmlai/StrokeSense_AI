@@ -1,17 +1,16 @@
-**T003-1 — SQL Server Migration Pending**
+Fix the backend startup error in `app/models/action_models.py`, line 25.
 
-Manual SSMS verification confirmed that `dbo.pm_actions` does not exist in `PeopleConnect_Dev` (0 columns returned).
+Error: `SyntaxError: positional argument follows keyword argument`.
 
-1. Inspect `migrations/003_create_pm_actions_table.sql`.
-2. Compare its 13 columns against the 16 columns specified in the PRD/Task Breakdown Excel. Resolve any missing required fields.
-3. Verify the migration is safe, non-destructive, and compatible with existing SQL Server tables.
-4. Apply the validated migration to `PeopleConnect_Dev` using the configured database connection.
-5. Verify that `dbo.pm_actions` exists and all required columns, constraints, and indexes are present.
-6. Do not modify Arun's lifecycle tables or existing `dbo.connect_actions` data.
-7. Do not claim completion without actual SQL Server verification.
+Correct the SQLAlchemy `Column()` argument ordering while preserving the existing database schema and foreign key.
 
-**MANDATORY:** Use `py -m` for all Python module commands on this Tech Mahindra Windows system. Never use `python` or `python -m`.
+**Mandatory rules:**
+- Modify only Praveen's code.
+- Do not modify Arun's lifecycle code or tables.
+- Do not change or recreate SQL Server tables.
+- Preserve all existing APIs, RBAC, IBU scoping and history tracking.
+- Use `py -m` for every Python command. Never use `python` or `python -m`.
+- Verify syntax and imports, then start the backend using `py -m uvicorn app.main:app --host 127.0.0.1 --port 8000`.
+- Do not claim success unless the backend actually starts without errors.
 
-Preserve existing APIs, RBAC, IBU scoping, atomic history tracking, and all other mandatory project rules.
-
-Report the actual database verification results.
+Fix this issue only. Report the exact changes and startup result.
