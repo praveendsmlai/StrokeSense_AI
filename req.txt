@@ -1,22 +1,123 @@
-Fix the confirmed HTTP status code issue in T003-3 Connect Closure API.
+# PEOPLECONNECT — T003-4: APPEND-ONLY CASE HISTORY
 
-**Mandatory Rules:**
-- Use the approved PRD, Task Breakdown Excel and original UI reference images as the source of truth for API design. Do not invent requirements or redesign APIs based on assumptions.
-- Work only on Praveen's assigned tasks.
-- Do not modify Arun's lifecycle implementation or tables, or Abhishek's authentication code.
-- Preserve SQL Server PeopleConnect_Dev data, existing APIs, RBAC and IBU scoping.
-- Use `py -m` for all Python commands.
-- Do not touch the deferred Phase 3 issues.
+## OBJECTIVE
 
-**Confirmed Issue:**
+Implement **T003-4 — Append-Only Case History** for Praveen's assigned PeopleConnect scope.
 
-PUT `/api/v1/connects/PC-00001/close` returns HTTP 200 with `success:false` when one action remains IN_PROGRESS.
+**Do not implement based on assumptions or your own proposed design. Follow the approved source documents and actual UI reference images.**
 
-**Required Correction:**
-1. Return HTTP 400 when pending actions prevent closure, with a clear error response listing the blocking actions.
-2. Preserve existing closure validation and success behavior.
-3. Do not modify database records during failed closure attempts.
-4. Add regression tests for blocked closure and correct HTTP status.
-5. Run the relevant tests and report actual results.
+## STEP 1 — MANDATORY SOURCE DOCUMENT REVIEW
 
-Implement the correction now. Do not claim success without verification.
+Before writing any code:
+
+1. Locate and read the approved PRD from the `source document` folder.
+2. Read the complete `PeopleConnect_Task_Breakdown_Plan.xlsx`.
+3. Identify the exact T003-4 row: **Append-Only Case History — Preserve chronological history of all Connect and action updates.**
+4. Read all applicable functional requirements, including relevant audit, action, lifecycle, history, access-control and reporting requirements.
+5. Locate and inspect the original PeopleConnect UI reference images.
+6. Identify every UI screen, history section, field, filter, timeline element and operation relevant to T003-4.
+7. Inspect the existing FastAPI routes, SQLAlchemy models, database tables, services and migrations.
+
+Treat the **approved PRD, Task Breakdown Excel and original UI images as the source of truth**.
+
+If the documents or UI images are unavailable or contradictory, report the exact gap. Do not invent requirements, fields, endpoints or workflow rules.
+
+## STEP 2 — IMPLEMENT T003-4
+
+Implement the complete append-only case history functionality as required by the source documents.
+
+The implementation must support the documented chronological history of Connect and action updates.
+
+Determine the following strictly from the PRD, Task Breakdown and UI references:
+
+- Which Connect and action events must be recorded.
+- Which actor, timestamp, old value, new value and contextual details must be stored.
+- How history entries are created during existing operations.
+- How historical information is retrieved through APIs.
+- How the UI expects history records, chronology, pagination and filters.
+- How authorized users access history within their permitted roles and IBU scope.
+- How historical records are protected against unauthorized modification or deletion.
+
+Inspect existing audit/history tables and services first. Reuse appropriate existing structures rather than creating duplicate history systems.
+
+**Append-only means historical events must remain immutable. Updating a current Connect or action must not overwrite its previous history entries.**
+
+Where required, record history atomically with the corresponding business transaction, so failed business operations do not leave misleading history entries.
+
+Preserve existing Connect/action APIs and their established contracts unless the approved documents and UI requirements explicitly justify a compatible change.
+
+## STEP 3 — API DESIGN BASED ON UI
+
+Design or correct the T003-4 APIs **only after mapping them against the actual UI reference images and PRD**.
+
+For each required UI operation, verify:
+
+- Correct HTTP method and route.
+- Request parameters and validation.
+- Response fields and data types.
+- Chronological ordering.
+- Pagination and filtering where specified.
+- Correct response codes and errors.
+- JWT authentication.
+- Role-based authorization and IBU-level data isolation.
+
+Do not create arbitrary endpoints merely because they seem useful.
+
+Do not return mock history or hardcoded data. APIs must retrieve actual persisted records from the configured MS SQL Server database.
+
+## STEP 4 — MANDATORY PROJECT RULES
+
+1. Work **ONLY on Praveen's assigned tasks**, specifically T003-4.
+2. Do not modify Arun's lifecycle implementation, nine lifecycle tables, or their existing business logic.
+3. Do not modify Abhishek's authentication implementation.
+4. Reuse existing canonical data and services through permitted integration points; do not introduce unnecessary adapters or a separate service.
+5. Use the existing **PeopleConnect_Dev MS SQL Server database**. Preserve existing tables and data.
+6. Do not create parallel or duplicate lifecycle, action or history records.
+7. Maintain existing JWT, RBAC, IBU scoping and authorization behavior.
+8. Do not introduce mock responses, fake success results or hardcoded business data.
+9. Use **`py -m` for all Python commands** on the Tech Mahindra Windows environment, never `python` or `python -m`.
+10. Use `requirements-lock.txt` and existing project conventions for dependencies.
+11. Do not modify frontend code in this task. However, **backend APIs MUST be designed according to the original UI reference images**.
+12. Do not touch the previously deferred Phase 3 Azure OpenAI issues. They will be handled at the end of the project.
+13. Do not refactor unrelated modules or modify existing data to make tests pass.
+14. If a conflict with Arun's lifecycle or Abhishek's authentication work is identified, document it for integration/merging. Do not change their owned implementation.
+15. The implementation must follow the approved **PRD + Task Breakdown Excel + UI images**, not Claude's suggestions or assumptions.
+
+## STEP 5 — TESTING AND VERIFICATION
+
+After implementation:
+
+1. Run targeted tests for T003-4.
+2. Verify creating a business event produces the required persisted history.
+3. Verify multiple changes preserve previous entries and maintain correct chronology.
+4. Verify unauthorized users cannot read or alter restricted history.
+5. Verify history cannot be updated or deleted through application operations.
+6. Verify failed transactions do not produce false history events.
+7. Verify the required APIs appear in FastAPI OpenAPI/Swagger.
+8. Run relevant regression tests for existing action and closure behavior.
+9. Verify SQL Server compatibility and actual schema alignment without destructive database changes.
+
+Use commands such as:
+
+`py -m pytest tests -q`
+
+Do not claim live Swagger validation unless the endpoints were actually executed and their responses inspected.
+
+## STEP 6 — FINAL REPORT
+
+Provide a concise but complete implementation report containing:
+
+- Exact PRD requirements and Task Breakdown row referenced.
+- UI reference images inspected and UI-to-API mapping.
+- Existing history infrastructure reused.
+- Files created and modified.
+- Exact HTTP methods, API paths and request/response schemas.
+- SQL Server tables used and any migration requirements.
+- Append-only and authorization enforcement details.
+- Actual tests run, with passed/failed/skipped counts.
+- Outstanding integration conflicts or missing requirements.
+- **Manual Swagger testing steps, one API at a time**, including expected HTTP codes and example responses.
+
+**IMPORTANT:** Implement the code now. Do not stop after producing an implementation plan. Do not declare COMPLETE or PRODUCTION-READY merely because files were created or unit tests passed. Clearly distinguish implementation, automated tests, live SQL verification and pending manual Swagger testing.
+
+Do not proceed to T003-5 or other tasks until T003-4 implementation is reported.
