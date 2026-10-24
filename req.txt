@@ -1,32 +1,22 @@
-# PEOPLECONNECT — T003-3 CLOSURE STATUS API BUG FIX
+Fix the confirmed HTTP status code issue in T003-3 Connect Closure API.
 
-Fix the confirmed HTTP 500 error in:
+**Mandatory Rules:**
+- Use the approved PRD, Task Breakdown Excel and original UI reference images as the source of truth for API design. Do not invent requirements or redesign APIs based on assumptions.
+- Work only on Praveen's assigned tasks.
+- Do not modify Arun's lifecycle implementation or tables, or Abhishek's authentication code.
+- Preserve SQL Server PeopleConnect_Dev data, existing APIs, RBAC and IBU scoping.
+- Use `py -m` for all Python commands.
+- Do not touch the deferred Phase 3 issues.
 
-GET /api/v1/connects/{connect_id}/closure-status
+**Confirmed Issue:**
 
-**Confirmed traceback:**
-- File: backend/app/api/connect_closure_endpoints.py
-- Line 136: `PendingAction(**action)`
-- Pydantic validation fails because `owner_employee_id=None`, but the response schema expects a string.
+PUT `/api/v1/connects/PC-00001/close` returns HTTP 200 with `success:false` when one action remains IN_PROGRESS.
 
-**Required implementation:**
-1. Inspect the actual API implementation and Pydantic schemas.
-2. Allow nullable owner fields in the response schema wherever the SQL Server database permits NULL.
-3. Do not insert fake employee IDs or modify existing action records.
-4. Ensure actions with missing owners are still counted as pending and block closure.
-5. Verify using existing connect `PC-00001`, which has an `IN_PROGRESS` action with NULL owner fields.
-6. Add regression tests for NULL owner fields and closure blocking.
-7. Run relevant tests and verify the endpoint through the existing FastAPI application.
-8. Report actual results, including any remaining failures.
+**Required Correction:**
+1. Return HTTP 400 when pending actions prevent closure, with a clear error response listing the blocking actions.
+2. Preserve existing closure validation and success behavior.
+3. Do not modify database records during failed closure attempts.
+4. Add regression tests for blocked closure and correct HTTP status.
+5. Run the relevant tests and report actual results.
 
-**MANDATORY RULES:**
-- Use the approved PRD, Task Breakdown Excel, and original UI reference screenshots from the source documents folder as the source of truth for requirements, API contracts, and behavior. Do not substitute your own assumptions or design suggestions.
-- Work only on Praveen's assigned implementation.
-- Do not modify Arun's lifecycle code or nine lifecycle tables.
-- Do not modify Abhishek's authentication implementation.
-- Preserve existing SQL Server data in `PeopleConnect_Dev`.
-- Preserve existing JWT, RBAC, and IBU scoping.
-- Use `py -m` for Python commands on Tech Mahindra Windows.
-- Do not touch the three deferred Phase 3 issues.
-- Implement the fix, not just a plan.
-- Do not claim completion without test evidence.
+Implement the correction now. Do not claim success without verification.
