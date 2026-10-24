@@ -1,24 +1,151 @@
-# PEOPLECONNECT — T003-4 ACTION HISTORY API BUG FIX
+# PEOPLECONNECT — T003-1: ACTION MANAGEMENT — CREATION & EDITING
 
-Fix the confirmed HTTP 500 error in:
+## OBJECTIVE
 
-GET /api/v1/actions/{action_id}/history
+Implement and complete **T003-1: Action Management – Creation & Editing**, assigned to Praveen under T003.
 
-Action ID: C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2
+**Implement the actual source-document requirements now. Do not provide only an implementation plan.**
 
-Actual: HTTP 500 — "Failed to retrieve history".
+## 1. MANDATORY SOURCE OF TRUTH
 
-**Mandatory instructions:**
+First, thoroughly inspect the `source document` folder and read:
 
-1. Read the PRD, Task Breakdown Excel and UI reference images from the source document folder. These are the source of truth for API behavior and response structure. Do not invent requirements.
-2. Inspect the actual backend traceback and identify the exact root cause before changing code.
-3. Fix the action history API using the existing MS SQL Server `PeopleConnect_Dev` database and `change_history` table.
-4. Handle nullable fields and actions with no history correctly. Return HTTP 200 with an empty history list when appropriate.
-5. Preserve RBAC, IBU scoping, pagination and append-only history behavior.
-6. Do not modify Arun's lifecycle code/tables or Abhishek's authentication code.
-7. Do not modify the working Connect History API or unrelated functionality.
-8. Use `py -m` for all Python commands.
-9. Run focused tests and regression tests. Do not modify tests merely to hide defects.
-10. Do not touch deferred Phase 3 issues.
+1. Complete PeopleConnect PRD, including applicable FR-01 to FR-28.
+2. Original Task Breakdown Excel.
+3. All relevant UI reference screenshots/images.
+4. Existing backend APIs, database models, services, schemas and tests.
 
-Implement the fix now. Report the root cause, exact files changed, test results and remaining limitations. Do not claim Swagger success without an actual API response.
+**CRITICAL: Design and implement APIs strictly according to the PRD, Task Breakdown Excel and UI images—not your own assumptions or external suggestions.**
+
+Map every relevant UI action, button, input, dropdown, validation, workflow and displayed field to its required backend API and database operation.
+
+If an API already exists, inspect and reuse it. Do not duplicate functionality.
+
+If source documents conflict or a requirement is unclear, report the exact source and discrepancy. Do not invent requirements.
+
+## 2. TASK SCOPE — T003-1
+
+Complete Action Management – Creation & Editing as defined in the approved documents.
+
+The previous implementation audit identified:
+
+- Action creation currently depends on AI extraction.
+- An action update API already exists.
+- Independent/manual action creation was identified as missing.
+- Actual UI compatibility has not been fully verified.
+
+Validate these findings against the current code and source documents before making changes.
+
+Implement all missing functionality required for T003-1, including independent action creation where supported by the PRD/UI, correct editing behavior, validation, persistence and integration.
+
+Ensure applicable action fields, ownership, due dates, priority, status, Connect association and other required data follow the source documents exactly.
+
+**Do not create endpoints merely because an earlier audit suggested a particular URL. Determine endpoint methods, routes, request bodies and response structures from the PRD, UI requirements and existing API conventions.**
+
+## 3. EXISTING INTEGRATIONS
+
+Reuse existing functionality wherever appropriate:
+
+- SQL Server `PeopleConnect_Dev`
+- Existing `connect_actions` table
+- Existing action update APIs
+- Existing Connect relationships
+- Existing notification functionality
+- Existing T003-4 append-only `change_history`
+- Existing authentication and authorization mechanisms
+
+New action creation and editing must integrate with the existing audit/history functionality when required by the source documents.
+
+Preserve atomic transactions and prevent partial writes.
+
+Do not introduce duplicate actions or duplicate notifications.
+
+Do not break the already tested action-history and Connect-history endpoints.
+
+## 4. COMPULSORY DEVELOPMENT RULES
+
+1. Work **ONLY on Praveen's assigned T003-1 scope**.
+2. Never modify Arun's lifecycle code or tables.
+3. Never modify Abhishek's authentication code.
+4. Preserve existing MS SQL Server data.
+5. Do not create unnecessary tables, adapters, duplicate services or migrations.
+6. Do not hardcode employee information, Connect IDs, roles or business data.
+7. Use actual employee master and authorized Connect data where required.
+8. Preserve JWT authentication, role-based access and IBU scoping.
+9. Follow the PRD for BHR and BHR Leader permissions within their authorized scope.
+10. Design every API for the original UI screenshots, not for an invented interface.
+11. Preserve existing APIs and backward compatibility unless the approved source documents explicitly require changes.
+12. Do not use mock data or placeholder logic in production.
+13. Use `py -m` for all Python commands on the Tech Mahindra Windows environment.
+14. Do not use `python` or `python -m` commands.
+15. Use the existing dependency configuration and `requirements-lock.txt`.
+16. Do not modify unrelated modules.
+17. Do not touch the three previously deferred Phase 3 issues: extract-actions provider-error HTTP status, generate-insights returning success status on provider failure, and AI-history HTTP 500. These will be handled at the end.
+18. Record possible integration conflicts for later merging with Arun and Abhishek; do not modify their implementation to resolve them now.
+
+## 5. IMPLEMENTATION REQUIREMENTS
+
+Before implementation, inspect the existing database schema and API contracts.
+
+Then implement the missing T003-1 functionality based on the original requirements.
+
+Verify:
+
+- Authorized independent action creation, if required.
+- Action editing according to allowed fields and business rules.
+- Valid Connect association.
+- Correct employee/owner resolution and validation.
+- Proper due-date, priority and status handling.
+- Duplicate prevention where specified.
+- Accurate database persistence.
+- Audit-history recording of creation and edits.
+- Appropriate notification integration where required.
+- Correct HTTP status codes for successful and failed operations.
+- Consistent API request/response structures for the actual UI.
+
+Do not assume that creating an action must trigger AI. Manual and AI-generated action flows must remain compatible wherever both are required.
+
+## 6. TESTING AND VERIFICATION
+
+Implement tests for the actual business requirements and failure cases.
+
+Run relevant tests using commands such as:
+
+`py -m pytest tests/ -q -ra`
+
+Also verify:
+
+- All required endpoints appear in FastAPI OpenAPI/Swagger.
+- Existing action functionality remains operational.
+- SQL Server schema and queries match the real `PeopleConnect_Dev` database.
+- Authorized and unauthorized access cases.
+- Cross-IBU isolation.
+- Valid and invalid input.
+- Transaction rollback behavior.
+- Accurate `change_history` persistence.
+- No regressions in existing T003-2, T003-3, T003-4 and T003-5 functionality.
+
+Do not modify production data destructively for testing.
+
+**Do not claim manual Swagger testing passed unless actual HTTP requests were executed and responses verified.**
+
+## 7. FINAL REPORT — REQUIRED
+
+After implementation, provide:
+
+1. Exact PRD references, Excel task row and UI images used.
+2. Source requirement-to-API mapping.
+3. Existing APIs reused.
+4. New or modified APIs with HTTP methods and full paths.
+5. Actual request and response schemas.
+6. Files created and modified.
+7. Database tables used and any schema changes.
+8. Audit/history and notification integration results.
+9. Exact test commands and pass/fail counts.
+10. Any remaining missing requirements or failed tests.
+11. Anything requiring later merging with Arun or Abhishek.
+12. Manual Swagger test sequence with real sample data.
+
+**Important: Do not mark T003-1 COMPLETE or PRODUCTION READY if source requirements remain unimplemented, tests fail, or verification has not been performed.**
+
+Proceed with implementation, not just analysis.
