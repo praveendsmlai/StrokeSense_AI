@@ -1,30 +1,102 @@
-Fix the T003-7 Action Tracker List IBU authorization issue identified in `T003_7_ADMIN_QUERY_ROOT_CAUSE_ANALYSIS.md`.
+# PEOPLECONNECT — RESUME EXISTING DEVELOPMENT
 
-First verify the original PRD, Breakdown Planner, Requirements Traceability and existing authorization behavior.
+Continue the PeopleConnect project from the previous Claude Code session in `C:\FinalProject\peopleconnect`.
 
-The current `GET /api/v1/actions` applies `current_user.ibu` filtering to PLATFORM_ADMIN, resulting in zero records because the admin's IBU is `ALPHABET`.
+The previous session was interrupted after implementing the T003-7 Action Tracker List admin authorization fix. Do not restart development or repeat completed work.
 
-The existing `require_ibu_access()` implementation permits admin cross-IBU access.
+## 1. RECOVER CURRENT STATE
 
-**Implement Fix Option 1 only if it is consistent with the established authorization contract.**
+First inspect the actual project files and these reports:
 
-Mandatory rules:
+- `COMPREHENSIVE_TASK_AUDIT.md`
+- `T003_7_SOURCE_DOCUMENT_VERIFICATION_AUDIT.md`
+- `T003_7_IMPLEMENTATION_COMPLETE.md`
+- `T003_7_ADMIN_QUERY_ROOT_CAUSE_ANALYSIS.md`
+- `T003_7_AUTHORIZATION_FIX_SUMMARY.md`
 
-1. Modify only Praveen-owned T003-7 code.
-2. Reuse existing admin authorization logic; do not invent new permissions.
-3. Do not modify `app/core/auth.py` or Abhishek's authentication implementation.
-4. Do not modify Arun's lifecycle code or tables.
-5. Preserve IBU restrictions for non-admin users.
-6. Preserve explicit IBU filtering for authorized admins.
-7. Do not hardcode `ALPHABET`, `IBU-001`, or other IBU values.
-8. Do not change SQL Server schema or existing data.
-9. Preserve filtering, sorting, pagination and soft-delete behavior.
-10. Add tests for admin cross-IBU visibility, non-admin IBU isolation and unauthorized access.
-11. Run regression tests using `py -m pytest`.
-12. Do not modify unrelated tasks or deferred AI integrations.
+Locate files if their names or paths differ.
 
-If source requirements conflict with the existing authorization contract, stop and report the conflict instead of changing permissions.
+The previous session reported that `GET /api/v1/actions` was implemented and the PLATFORM_ADMIN IBU filtering issue was fixed.
 
-After the fix, report exact files changed, test results and manual Swagger retest instructions.
+Verify the actual code and test results. Do not assume reported success means everything passed.
 
-Stop after T003-7.
+## 2. VERIFY T003-7 FIX
+
+Inspect `app/api/action_endpoints.py` and confirm that:
+
+- PLATFORM_ADMIN visibility follows existing RBAC authorization rules.
+- Non-admin users remain restricted to authorized IBUs.
+- Existing filters, pagination, sorting and soft-delete behavior remain intact.
+- No authentication or lifecycle code was modified.
+
+Run focused automated tests using `py -m pytest`.
+
+Do not recreate the endpoint or rewrite working code.
+
+If T003-7 is ready, mark it as **IMPLEMENTED — MANUAL SWAGGER RETEST PENDING**.
+
+Do not repeat completed tests unnecessarily.
+
+## 3. CONTINUE PENDING PRAVEEN TASKS
+
+After verifying T003-7, continue developing the remaining Praveen-owned backend tasks according to their actual dependencies and original Breakdown Planner:
+
+- T003-2 — Status Management and SLA
+- T003-5 — Notifications
+- T003-6 — Reminders and Aging
+- T003-8 — Dashboards
+- T003-9 — Reporting
+- T003-10 — Theme Insights
+- T003-11 — Administration Configuration
+- T003-12 — Testing and Fixes
+
+Inspect existing implementations first. Complete only missing, source-approved functionality.
+
+Do not reimplement completed tasks.
+
+## 4. ALL MANDATORY RULES
+
+1. Original PRD, Breakdown Planner, Requirements Traceability and UI reference screenshots are the source of truth.
+2. Work ONLY on Praveen-owned tasks.
+3. Never modify Arun's lifecycle code, models, APIs, migrations or database tables.
+4. Do not modify Abhishek's authentication code.
+5. Preserve Microsoft SQL Server `PeopleConnect_Dev`, existing SQLAlchemy models, JWT, RBAC, IBU authorization and audit history.
+6. Do not invent requirements, API contracts, database fields or workflows.
+7. Do not create duplicate services, tables or adapters.
+8. Do not change database schema or run destructive migrations without approval.
+9. Do not modify frontend code.
+10. Preserve all working APIs and database records.
+11. Use `py -m` for all Python module commands on Tech Mahindra Windows. Never use `python` or `python -m`.
+12. Implement real provider integration code where required, but do not claim live Azure integration success without testing.
+13. Keep previously identified Azure OpenAI failures for final integration testing.
+14. Run focused tests and relevant regression tests.
+15. Do not claim success without evidence.
+
+## 5. EXECUTION INSTRUCTIONS
+
+For each pending task:
+
+1. Read its exact PRD and Breakdown Planner requirements.
+2. Inspect existing code and identify gaps.
+3. Implement missing functionality.
+4. Run automated tests.
+5. Record results.
+6. Continue to the next task automatically.
+
+Do not stop after each task for approval unless there is a critical ambiguity, authorization conflict or destructive database operation.
+
+Keep implementation focused and avoid unnecessary long reports that consume context.
+
+## 6. FINAL OUTPUT
+
+Update `PRAVEEN_PENDING_TASKS_IMPLEMENTATION_REPORT.md` with:
+
+- Task-wise completion status
+- Source requirement references
+- Files changed
+- APIs implemented
+- Tests passed/failed
+- Remaining blockers
+- Pending manual Swagger tests
+
+**Resume from the existing codebase. Preserve all completed work. Continue implementation without restarting the project.**
