@@ -1,5 +1,14 @@
-Please inspect `backend/app/api/ai_endpoints.py` and identify why the action extraction endpoint returns HTTP 201 when its response body contains `status: FAILED`.
+Fix the Action Extraction API in `backend/app/api/ai_endpoints.py` based on your root cause analysis.
 
-Do not modify any files yet.
+1. Check `ai_response.success` before returning.
+2. Return HTTP 201 only when extraction actually succeeds.
+3. Return HTTP 503 when Azure OpenAI is unavailable or credentials are missing.
+4. Handle other provider failures with appropriate HTTP error codes.
+5. Preserve truthful FAILED/UNAVAILABLE audit logging, including error details.
+6. Never create fake actions or return success on failure.
+7. Preserve existing JWT, RBAC, IBU scoping and database transactions.
+8. Do not modify Arun's tables or lifecycle code.
+9. Add regression tests for success, provider unavailable and provider failure.
+10. Use `py -m` on Windows and `requirements-lock.txt` for dependencies.
 
-Only explain the exact code path causing this mismatch, the relevant function and line numbers, and the recommended fix.
+Implement the fix, run relevant tests, and report actual results. Do not claim success without verification.
