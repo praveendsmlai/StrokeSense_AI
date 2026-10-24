@@ -1,126 +1,102 @@
-# PEOPLECONNECT — PRAVEEN TASK 6: REMINDER FILTERING & OWNER RESOLUTION FIX
+# PEOPLECONNECT — COMPLETE PRAVEEN TASK IMPLEMENTATION AUDIT
 
-**Implement the required code corrections now. Do not provide only an implementation plan or claim completion without verification.**
+Perform a complete TASK-WISE implementation verification of the PeopleConnect project.
 
-## Mandatory Rules
+## MANDATORY INSTRUCTIONS
 
-1. Work ONLY on Praveen's assigned **Task 6 — Action Reminders & Aging (FR-14)**.
-2. Do NOT modify Arun's lifecycle code, his 9 tables, or their existing data.
-3. Do NOT modify Abhishek's authentication code.
-4. Preserve JWT authentication, RBAC, IBU scoping and all existing APIs.
-5. Follow the approved PRD, FR-01–FR-28, Task Breakdown Excel and original UI reference screenshots. Backend behavior and API contracts must support the actual UI workflow.
-6. Use the existing **PeopleConnect_Dev MS SQL Server database**, not SQLite or mock production data.
-7. Reuse existing models, services, tables and APIs. Create a new table only if genuinely required, with a safe migration and schema verification.
-8. On Tech Mahindra Windows, use **`py -m`**, not `python`, for Python commands.
-9. Do not alter unrelated modules or the previously deferred Phase 3 issues.
-10. Preserve existing data. No destructive SQL, dummy employee assignments or hardcoded email addresses.
-11. Run actual verification and report failures truthfully.
+1. First locate and read the original Task Breakdown Excel from the **Source Documents** folder. Do not rely on previous Claude summaries.
+2. Read the complete ownership column. Include EVERY task assigned to **Praveen** in T002 and T003, including **AI Output Generation Integration Point** and Testing and Bug Fixing.
+3. Use the approved PRD, FR-01 to FR-28, Task Breakdown Excel, and original UI reference screenshots from Source Documents.
+4. **All API designs and API contracts must match the original UI screenshots**, including every button, field, filter, action, workflow, and reporting requirement. Identify missing or mismatched APIs.
+5. Audit ONLY Praveen's assigned tasks. Do not count Arun Kumar's or Abhishek's tasks as Praveen's.
+6. Do NOT modify Arun's lifecycle code or his nine tables. Do NOT modify Abhishek's authentication code.
+7. Use existing canonical lifecycle data and one MS SQL Server database: `PeopleConnect_Dev`.
+8. Preserve JWT, RBAC, BHR/BHR Leader permissions, and IBU scoping.
+9. Use `py -m` for all Python commands on Tech Mahindra Windows; NEVER `python` or `python -m`.
+10. Inspect real code, registered FastAPI routes, Swagger/OpenAPI, services, SQL Server tables, migrations, and tests.
+11. Do not assume an API is implemented simply because Swagger shows it.
+12. Mark a task COMPLETE only with sufficient working implementation and verification evidence. Otherwise mark PARTIAL, PENDING, BLOCKED, or NOT VERIFIED.
+13. If Praveen's assigned functionality requires additional tables, report which tables are missing. Create them later through safe migrations only when implementation is explicitly authorized. Never duplicate existing tables.
+14. Do not implement any functionality during this audit. **Verification only.**
+15. Keep previously deferred Phase 3 API issues separate and do not fix them now.
+16. Azure OpenAI and ACS live testing remains pending until credentials are available. Do not call untested integrations production-ready.
+17. Do not create another 36-hour implementation plan. Perform the actual task-by-task verification now.
 
-## Confirmed Database Findings
+## VERIFICATION PROCESS
 
-Table: `dbo.connect_actions`
+### Step 1 — Read Source Documents
 
-Existing action:
+Locate and inspect:
+- Original Task Breakdown Excel
+- Approved PRD and functional requirements
+- UI reference screenshots
+- Existing API specifications, where available
 
-- ID: `C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2`
-- Connect ID: `PC-00001`
-- Title: `TEST - Resolve provisioning issue`
-- Status: `IN_PROGRESS`
-- Due date: `2026-11-05`
-- `owner_employee_id`: NULL
-- `owner_email`: NULL
+Extract every Praveen-owned task, preserving its exact original task name, description, owner, workstream, and row identifier.
 
-The current reminder query filters only `OPEN` and `OVERDUE`, potentially excluding valid active actions with status `IN_PROGRESS`.
+Explicitly verify the ownership of **AI Output Generation Integration Point** and T002 Testing and Bug Fixing.
 
-The employee master has actual columns including:
+### Step 2 — Verify Existing Implementation
 
-- `EMPID` (integer)
-- `EMP_NAME`
-- `EMAIL_ID`
-- `EMPLOYEE_IBU`
+For each Praveen-assigned task, inspect:
+- Actual backend code and functional logic
+- Full API methods and endpoint paths
+- Whether each API is registered in Swagger
+- Request/response schemas against the UI
+- Required database tables and columns
+- Correct SQL Server persistence and retrieval
+- Access permissions and validation
+- Unit/integration test results
+- Manual Swagger verification evidence
 
-Do not assume columns such as `display_name` exist. Inspect the actual SQL Server schema and use the correct table and column names.
+Classify the task as COMPLETE, PARTIAL, PENDING, BLOCKED, or NOT VERIFIED.
 
-## Required Corrections
+### Step 3 — Identify Missing Functionality
 
-### 1. Fix Action Status Filtering
+For EVERY incomplete Praveen task, document:
+- Exactly what is already implemented
+- What functionality is missing
+- Missing or incompatible APIs
+- Missing tables or migrations
+- UI workflows not supported
+- Untested or failing functionality
+- Dependencies on existing Arun lifecycle data
 
-Inspect `backend/app/tasks/reminder_tasks.py` and the actual action status definitions.
+Pay special attention to AI output generation, actions, notifications, reminders, dashboards, reporting, theme analysis, and administration.
 
-Ensure that reminder, overdue and escalation jobs consider all eligible non-terminal statuses, including `IN_PROGRESS`.
+### Step 4 — Final Task Completion Report
 
-Use the existing application's valid status definitions rather than inventing new values.
+Provide this exact table:
 
-Exclude closed, completed, cancelled, deleted and other terminal actions as appropriate.
+| Task No. | T002/T003 | Task Name | Assigned To | Implementation Status | Existing APIs | Missing APIs/Features | Database Status | Testing Status |
+|---|---|---|---|---|---|---|---|---|
 
-Do not change action status values merely to make a test pass.
+Then provide:
 
-### 2. Fix Owner Resolution
+**TOTAL PRAVEEN TASKS:** X  
+**COMPLETE:** X  
+**PARTIAL:** X  
+**PENDING:** X  
+**BLOCKED:** X  
+**NOT VERIFIED:** X  
 
-Build or correct recipient resolution using actual employee master columns and existing authorized data relationships.
+Counts must match the exact Excel ownership rows.
 
-- When `owner_employee_id` is present, resolve `EMPID` to `EMP_NAME` and `EMAIL_ID`.
-- Use the existing `owner_email` when valid.
-- If both owner fields are NULL, do NOT assign an arbitrary employee.
-- Log missing ownership and skip delivery safely while preserving an actionable diagnostic.
-- Do not expose other IBU employees through unauthorized queries.
-- Do not modify employee master records.
+Finally provide:
 
-### 3. Verify Reminder and Escalation Logic
+1. Complete list of implemented Praveen tasks with code/API evidence.
+2. Complete list of pending and partially implemented tasks.
+3. Missing Swagger endpoints required by the original UI screenshots.
+4. Database gaps.
+5. Deferred issues.
+6. **The exact next Praveen-assigned task to work on**, based on dependencies.
 
-Review all three scheduled jobs:
+## IMPORTANT
 
-- Due-date reminders (configured days before due date)
-- Overdue alerts
-- Aging/SLA escalations
+We are moving **TASK-WISE, NOT PHASE-WISE**.
 
-Use business-configured reminder and escalation rules where available, rather than hardcoding values contrary to the PRD.
+Do not modify code or database during verification.
 
-Check date handling, eligible statuses, employee resolution, retries, idempotency, and notification history.
+Do not claim 100% completion without implementation and testing evidence.
 
-Ensure that overdue processing does not incorrectly change unrelated workflow states or bypass existing action update/audit behavior.
-
-### 4. Maintain Email Integration
-
-Reuse the existing Azure Communication Services notification service and Jinja2 templates.
-
-- No fake successful email delivery.
-- Missing ACS credentials must produce truthful failure status.
-- Do not log `SENT` without provider confirmation.
-- Preserve idempotency to avoid duplicate reminders.
-- Use actual employee names and authorized recipient emails.
-
-### 5. Verification
-
-Run:
-
-`py -m pytest tests/test_task_5_6_implementation.py -q -ra`
-
-Also add and run focused tests for:
-
-- `IN_PROGRESS` action eligibility
-- `OPEN` action eligibility
-- Terminal status exclusion
-- Owner resolution through real schema columns
-- Missing owner ID and email
-- Duplicate reminder prevention
-- Correct reminder date selection
-- Safe ACS-unavailable behavior
-
-Verify database schema and queries against `PeopleConnect_Dev` without modifying existing action records.
-
-**Important:** The current action due date is November 5, 2026. It should only qualify for a three-day reminder on November 2, 2026 (using the appropriate business timezone), not on October 24.
-
-## Final Output Required
-
-Provide:
-
-1. Exact files modified.
-2. SQL queries corrected.
-3. Action statuses supported.
-4. Owner resolution behavior, including NULL handling.
-5. Tests executed with real pass/fail counts.
-6. Database verification results.
-7. Remaining limitations, especially live ACS testing.
-
-**Do not claim Task 6 is fully complete or production-ready unless the implementation and relevant tests actually support that claim.**
+Finish with the complete task matrix and exact implementation counts, not just a summary or future plan.
