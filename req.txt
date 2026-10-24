@@ -1,68 +1,55 @@
-# PEOPLECONNECT — COMPLETE TASK-WISE DEVELOPMENT AUDIT
+# PEOPLECONNECT — T003-7: SOURCE DOCUMENT VERIFICATION
 
-Inspect the entire existing PeopleConnect project and determine the actual development progress based on source code, APIs, database models, migrations, tests, and integrations.
+## OBJECTIVE
 
-**MANDATORY RULES**
+Verify the exact requirements of **T003-7 — Action Tracker List** before implementation.
 
-1. AUDIT ONLY. Do not modify, generate, delete, or refactor any code.
-2. Do not modify Arun's lifecycle code or his database tables.
-3. Focus only on Praveen's assigned tasks under T002 and T003.
-4. Follow the original task breakdown, PRD, FR-01 to FR-28 requirements, and UI specifications available in the project.
-5. Do not invent phases, task IDs, requirements, or completion percentages.
-6. Tech Mahindra Windows supports `py -m`. Never use `python` or `python -m`.
-7. Use the existing MS SQL Server database `PeopleConnect_Dev` for read-only verification where necessary. No database changes.
-8. Do not assume an API is working simply because its endpoint exists.
-9. Do not claim successful integration without code evidence or actual test results.
-10. Do not modify or retest the previously deferred Azure OpenAI issues.
+**AUDIT ONLY. DO NOT MODIFY CODE OR DATABASE.**
 
-**AUDIT REQUIREMENTS**
+## MANDATORY INSTRUCTIONS
 
-For EVERY original task assigned to Praveen:
+1. Locate and thoroughly read the original PRD, including applicable FR-01 to FR-28 requirements.
+2. Read the original Task Breakdown Planner Excel from the source document folder.
+3. Inspect all relevant original UI reference images.
+4. Identify the exact T003-7 task description, owner, requirements, acceptance criteria and dependencies.
+5. Compare every requirement with existing FastAPI code, APIs, SQLAlchemy models and the actual MS SQL Server schema.
+6. Identify which requirements are already implemented and which are missing.
+7. Map each UI button, filter, field, table column and workflow to existing or required backend functionality.
+8. Determine the required API endpoints, methods, request fields and response contracts **only from the approved source documents and UI references**.
+9. Do not invent API routes, filters, pagination defaults, sorting options, response schemas, database fields or business rules.
+10. Do not use ChatGPT's previous suggestions as requirements.
+11. Reuse existing APIs wherever possible and identify genuine implementation gaps.
 
-- Exact task ID and original task name.
-- Required functionality.
-- What has actually been implemented.
-- Relevant backend files, classes, functions and API endpoints.
-- Existing database tables used.
-- Missing functionality and implementation gaps.
-- Current status: COMPLETE, PARTIAL, NOT STARTED, or BLOCKED.
-- Evidence supporting the status.
-- Dependencies on other tasks.
+## STRICT PROJECT RULES
 
-Also identify:
+- Work only within Praveen's assigned T003-7 scope.
+- Arun's lifecycle code, APIs, models and database tables are strictly read-only.
+- Do not modify Abhishek's authentication code.
+- Use existing Microsoft SQL Server `PeopleConnect_Dev`.
+- Preserve existing JWT, RBAC, IBU scoping and employee master integration.
+- Do not modify existing tables or data.
+- Do not create duplicate services, adapters or tables.
+- Do not modify frontend code.
+- Do not touch deferred Azure OpenAI issues.
+- Do not begin another task.
+- On Tech Mahindra Windows, use **`py -m` exclusively** for Python module commands. Never use `python`, `python -m` or `python3`.
+- Do not execute migrations or write operations during this audit.
 
-- Placeholder or mock implementations.
-- Hardcoded data.
-- Missing real integrations.
-- APIs not aligned with requirements.
-- Duplicate implementations or unnecessary adapters.
-- Missing tests and unverified functionality.
-- Existing code that can be reused.
+## REQUIRED REPORT
 
-**IMPORTANT STATUS RULE**
+Provide a requirement mapping table containing:
 
-Distinguish between:
-- Code implemented.
-- Automated tests passed.
-- Manually verified through Swagger.
-- Verified against MS SQL Server.
-- Live external provider integration verified.
+| Source Document | Requirement Reference | Exact Requirement | UI Image Reference | Existing API/Code | Missing Functionality | Status |
+|---|---|---|---|---|---|---|
 
-Do not treat these as equivalent.
+Also provide:
 
-**FINAL OUTPUT**
+1. Exact T003-7 task description from the original Breakdown Planner.
+2. All applicable PRD references.
+3. Relevant UI image filenames and required UI behavior.
+4. Existing reusable APIs and database tables.
+5. Exact missing implementation.
+6. Proposed implementation strictly justified by the source documents.
+7. Any unclear or conflicting requirements requiring approval.
 
-Provide:
-
-1. Complete original T002/T003 task-wise audit table.
-2. Number of COMPLETE, PARTIAL, NOT STARTED and BLOCKED tasks.
-3. Overall development progress, only if supported by evidence.
-4. Exact pending work for every incomplete task.
-5. Recommended development sequence using original task IDs.
-6. Identify the SINGLE NEXT TASK we should implement.
-7. Explain why that task comes next and its dependencies.
-8. List tasks that should be completed before final end-to-end Swagger testing.
-
-Keep the known Azure OpenAI API failures in a separate DEFERRED section for final testing.
-
-Do not start development. Wait for my approval after presenting the audit.
+**Do not implement anything yet. Stop after the verification report and wait for my approval.**
