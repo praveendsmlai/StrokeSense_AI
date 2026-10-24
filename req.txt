@@ -1,1 +1,30 @@
-Investigate why GET /api/v1/actions returns HTTP 200 with total_count=0 for a PLATFORM_ADMIN user, while dbo.pm_actions contains 16 records. Check the actual JWT claims, existing RBAC/IBU authorization rules, SQLAlchemy query filters, soft-delete conditions, and SQL Server database connection. Verify expected PLATFORM_ADMIN visibility against the original PRD and existing authentication implementation. Do not assume admin has unrestricted access. Do not modify Arun's code/tables or Abhishek's authentication code. Do not change anything yet. Report the exact root cause, relevant file/line numbers, and source-supported fix. Use only `py -m` for Python commands.
+Fix the T003-7 Action Tracker List IBU authorization issue identified in `T003_7_ADMIN_QUERY_ROOT_CAUSE_ANALYSIS.md`.
+
+First verify the original PRD, Breakdown Planner, Requirements Traceability and existing authorization behavior.
+
+The current `GET /api/v1/actions` applies `current_user.ibu` filtering to PLATFORM_ADMIN, resulting in zero records because the admin's IBU is `ALPHABET`.
+
+The existing `require_ibu_access()` implementation permits admin cross-IBU access.
+
+**Implement Fix Option 1 only if it is consistent with the established authorization contract.**
+
+Mandatory rules:
+
+1. Modify only Praveen-owned T003-7 code.
+2. Reuse existing admin authorization logic; do not invent new permissions.
+3. Do not modify `app/core/auth.py` or Abhishek's authentication implementation.
+4. Do not modify Arun's lifecycle code or tables.
+5. Preserve IBU restrictions for non-admin users.
+6. Preserve explicit IBU filtering for authorized admins.
+7. Do not hardcode `ALPHABET`, `IBU-001`, or other IBU values.
+8. Do not change SQL Server schema or existing data.
+9. Preserve filtering, sorting, pagination and soft-delete behavior.
+10. Add tests for admin cross-IBU visibility, non-admin IBU isolation and unauthorized access.
+11. Run regression tests using `py -m pytest`.
+12. Do not modify unrelated tasks or deferred AI integrations.
+
+If source requirements conflict with the existing authorization contract, stop and report the conflict instead of changing permissions.
+
+After the fix, report exact files changed, test results and manual Swagger retest instructions.
+
+Stop after T003-7.
