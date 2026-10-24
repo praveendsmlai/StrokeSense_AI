@@ -1,14 +1,90 @@
-Fix the Action Extraction API in `backend/app/api/ai_endpoints.py` based on your root cause analysis.
+# PEOPLECONNECT — CRITICAL: FIX 3 API ISSUES PERMANENTLY
 
-1. Check `ai_response.success` before returning.
-2. Return HTTP 201 only when extraction actually succeeds.
-3. Return HTTP 503 when Azure OpenAI is unavailable or credentials are missing.
-4. Handle other provider failures with appropriate HTTP error codes.
-5. Preserve truthful FAILED/UNAVAILABLE audit logging, including error details.
-6. Never create fake actions or return success on failure.
-7. Preserve existing JWT, RBAC, IBU scoping and database transactions.
-8. Do not modify Arun's tables or lifecycle code.
-9. Add regression tests for success, provider unavailable and provider failure.
-10. Use `py -m` on Windows and `requirements-lock.txt` for dependencies.
+This is the THIRD attempt to resolve these issues. Previous fixes were reported as COMPLETE, but manual Swagger testing continued to fail.
 
-Implement the fix, run relevant tests, and report actual results. Do not claim success without verification.
+Do not claim success merely because code compiles, unit tests pass, or a report was generated.
+
+## ISSUE 1 — Action Extraction API
+
+POST `/api/v1/minutes/{minutes_id}/extract-actions`
+
+Current problems:
+- Previously returned HTTP 201 with `status: FAILED`.
+- After changes, returned HTTP 422 with `actions_created: 0` and `status: FAILED`.
+- Azure credentials are currently unavailable.
+
+Required:
+- Trace the complete execution path, including provider configuration, `ai_response.success`, exception handling, and HTTP response creation.
+- Missing/unavailable Azure provider must return HTTP 503.
+- Return HTTP 201 only after successful extraction and database persistence.
+- Do not incorrectly use HTTP 422 for provider connection failures.
+- Preserve accurate failure audit records.
+- Never insert fabricated actions.
+
+## ISSUE 2 — Insights Generation API
+
+POST `/api/v1/connects/{connect_id}/insights`
+
+Current actual response:
+- HTTP 201
+- `insights_created: 0`
+- `status: FAILED`
+- `error: Failed to connect to Azure OpenAI`
+
+Required:
+- Identify the exact cause of HTTP 201 being returned despite AI failure.
+- Fix all provider-error response paths.
+- Missing/unavailable Azure provider must return HTTP 503.
+- HTTP 201 only when generation and persistence succeed.
+- Preserve accurate audit records and prevent fake insights.
+
+## ISSUE 3 — AI History API
+
+GET `/api/v1/connects/{connect_id}/ai-history`
+
+Current actual response:
+- HTTP 500 Internal Server Error
+
+Required:
+- Inspect the complete backend traceback.
+- Identify the failing SQL query, ORM mapping, response schema, or serialization logic.
+- Fix the actual root cause.
+- Verify against existing SQL Server records.
+- Return HTTP 200 with real history records, including failed AI requests.
+- Ensure pagination works.
+- Do not hide database errors by returning an empty list.
+
+## MANDATORY DEBUGGING AND VERIFICATION
+
+1. First inspect existing code and identify the exact root cause of each issue.
+2. Identify which process is actually serving port 8000. Check the process command line and working directory.
+3. Ensure the running server is using the latest modified code. Restart only the verified project server when necessary. Do not kill unrelated processes.
+4. Confirm the application is connected to the intended `PeopleConnect_Dev` SQL Server database.
+5. Do not modify Arun's lifecycle code, tables, schemas, or existing records.
+6. Modify only Praveen-owned AI/API components and related tests.
+7. Preserve JWT authentication, RBAC, IBU scoping, and existing working APIs.
+8. Use `py -m` instead of `python` on this Tech Mahindra Windows system.
+9. Use `requirements-lock.txt` as the dependency source, not the outdated `requirements.txt`. Do not unnecessarily reinstall packages.
+10. Azure credentials are NOT available. Do not invent credentials, hardcode secrets, or claim live Azure integration was tested.
+11. Use mocks only for isolated automated tests, never to fabricate successful Swagger responses.
+12. Run regression tests and verify HTTP status codes and response bodies against the actual running application.
+13. For AI History, verify the real SQL Server records are returned.
+14. Verify that failed AI operations are correctly recorded in AI History.
+15. Do not perform unnecessary database migrations or create duplicate APIs.
+
+## REQUIRED FINAL OUTPUT
+
+Provide a concise verification table containing:
+
+- API method and URL
+- Exact root cause
+- Files and code paths changed
+- Automated test results
+- Actual HTTP status from the running backend
+- Actual response body (without secrets)
+- SQL Server verification results
+- Remaining limitations
+
+If any issue remains unresolved, explicitly mark it FAILED or BLOCKED and explain why.
+
+**STOP after fixing and verifying these three issues. Do not start Phase 4. Do not claim COMPLETE without evidence from the running backend.**
