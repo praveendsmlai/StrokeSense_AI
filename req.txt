@@ -1,152 +1,127 @@
-# PEOPLECONNECT — PHASE 4 GAP IMPLEMENTATION
+# PEOPLECONNECT — IMPLEMENT PRAVEEN TASKS 5 & 6 NOW
 
-Implement the confirmed missing functionality identified in `PHASE_4_SCOPE_AUDIT_REPORT.md`.
+Your previous response produced only `PHASE_4_IMPLEMENTATION_PLAN.md` and a 36-hour estimate. The requested functionality was NOT implemented.
 
-This is an IMPLEMENTATION task, not another audit.
+STOP generating more plans, estimates, audit summaries, or proposed phases.
 
-## Mandatory scope
+**START ACTUAL CODE IMPLEMENTATION NOW.**
 
-1. Implement ONLY Praveen's assigned Task 5 (Automated Communications & Notifications) and Task 6 (Action Reminders & Aging).
-2. Follow `Source_document/` PRD, Task Breakdown Excel, FR-01–FR-28, and approved `UI/` screenshots.
-3. Every API, notification event, field and response must align with the applicable UI workflows.
-4. DO NOT modify Arun's lifecycle code, APIs, models, or 9 existing tables.
-5. DO NOT modify Abhishek's authentication module.
-6. Use Arun's canonical lifecycle data for recipient and Connect information without duplicating lifecycle tables.
-7. No frontend development.
-8. Preserve the existing `PeopleConnect_Dev` SQL Server data, APIs, authentication and RBAC.
+## 1. NON-NEGOTIABLE PROJECT RULES
 
-## Implement all four confirmed gaps
+1. Development must be TASK-WISE, not PHASE-WISE.
+2. Implement ONLY tasks assigned to Praveen in `Source_document/` Task Breakdown Excel.
+3. Identify and maintain the complete checklist of all 12 Praveen-assigned tasks, including subtasks, but work ONLY on Task 5 and Task 6 in this execution.
+4. Follow the original PRD, FR-01–FR-28, Task Breakdown, and approved `UI/` screenshots as the source of truth.
+5. Every implemented backend workflow, API, parameter and response must align with applicable approved UI requirements.
+6. Do NOT implement or modify Arun's lifecycle business logic, APIs, models, or database tables.
+7. Do NOT modify Abhishek's authentication code.
+8. Reuse existing Arun lifecycle records and canonical tables for authorized Praveen-owned integrations.
+9. Do not rebuild any existing functionality unnecessarily.
+10. Frontend changes are OUT OF SCOPE.
+11. Use one existing MS SQL Server database: `PeopleConnect_Dev`.
+12. Always use `py -m` for Python commands on Tech Mahindra Windows. Never use `python` or `python -m`.
+13. Preserve existing dependencies and `requirements-lock.txt`.
+14. Never introduce fake data, placeholder functionality, or mock production integrations.
+15. Do not modify or attempt to fix the three previously deferred Phase 3 API issues.
 
-### A. Automatic notification triggers — FR-16
+## 2. TASK 5 — AUTOMATED COMMUNICATIONS & NOTIFICATIONS
 
-Integrate the existing notification service into Praveen-owned business workflows:
+Implement all verified Task 5 requirements, including:
 
-- Published/approved minutes → automatically notify required participants.
-- Action assignment → notify the actual action owner and CC the initiating BHR.
-- Action status changes/closure → send required notifications.
-- Other approved notification events identified in the Task Breakdown/PRD.
+- Automatically trigger notifications when validated minutes are published.
+- Notify action owners when actions are assigned.
+- Automatically CC the initiating BHR as required by FR-16.
+- Trigger required action status/closure communications.
+- Generate recipient lists from existing employee, participant, initiator and action-owner records.
+- Create standardized email templates populated with actual business data.
+- Reuse existing ACS email provider, notification preferences, notification tracking and idempotency logic.
+- Ensure ACS failures are handled without falsely indicating delivery.
 
-Reuse existing APIs and notification services. Do not add unnecessary public endpoints.
+Do not require users to call the manual `send-notification` API for automatic business events.
 
-Ensure business changes and notification records are consistent. An ACS failure must not falsely report email delivery or corrupt the underlying business transaction. Preserve idempotency.
+Before editing an existing API handler, verify its code ownership. Modify only Praveen-owned implementation. If an event is handled exclusively by Arun's code, implement a safe external integration without modifying his module, or clearly report the integration boundary as BLOCKED.
 
-For any event originating inside Arun-owned lifecycle code, do not edit Arun's code. Use an authorized integration mechanism outside his modules and document any unavailable integration boundary.
+## 3. TASK 6 — ACTION REMINDERS & AGING
 
-### B. Automatic reminders, overdue alerts and aging — FR-14
+Implement all verified Task 6 requirements:
 
-Implement a working background scheduler for:
+- Working automated scheduler or dedicated scheduled worker.
+- Proactive reminders before action due dates.
+- Overdue action identification and alerts.
+- Action aging calculations.
+- Escalations according to approved SLA/escalation configuration.
+- Appropriate recipient resolution.
+- Duplicate prevention across repeated scheduler executions.
+- Recovery after restart and safe execution with multiple application workers.
+- Auditable notification outcomes.
 
-- Action reminders before due dates.
-- Overdue action detection and notifications.
-- Action aging and escalation according to the actual approved SLA/escalation rules.
-- Repeat prevention using stable idempotency keys.
-- Notification preferences where applicable.
+Use real SQL Server actions and due dates.
 
-Use actual action due dates, statuses, owners and SLA configuration from SQL Server.
+Do not hardcode T-3 or 30-day escalation unless confirmed in the PRD or existing configuration.
 
-Never hardcode a 3-day reminder or 30-day escalation unless confirmed by the approved requirement/configuration.
+## 4. DATABASE IMPLEMENTATION IS MANDATORY
 
-Choose a scheduler architecture suitable for deployment. Ensure multiple application workers do not send duplicate reminders. Include startup/shutdown behavior and an independently runnable scheduled-worker option if needed.
+Inspect existing schema first.
 
-### C. Email templates
+Reuse `dbo.email_notifications`, `dbo.notification_preferences`, and relevant Praveen-owned tables.
 
-Implement approved email templates for required notification categories.
+**Whenever additional tables, columns, indexes or constraints are required:**
 
-Use actual Connect, minutes, action, employee, due date and status data.
+1. Create correct SQLAlchemy models where applicable.
+2. Create safe SQL Server-compatible migration scripts.
+3. Execute migrations against `PeopleConnect_Dev`.
+4. Verify physical tables, columns and constraints using SQL Server queries.
+5. Confirm actual service/API operations persist data successfully.
+6. Preserve existing records and database integrity.
 
-Implement safe HTML rendering, escaping, subject generation and plain-text fallback.
+Do not claim implementation completion if the required SQL Server tables do not physically exist.
 
-Do not require callers to manually construct every notification email.
+Never alter Arun's tables or create duplicate lifecycle tables.
 
-### D. Recipient resolution and BHR CC
+## 5. IMPLEMENTATION AND TESTING
 
-Resolve recipients from the existing employee master and Arun's canonical participant/initiator data.
+Use the previous audit and implementation plan as references, not as substitutes for coding.
 
-- Validate recipient identity and email address.
-- Identify the initiating BHR correctly.
-- Include BHR in CC for action assignment notifications where FR-16 requires it.
-- Respect authorized IBU scope.
-- Never invent email addresses or send notifications to placeholder users.
-- Handle missing recipient emails explicitly and audit the failure.
+Implement Task 5 and Task 6 functionality directly in the existing backend.
 
-## Database and Azure integration
+Use actual SQL Server data for integration testing.
 
-- Reuse `dbo.email_notifications` and `dbo.notification_preferences`.
-- Create and execute safe SQL Server migrations ONLY if required for Praveen's functionality.
-- Verify changes against actual `PeopleConnect_Dev`.
-- Preserve existing notification history and idempotency.
-- Use existing real Azure Communication Services integration.
-- ACS credentials are unavailable: implement production code and offline provider-mocked tests, but mark live delivery UNTESTED.
-- Never report SENT/DELIVERED without appropriate provider evidence.
+Write focused tests for:
 
-## Testing and completion
+- Automatic minutes publication notification
+- Action assignment with BHR CC
+- Action status/closure notification
+- Scheduled reminders
+- Overdue alerts
+- SLA-based escalations
+- Scheduler restart and duplicate prevention
+- Missing/invalid recipient
+- ACS unavailable
+- SQL Server persistence
+- JWT/RBAC/IBU security boundaries
 
-Use `py -m` for all Python commands on Tech Mahindra Windows. Do not use `python` or `python -m`. Preserve `requirements-lock.txt`.
+Mock ACS only in isolated automated tests. Live ACS testing remains pending until credentials are available.
 
-Test at minimum:
+Do not unnecessarily repeat the four manually passed notification API tests.
 
-- Minutes publication notification trigger.
-- Action assignment with initiating BHR CC.
-- Action closure/status notification.
-- Upcoming reminders.
-- Overdue detection.
-- Aging and escalation.
-- Duplicate scheduler runs.
-- Missing recipients.
-- ACS unavailable.
-- SQL Server persistence.
-- RBAC/IBU isolation.
+## 6. REQUIRED COMPLETION REPORT
 
-Use mocked ACS only in isolated offline tests. Test database integration against SQL Server.
+Report only factual implementation evidence:
 
-Do not touch the three previously deferred Phase 3 API issues: Extract Actions 422, Generate Insights 201 FAILED, and AI History 500. Preserve their existing behavior for later correction; implement notification hooks without attempting to fix those issues.
+- Task 5 checklist: implemented / blocked / unverified
+- Task 6 checklist: implemented / blocked / unverified
+- Source requirement and UI mapping
+- Exact files created and modified
+- SQL Server migrations executed and verified
+- Scheduler implementation and actual test execution
+- Actual test commands and pass/fail counts
+- Remaining blockers
+- Live ACS testing status
 
-## Mandatory final evidence
+If execution limits prevent finishing, complete a coherent working portion, report the exact changed files and remaining work, and continue from that state in the next request. Never substitute another implementation plan for actual work.
 
-Provide:
+**Do not claim a task COMPLETE until its applicable requirements, implementation, database integration and available tests are verified.**
 
-1. Exact Praveen tasks and FR mappings implemented.
-2. Approved UI → event → API/service → SQL Server mapping.
-3. Files created and modified.
-4. Actual scheduler startup and execution verification.
-5. SQL Server migration results.
-6. Test names, pass/fail counts and failures.
-7. Demonstration that automatic notifications are triggered without manually calling `POST /send-notification`.
-8. Explicit unresolved limitations and pending live ACS testing.
+**START WITH ACTUAL TASK 5 CODE CHANGES, THEN PROCEED TO TASK 6.**
 
-Do not claim Phase 4 complete merely because the APIs exist or unit tests pass.
-
-Do not start Phase 5.
-
-
-## CRITICAL MANDATORY INSTRUCTIONS — OWNERSHIP, COMPLETENESS & DATABASE
-
-1. Implement ONLY the tasks explicitly assigned to Praveen in `Source_document/` Task Breakdown Excel, including his authorized integration responsibilities.
-
-2. First identify ALL 12 Praveen-assigned tasks from the Excel. Create a complete Task → PRD/FR Requirement → UI Screen → API/Service → SQL Server Table mapping. Do not miss any assigned task, subtask, business rule, or integration point.
-
-3. This Phase 4 implementation must complete all outstanding work related to Praveen's Task 5 and Task 6. Do not implement other phases prematurely. Maintain the full 12-task checklist for subsequent phases.
-
-4. Wherever Praveen's assigned functionality requires new database tables, columns, constraints, indexes or relationships, create them using proper SQL Server-compatible migrations. Execute the migrations against `PeopleConnect_Dev` and verify the actual schema and data.
-
-5. Do not stop after creating SQLAlchemy models. A required table is NOT implemented until it physically exists in SQL Server and the corresponding API/service works against it.
-
-6. Reuse existing tables whenever possible. Do not create unnecessary or duplicate tables. Preserve all existing records and migrations.
-
-7. NEVER modify, drop, recreate or replace Arun's lifecycle tables, APIs, models or business logic. Reuse his canonical lifecycle data for Praveen's authorized integration requirements.
-
-8. Do not modify Abhishek's authentication module. Preserve existing JWT, RBAC and IBU-based authorization.
-
-9. Implement every applicable approved UI workflow and API contract within Praveen's scope, following the PRD and FR-01–FR-28. No unnecessary APIs, placeholder business logic or mock production data.
-
-10. Implement actual automatic triggers, schedulers, reminders, escalations, email templates, BHR CC and recipient resolution wherever required by Task 5, Task 6 and the approved PRD.
-
-11. Verify migrations, scheduler execution, SQL Server persistence, API responses and automated tests. Use `py -m` on Tech Mahindra Windows, never `python` or `python -m`.
-
-12. If any requirement cannot be implemented because of a missing dependency, identify it explicitly with the exact task/FR reference. Never silently skip it or claim completion.
-
-13. Keep live Azure OpenAI/ACS testing pending until credentials are available. Preserve the three deferred Phase 3 issues for final testing.
-
-14. Before declaring Phase 4 complete, report each Task 5/6 requirement as IMPLEMENTED & VERIFIED, IMPLEMENTED BUT NOT VERIFIED, or BLOCKED, with supporting evidence.
-
-**NON-NEGOTIABLE: No missing Praveen-owned requirements. No changes to Arun-owned functionality. No missing SQL Server migrations. No false completion claims.**
+Do not start any other Praveen task until Tasks 5 and 6 have been addressed.
