@@ -1,23 +1,126 @@
-Fix the confirmed Task 6 Python syntax error.
+# PEOPLECONNECT — PRAVEEN TASK 6: REMINDER FILTERING & OWNER RESOLUTION FIX
 
-File: `backend/app/tasks/reminder_tasks.py`, line 81.
+**Implement the required code corrections now. Do not provide only an implementation plan or claim completion without verification.**
 
-Error: `SyntaxError: 'await' outside async function`.
+## Mandatory Rules
 
-Review all three scheduled jobs and correct async/sync execution consistently with APScheduler and the existing NotificationService. Do not merely remove `await` or suppress the error.
+1. Work ONLY on Praveen's assigned **Task 6 — Action Reminders & Aging (FR-14)**.
+2. Do NOT modify Arun's lifecycle code, his 9 tables, or their existing data.
+3. Do NOT modify Abhishek's authentication code.
+4. Preserve JWT authentication, RBAC, IBU scoping and all existing APIs.
+5. Follow the approved PRD, FR-01–FR-28, Task Breakdown Excel and original UI reference screenshots. Backend behavior and API contracts must support the actual UI workflow.
+6. Use the existing **PeopleConnect_Dev MS SQL Server database**, not SQLite or mock production data.
+7. Reuse existing models, services, tables and APIs. Create a new table only if genuinely required, with a safe migration and schema verification.
+8. On Tech Mahindra Windows, use **`py -m`**, not `python`, for Python commands.
+9. Do not alter unrelated modules or the previously deferred Phase 3 issues.
+10. Preserve existing data. No destructive SQL, dummy employee assignments or hardcoded email addresses.
+11. Run actual verification and report failures truthfully.
 
-Mandatory:
-- Work ONLY on Praveen's Task 6.
-- Preserve approved PRD, Task Breakdown, FR-14 and UI requirements.
-- Do not modify Arun's lifecycle code/tables or Abhishek's authentication.
-- Use actual `PeopleConnect_Dev` SQL Server data.
-- Create and verify SQL Server migrations if genuinely required.
-- Use `py -m` on Tech Mahindra Windows.
-- Do not touch the deferred Phase 3 issues.
-- Preserve existing notification APIs and business logic.
+## Confirmed Database Findings
 
-First verify Python syntax and imports, then run:
+Table: `dbo.connect_actions`
 
-`py -m pytest tests\test_task_5_6_implementation.py -q -ra`
+Existing action:
 
-Report actual test results and any remaining failures. Do not claim completion unless all 14 tests pass and scheduler startup succeeds.
+- ID: `C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2`
+- Connect ID: `PC-00001`
+- Title: `TEST - Resolve provisioning issue`
+- Status: `IN_PROGRESS`
+- Due date: `2026-11-05`
+- `owner_employee_id`: NULL
+- `owner_email`: NULL
+
+The current reminder query filters only `OPEN` and `OVERDUE`, potentially excluding valid active actions with status `IN_PROGRESS`.
+
+The employee master has actual columns including:
+
+- `EMPID` (integer)
+- `EMP_NAME`
+- `EMAIL_ID`
+- `EMPLOYEE_IBU`
+
+Do not assume columns such as `display_name` exist. Inspect the actual SQL Server schema and use the correct table and column names.
+
+## Required Corrections
+
+### 1. Fix Action Status Filtering
+
+Inspect `backend/app/tasks/reminder_tasks.py` and the actual action status definitions.
+
+Ensure that reminder, overdue and escalation jobs consider all eligible non-terminal statuses, including `IN_PROGRESS`.
+
+Use the existing application's valid status definitions rather than inventing new values.
+
+Exclude closed, completed, cancelled, deleted and other terminal actions as appropriate.
+
+Do not change action status values merely to make a test pass.
+
+### 2. Fix Owner Resolution
+
+Build or correct recipient resolution using actual employee master columns and existing authorized data relationships.
+
+- When `owner_employee_id` is present, resolve `EMPID` to `EMP_NAME` and `EMAIL_ID`.
+- Use the existing `owner_email` when valid.
+- If both owner fields are NULL, do NOT assign an arbitrary employee.
+- Log missing ownership and skip delivery safely while preserving an actionable diagnostic.
+- Do not expose other IBU employees through unauthorized queries.
+- Do not modify employee master records.
+
+### 3. Verify Reminder and Escalation Logic
+
+Review all three scheduled jobs:
+
+- Due-date reminders (configured days before due date)
+- Overdue alerts
+- Aging/SLA escalations
+
+Use business-configured reminder and escalation rules where available, rather than hardcoding values contrary to the PRD.
+
+Check date handling, eligible statuses, employee resolution, retries, idempotency, and notification history.
+
+Ensure that overdue processing does not incorrectly change unrelated workflow states or bypass existing action update/audit behavior.
+
+### 4. Maintain Email Integration
+
+Reuse the existing Azure Communication Services notification service and Jinja2 templates.
+
+- No fake successful email delivery.
+- Missing ACS credentials must produce truthful failure status.
+- Do not log `SENT` without provider confirmation.
+- Preserve idempotency to avoid duplicate reminders.
+- Use actual employee names and authorized recipient emails.
+
+### 5. Verification
+
+Run:
+
+`py -m pytest tests/test_task_5_6_implementation.py -q -ra`
+
+Also add and run focused tests for:
+
+- `IN_PROGRESS` action eligibility
+- `OPEN` action eligibility
+- Terminal status exclusion
+- Owner resolution through real schema columns
+- Missing owner ID and email
+- Duplicate reminder prevention
+- Correct reminder date selection
+- Safe ACS-unavailable behavior
+
+Verify database schema and queries against `PeopleConnect_Dev` without modifying existing action records.
+
+**Important:** The current action due date is November 5, 2026. It should only qualify for a three-day reminder on November 2, 2026 (using the appropriate business timezone), not on October 24.
+
+## Final Output Required
+
+Provide:
+
+1. Exact files modified.
+2. SQL queries corrected.
+3. Action statuses supported.
+4. Owner resolution behavior, including NULL handling.
+5. Tests executed with real pass/fail counts.
+6. Database verification results.
+7. Remaining limitations, especially live ACS testing.
+
+**Do not claim Task 6 is fully complete or production-ready unless the implementation and relevant tests actually support that claim.**
