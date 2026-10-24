@@ -1,40 +1,27 @@
-# PEOPLECONNECT — T003-4 INCOMPLETE IMPLEMENTATION CORRECTION
+# PEOPLECONNECT — T003-4: MISSING CLOSED HISTORY EVENT FIX
 
-T003-4 is NOT complete. Your report explicitly shows:
+Fix the confirmed integration defect.
 
-1. Only 6/8 tests passing.
-2. History recording is not integrated into existing business operations.
-3. Live Swagger verification is pending.
+**Evidence:**
+- `PC-00002` was successfully closed through `PUT /api/v1/connects/{connect_id}/close`.
+- SQL Server confirms `plan_connect_initiations.status = 'CLOSED'`.
+- However, `dbo.change_history` contains zero records for `plan_connect_id = 'PC-00002' AND event_type = 'CLOSED'`.
 
-Complete the missing implementation now.
+**Instructions:**
+1. Inspect `connect_closure_endpoints.py`, `history_service.py`, actual database schema and existing tests.
+2. Identify why a successful Connect closure did not persist its history event.
+3. Implement reliable, transactionally consistent history recording for successful closures, using the event type defined in the existing schema.
+4. Record the real authenticated user, closure reason, Connect ID, previous status, new status and timestamp as supported by the PRD and existing schema.
+5. Never create closure history for a failed or blocked closure.
+6. Prevent duplicate closure events on repeated requests.
+7. Add regression tests and verify the actual SQL Server persistence behavior. Do not insert fabricated audit events to pass verification.
 
-MANDATORY RULES:
-
-1. Read the approved PRD, Task Breakdown Excel and original UI reference images from the source document folder.
-2. Implement strictly according to those sources, NOT your own assumptions or suggested API design.
-3. Work ONLY on Praveen's assigned T003-4 functionality.
-4. Do not modify Arun's lifecycle code/tables or Abhishek's authentication code.
-5. Preserve existing MS SQL Server PeopleConnect_Dev data and API contracts.
-6. Use `py -m` for all Python commands.
-7. Preserve JWT, RBAC and IBU scoping.
-8. Do not touch deferred Phase 3 issues.
-9. Do not modify frontend code. Backend API contracts must match the approved UI reference images.
-10. Document any integration conflict for merging instead of changing another developer's owned code.
-
-REQUIRED CORRECTIONS:
-
-- Integrate ChangeHistoryService.record_change() into the relevant existing Praveen-owned Connect and Action operations, as required by the source documents.
-- Ensure history is recorded automatically for applicable changes, with correct actor, timestamp and previous/new values.
-- For events owned by Arun's lifecycle code, identify the permitted integration boundary and report any dependency without modifying his files.
-- Enforce append-only persistence and prevent unauthorized updates/deletions.
-- Ensure history writes are atomic with corresponding business changes.
-- Fix the two failing timestamp tests. Do not delete, skip or weaken tests to achieve a pass.
-- Verify history retrieval endpoints, pagination, chronological ordering, RBAC and IBU restrictions.
-- Run targeted and regression tests using `py -m pytest`.
-- Verify the existing MS SQL Server schema and required OpenAPI endpoints without destructive changes.
-
-FINAL REPORT:
-
-Show exact files changed, event-to-history mapping, tests passed/failed, SQL verification results, and remaining blockers.
-
-Do not claim COMPLETE or PRODUCTION-READY without evidence. Do not proceed to T003-5 or another task.
+**Mandatory Rules:**
+- Use PRD, source-folder Task Breakdown Excel, and original UI reference images as the authoritative sources for API design and behavior. Do not invent requirements or APIs.
+- Work only on Praveen's assigned tasks.
+- Do not modify Arun's lifecycle implementation or Abhishek's authentication implementation.
+- Preserve existing MS SQL Server data, JWT, RBAC and IBU scoping.
+- Use `py -m` for every Python command on Tech Mahindra Windows.
+- Do not touch deferred Phase 3 issues.
+- Do not claim completion based only on unit tests; distinguish code verification from live Swagger/SQL verification.
+- Report exact files modified, root cause, test results and remaining gaps.
