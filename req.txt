@@ -1,55 +1,30 @@
-# PEOPLECONNECT — T003-7: SOURCE DOCUMENT VERIFICATION
+Proceed with T003-7 Action Tracker List implementation.
 
-## OBJECTIVE
+First read your completed `T003_7_SOURCE_DOCUMENT_VERIFICATION_AUDIT.md` report and recheck the original PRD (FR-19, FR-26), `REQUIREMENTS_TRACEABILITY.md` Section 8, `PeopleConnect_Task_Breakdown_Plan.xlsx` Row 29, and `Action_tracker_page.png`.
 
-Verify the exact requirements of **T003-7 — Action Tracker List** before implementation.
+Implement the complete T003-7 functionality strictly according to these approved source documents and the verified audit findings.
 
-**AUDIT ONLY. DO NOT MODIFY CODE OR DATABASE.**
+MANDATORY RULES:
 
-## MANDATORY INSTRUCTIONS
+1. Work ONLY on Praveen's T003-7 task.
+2. Do not modify Arun's lifecycle code, APIs, models, migrations, or tables.
+3. Preserve Abhishek's authentication implementation.
+4. Reuse existing FastAPI architecture, SQLAlchemy models, APIs, and Microsoft SQL Server `PeopleConnect_Dev`.
+5. Implement `GET /api/v1/actions` with only the source-approved filters, sorting, pagination, response fields, authorization, and UI requirements.
+6. Preserve JWT, RBAC, IBU authorization, and Connect access restrictions. Apply authorization before counting and pagination.
+7. Support standalone and Connect-linked actions according to the approved requirements.
+8. Do not invent functionality, parameters, defaults, business rules, or database fields.
+9. Resolve the four optional audit clarifications using approved source documents. Do not implement unconfirmed optional features. Stop only if a critical requirement cannot be resolved.
+10. Do not change database schema, existing data, or migrations.
+11. Do not modify frontend code or unrelated tasks.
+12. Preserve existing Action Creation, Editing, Status Management, Connect Closure, and Append-Only History functionality.
+13. Implement real SQL Server-compatible queries without hardcoded production data.
+14. Add comprehensive automated tests covering source-approved functionality, authorization, IBU isolation, filtering, sorting, pagination, and regressions.
+15. On Tech Mahindra Windows, use `py -m` for all Python module commands. Never use `python` or `python -m`.
+16. Run relevant tests and verify Swagger/OpenAPI registration. Clearly distinguish automated test results from actual SQL Server integration testing.
+17. Do not touch deferred Azure OpenAI or ACS issues.
+18. Do not claim success without evidence.
 
-1. Locate and thoroughly read the original PRD, including applicable FR-01 to FR-28 requirements.
-2. Read the original Task Breakdown Planner Excel from the source document folder.
-3. Inspect all relevant original UI reference images.
-4. Identify the exact T003-7 task description, owner, requirements, acceptance criteria and dependencies.
-5. Compare every requirement with existing FastAPI code, APIs, SQLAlchemy models and the actual MS SQL Server schema.
-6. Identify which requirements are already implemented and which are missing.
-7. Map each UI button, filter, field, table column and workflow to existing or required backend functionality.
-8. Determine the required API endpoints, methods, request fields and response contracts **only from the approved source documents and UI references**.
-9. Do not invent API routes, filters, pagination defaults, sorting options, response schemas, database fields or business rules.
-10. Do not use ChatGPT's previous suggestions as requirements.
-11. Reuse existing APIs wherever possible and identify genuine implementation gaps.
+After implementation, provide exact files changed, requirements implemented with source references, API contract, test commands/results, database verification status, unresolved gaps, and step-by-step manual Swagger testing instructions.
 
-## STRICT PROJECT RULES
-
-- Work only within Praveen's assigned T003-7 scope.
-- Arun's lifecycle code, APIs, models and database tables are strictly read-only.
-- Do not modify Abhishek's authentication code.
-- Use existing Microsoft SQL Server `PeopleConnect_Dev`.
-- Preserve existing JWT, RBAC, IBU scoping and employee master integration.
-- Do not modify existing tables or data.
-- Do not create duplicate services, adapters or tables.
-- Do not modify frontend code.
-- Do not touch deferred Azure OpenAI issues.
-- Do not begin another task.
-- On Tech Mahindra Windows, use **`py -m` exclusively** for Python module commands. Never use `python`, `python -m` or `python3`.
-- Do not execute migrations or write operations during this audit.
-
-## REQUIRED REPORT
-
-Provide a requirement mapping table containing:
-
-| Source Document | Requirement Reference | Exact Requirement | UI Image Reference | Existing API/Code | Missing Functionality | Status |
-|---|---|---|---|---|---|---|
-
-Also provide:
-
-1. Exact T003-7 task description from the original Breakdown Planner.
-2. All applicable PRD references.
-3. Relevant UI image filenames and required UI behavior.
-4. Existing reusable APIs and database tables.
-5. Exact missing implementation.
-6. Proposed implementation strictly justified by the source documents.
-7. Any unclear or conflicting requirements requiring approval.
-
-**Do not implement anything yet. Stop after the verification report and wait for my approval.**
+Do not start any other T003 task. Complete T003-7 and stop for my manual Swagger verification.
