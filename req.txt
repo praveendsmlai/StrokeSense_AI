@@ -1,85 +1,68 @@
-# PEOPLECONNECT — T003-1: FIX ACTION CREATION HTTP 500
+# PEOPLECONNECT — COMPLETE TASK-WISE DEVELOPMENT AUDIT
 
-## Objective
-Fix `POST /api/v1/actions` returning HTTP 500 during manual Swagger testing.
+Inspect the entire existing PeopleConnect project and determine the actual development progress based on source code, APIs, database models, migrations, tests, and integrations.
 
-**Actual backend error:**
-```text
-Foreign key associated with column 'pm_actions.connect_id'
-could not find table 'dbo.plan_connect_initiations'
-```
+**MANDATORY RULES**
 
-## Tasks
+1. AUDIT ONLY. Do not modify, generate, delete, or refactor any code.
+2. Do not modify Arun's lifecycle code or his database tables.
+3. Focus only on Praveen's assigned tasks under T002 and T003.
+4. Follow the original task breakdown, PRD, FR-01 to FR-28 requirements, and UI specifications available in the project.
+5. Do not invent phases, task IDs, requirements, or completion percentages.
+6. Tech Mahindra Windows supports `py -m`. Never use `python` or `python -m`.
+7. Use the existing MS SQL Server database `PeopleConnect_Dev` for read-only verification where necessary. No database changes.
+8. Do not assume an API is working simply because its endpoint exists.
+9. Do not claim successful integration without code evidence or actual test results.
+10. Do not modify or retest the previously deferred Azure OpenAI issues.
 
-1. Inspect `app/models/action_models.py`, SQLAlchemy Base, metadata registration, model imports, and existing lifecycle mappings.
-2. Identify and fix the foreign key metadata resolution issue correctly.
-3. Reuse existing Arun lifecycle table definitions where possible, without modifying them.
-4. Preserve `dbo.pm_actions` with all 17 existing columns.
-5. Do not remove database foreign key constraints or bypass business validation to hide the error.
-6. Verify both:
-   - Standalone action creation with `connect_id = null`.
-   - Connect-linked action creation with a valid existing Connect ID.
-7. Ensure T003-4 change history and action creation use one atomic database transaction.
-8. Verify existing PUT action update functionality remains unaffected.
-9. Run focused tests and verify FastAPI starts without errors.
-10. Report the exact root cause, changed files, commands executed, and actual test results.
+**AUDIT REQUIREMENTS**
 
-## MANDATORY RULES — STRICTLY FOLLOW
+For EVERY original task assigned to Praveen:
 
-**1. PYTHON COMMANDS — HIGHEST PRIORITY**
+- Exact task ID and original task name.
+- Required functionality.
+- What has actually been implemented.
+- Relevant backend files, classes, functions and API endpoints.
+- Existing database tables used.
+- Missing functionality and implementation gaps.
+- Current status: COMPLETE, PARTIAL, NOT STARTED, or BLOCKED.
+- Evidence supporting the status.
+- Dependencies on other tasks.
 
-This is the Tech Mahindra Windows environment.
+Also identify:
 
-- ALWAYS use `py -m` for Python module execution.
-- NEVER use `python`, `python -m`, or `python3`.
-- Examples:
-  - `py -m pytest`
-  - `py -m pip install`
-  - `py -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
-  - `py -m compileall app`
-- Do not switch Python interpreters or create environments without permission.
+- Placeholder or mock implementations.
+- Hardcoded data.
+- Missing real integrations.
+- APIs not aligned with requirements.
+- Duplicate implementations or unnecessary adapters.
+- Missing tests and unverified functionality.
+- Existing code that can be reused.
 
-**2. ARUN'S CODE AND TABLES — STRICTLY READ-ONLY**
+**IMPORTANT STATUS RULE**
 
-- Work ONLY on Praveen's assigned Module 3 code.
-- DO NOT modify Arun's lifecycle source files, SQLAlchemy models, migrations, tables, constraints, indexes, or data.
-- DO NOT create duplicate lifecycle tables or mappings.
-- DO NOT execute INSERT, UPDATE, DELETE, ALTER, DROP, or TRUNCATE against Arun-owned tables.
-- Reading Arun's existing tables and model definitions for integration is allowed.
-- If the fix requires changing Arun-owned code or schema, STOP and report the blocker instead of making the change.
+Distinguish between:
+- Code implemented.
+- Automated tests passed.
+- Manually verified through Swagger.
+- Verified against MS SQL Server.
+- Live external provider integration verified.
 
-**3. DATABASE SAFETY**
+Do not treat these as equivalent.
 
-- Database: `PeopleConnect_Dev` (Microsoft SQL Server).
-- Preserve existing data and schemas.
-- Do not recreate `dbo.pm_actions`.
-- Do not execute destructive migrations.
-- Do not change database constraints without approval.
-- Do not create unnecessary tables or duplicate models.
+**FINAL OUTPUT**
 
-**4. API AND SECURITY**
+Provide:
 
-- Preserve existing JWT authentication.
-- Preserve RBAC, action ownership checks, and IBU-based authorization.
-- Preserve existing API request and response contracts.
-- Do not modify unrelated APIs.
-- Do not introduce mock data into production code.
-- Maintain proper transaction rollback on failures.
+1. Complete original T002/T003 task-wise audit table.
+2. Number of COMPLETE, PARTIAL, NOT STARTED and BLOCKED tasks.
+3. Overall development progress, only if supported by evidence.
+4. Exact pending work for every incomplete task.
+5. Recommended development sequence using original task IDs.
+6. Identify the SINGLE NEXT TASK we should implement.
+7. Explain why that task comes next and its dependencies.
+8. List tasks that should be completed before final end-to-end Swagger testing.
 
-**5. TESTING AND REPORTING**
+Keep the known Azure OpenAI API failures in a separate DEFERRED section for final testing.
 
-- Use `py -m` for ALL Python commands.
-- Test the actual affected code, including SQLAlchemy metadata resolution.
-- Confirm backend startup using the correct command.
-- Run relevant regression tests.
-- Do not claim production readiness from unit tests alone.
-- Do not claim Swagger testing passed. I will manually verify the API in Swagger.
-- Do not mark T003-1 COMPLETE until the actual endpoint succeeds.
-
-## Expected Result
-
-`POST /api/v1/actions` should create an action successfully without SQLAlchemy foreign key metadata errors.
-
-The action must persist in `dbo.pm_actions`, with its T003-4 history record saved atomically.
-
-**IMPORTANT: Fix only the actual problem. Do not modify Arun's lifecycle implementation or unrelated PeopleConnect functionality.**
+Do not start development. Wait for my approval after presenting the audit.
