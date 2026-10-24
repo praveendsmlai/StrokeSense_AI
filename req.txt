@@ -1,43 +1,17 @@
-# PEOPLECONNECT — T003-1 IMPLEMENTATION FOLLOW-UP
+**T003-1 — SQL Server Migration Pending**
 
-Your previous response provided only analysis and marked T003-1 BLOCKED. Complete the actual implementation.
+Manual SSMS verification confirmed that `dbo.pm_actions` does not exist in `PeopleConnect_Dev` (0 columns returned).
 
-MANDATORY RULES:
+1. Inspect `migrations/003_create_pm_actions_table.sql`.
+2. Compare its 13 columns against the 16 columns specified in the PRD/Task Breakdown Excel. Resolve any missing required fields.
+3. Verify the migration is safe, non-destructive, and compatible with existing SQL Server tables.
+4. Apply the validated migration to `PeopleConnect_Dev` using the configured database connection.
+5. Verify that `dbo.pm_actions` exists and all required columns, constraints, and indexes are present.
+6. Do not modify Arun's lifecycle tables or existing `dbo.connect_actions` data.
+7. Do not claim completion without actual SQL Server verification.
 
-1. Read the original PRD, Task Breakdown Excel and UI reference images from the source document folder. These are the ONLY source of truth for API design and business requirements. Do not use your own assumptions or suggestions.
-2. Work only on Praveen's T003-1 task.
-3. Do not modify Arun's lifecycle code/tables or Abhishek's authentication code.
-4. Use the existing PeopleConnect_Dev SQL Server database.
-5. Preserve existing records, APIs, history, notifications, RBAC and IBU scoping.
-6. Use `py -m` for every Python command.
-7. Do not touch deferred Phase 3 issues.
+**MANDATORY:** Use `py -m` for all Python module commands on this Tech Mahindra Windows system. Never use `python` or `python -m`.
 
-FIRST verify the exact PRD requirement for `dbo.pm_actions`, compare all its documented fields with the existing `dbo.connect_actions` table, and inspect all dependent APIs, constraints and foreign keys.
+Preserve existing APIs, RBAC, IBU scoping, atomic history tracking, and all other mandatory project rules.
 
-Determine whether independent and Connect-linked actions can safely share the existing table or require the PRD-defined separate table.
-
-Do not assume making `plan_connect_id` nullable is automatically the correct solution.
-
-Implement the source-document-compliant approach with safe database migrations where necessary. Do not delete or overwrite existing data.
-
-Complete action creation and editing APIs according to the PRD and UI screenshots, including validation, ownership, independent/linked action handling, authorization, persistence and atomic history recording.
-
-Reuse existing APIs where applicable. Do not introduce duplicate or conflicting routes.
-
-Run automated tests, verify OpenAPI registration and report exact results.
-
-Do not stop at analysis or defer implementation because of token limits. Implement the changes now.
-
-If a genuine source-document contradiction prevents safe implementation, identify the exact conflicting clauses and required decision. Otherwise complete the task.
-
-FINAL OUTPUT:
-- Exact PRD and UI references
-- Database design selected and justification
-- Files changed
-- APIs implemented
-- Migration details
-- Tests passed/failed
-- Remaining blockers
-- Exact manual Swagger testing steps
-
-Do not claim COMPLETE until implementation and verification are finished.
+Report the actual database verification results.
