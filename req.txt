@@ -1,103 +1,15 @@
-# PEOPLECONNECT — PHASE 4: AZURE COMMUNICATION SERVICES INTEGRATION
+Fix the Phase 4 SQL Server database schema issue.
 
-Implement production-oriented email notification functionality using Azure Communication Services (ACS).
+GET /api/v1/notification-preferences returns HTTP 500 because dbo.notification_preferences does not exist in PeopleConnect_Dev.
 
-## Mandatory Rules
-- Work ONLY on Praveen's assigned Module 3 and notification-related tasks.
-- DO NOT modify Arun's lifecycle code or database tables.
-- Preserve existing MS SQL Server tables and data.
-- Use existing database models and APIs wherever possible.
-- Use `py -m` instead of `python` on Tech Mahindra Windows.
-- Use existing `requirements-lock.txt` for dependencies.
-- Do not introduce mock email delivery into production.
-- Do not claim successful delivery without provider confirmation.
-- Preserve JWT authentication, RBAC and IBU-based access controls.
+1. Inspect existing notification models and database configuration.
+2. Identify all Phase 4 notification tables missing from SQL Server.
+3. Create a safe, SQL Server-compatible migration for only the missing notification tables, matching the existing models exactly.
+4. Preserve existing records and avoid duplicate table creation.
+5. Do not modify Arun's 9 lifecycle tables, models, or APIs.
+6. Do not modify unrelated Module 3 tables.
+7. Use `py -m` instead of `python` on Windows.
+8. Run database and API verification using the actual PeopleConnect_Dev SQL Server database.
+9. Do not report success unless the tables exist and GET /api/v1/notification-preferences returns HTTP 200.
 
-## Requirements
-
-### 1. ACS Integration
-Implement a real Azure Communication Services email provider.
-
-Support:
-- ACS connection string authentication.
-- Microsoft Entra ID authentication where supported.
-- Configurable sender email address.
-- Environment-based configuration.
-- Secure credential handling.
-
-### 2. Email Notifications
-Implement and integrate notifications for:
-- Published meeting minutes.
-- Action item assignment.
-- Action status updates where required.
-- Upcoming action due dates.
-- Overdue actions.
-- SLA breaches.
-- Escalations.
-
-### 3. Email Templates
-Create configurable templates containing relevant Connect details, action owner, due date, status and escalation information.
-
-### 4. Reminder Automation
-Implement scheduled reminder processing based on existing SLA and escalation rules.
-
-Prevent duplicate notifications using idempotency keys.
-
-### 5. Delivery Tracking
-Track:
-- Notification ID
-- Recipient
-- Notification type
-- Provider message ID
-- Delivery status
-- Retry count
-- Error details
-- Created and sent timestamps
-
-Use existing notification tables where compatible. Do not create duplicate tables unnecessarily.
-
-### 6. API Integration
-Inspect existing notification APIs first.
-
-Reuse or extend them only where functionality is missing. Preserve existing API contracts unless changes are necessary and documented.
-
-### 7. Error Handling
-Handle missing ACS credentials, authentication failures, timeouts, throttling and delivery failures.
-
-Never mark an email as SENT unless ACS confirms acceptance. Track delivery confirmation separately.
-
-### 8. Testing
-Perform offline tests using controlled provider mocks.
-
-Verify:
-- API authentication and authorization.
-- Email payload generation.
-- Retry behaviour.
-- Reminder scheduling.
-- Duplicate prevention.
-- Delivery status persistence.
-- Existing backend regression tests.
-
-Live ACS testing can remain pending until Tech Mahindra provides credentials.
-
-## Final Report
-Provide:
-1. Existing functionality reused.
-2. New functionality implemented.
-3. Files modified.
-4. APIs added or modified.
-5. Tests executed and results.
-6. ACS configuration requirements.
-7. Pending live integration tests.
-
-Do not modify unrelated modules.
-
-Do not report production readiness without successful live provider verification.
-
-## Deferred Issues
-The following Phase 3 issues are intentionally deferred until final project testing:
-- Extract Actions: HTTP 422 instead of expected 503.
-- Generate Insights: HTTP 201 with FAILED response.
-- AI History: HTTP 500.
-
-Do not attempt to fix these during Phase 4.
+Show the SQL changes, migration results, and actual API response.
