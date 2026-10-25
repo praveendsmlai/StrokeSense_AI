@@ -1,21 +1,33 @@
-Inspect the existing PeopleConnect FastAPI backend for implementing two requirements:
+Implement Phase 1 of PeopleConnect T002 transcript ingestion.
 
-1. Transcript, audio and video upload, with extracted/transcribed text persisted in a SQL Server transcript table. Existing MoM generation must read this persisted transcript.
-2. Voice recording upload API, accepting browser-recorded audio and persisting its transcript in the same table.
+Goal:
+Create a working transcript upload API that extracts text from supported text documents and stores the transcript in the existing SQL Server ConnectInputSource table.
 
-First inspect existing transcript, document, meeting, recording, AI generation, SQLAlchemy models, migrations, and Azure OpenAI integration.
+Requirements:
 
-Identify reusable components, missing functionality, and exact required changes.
+1. Inspect the existing ConnectInputSource SQLAlchemy model and actual SQL Server schema before modifying anything.
+2. Implement POST /api/v1/connects/{connect_id}/transcripts/upload using multipart/form-data.
+3. Support .txt, .docx and text-based .pdf files using real extraction libraries.
+4. Validate connect existence using Arun's existing canonical lifecycle tables, without modifying them.
+5. Reuse existing authentication, BHR+ authorization and IBU-scoping rules.
+6. Validate file extension, MIME/content, size and empty transcript.
+7. Persist extracted transcript text in the existing ConnectInputSource table with correct connect_id and available source metadata.
+8. Store uploaded files securely in configurable local storage, outside publicly served directories, using generated safe filenames.
+9. Return transcript ID, connect ID, filename, extraction status and extracted text length.
+10. Add a GET endpoint to retrieve transcripts for an authorized connect, only if an equivalent endpoint does not already exist.
+11. Add automated tests for successful upload, invalid format, missing connect, unauthorized access, IBU isolation and SQL persistence.
+12. Register new endpoints in existing FastAPI Swagger.
 
 Constraints:
-- Work only within Praveen-owned T002/T003 scope.
+- Modify only Praveen-owned T002 files and supporting infrastructure.
 - Do not modify Arun's lifecycle code or nine canonical tables.
-- Use existing SQL Server PeopleConnect_Dev, dbo schema.
-- No separate service or database.
-- Do not duplicate existing endpoints or tables.
-- Preserve existing MoM generation and approval workflows.
-- No mock transcription or fake success.
-- Do not modify code or database yet.
+- Use existing PeopleConnect_Dev SQL Server database and dbo schema.
+- Do not create a duplicate transcript table.
+- Do not change the existing MoM generation API in this phase.
+- Do not implement audio/video transcription or voice recording yet.
+- Do not use mock success responses.
+- Do not delete or overwrite existing records.
 - Use py -m for Python commands.
+- Inspect the existing code before editing.
 
-Report existing endpoints, existing transcript table/schema, current MoM data source, supported media formats, transcription provider availability, and a minimal implementation plan.
+After implementation, run relevant tests and report exact files changed, endpoint contracts, SQL persistence evidence, and any remaining limitations. Do not claim tests passed unless actually executed.
