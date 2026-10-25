@@ -1,41 +1,9 @@
-Continue PeopleConnect T002 — Phase 3: Integrate stored transcripts with MoM generation.
+Fix GET /api/v1/connects/{connect_id}/ai-history returning HTTP 500.
 
-Phase 1 and Phase 2 are implemented. Now complete the end-to-end transcript-to-MoM workflow.
+Root cause: AIGenerationHistoryItem Pydantic validation rejects request_type="EXTRACT_INSIGHTS".
 
-1. Inspect the existing generate-minutes API, AI generation service, ConnectInputSource model and SQL Server schema before making changes.
+Inspect the existing request type enum, database values, and AI history response schema. Make the smallest backward-compatible fix so existing EXTRACT_INSIGHTS records are returned correctly.
 
-2. Reuse the existing POST /api/v1/connects/{connect_id}/generate-minutes endpoint. Do not create a duplicate MoM generation endpoint.
+Do not modify Arun's lifecycle code or tables. Do not delete or update existing database records.
 
-3. Extend the existing API to support selecting a stored transcript using transcript_id, or explicitly selecting completed transcripts belonging to the requested connect.
-
-4. Read actual transcript text from dbo.connect_input_sources in PeopleConnect_Dev SQL Server. Never require the frontend to copy and resend the full transcript.
-
-5. Validate that the selected transcript belongs to the requested connect, is authorized for the current user's IBU scope, has COMPLETED transcription status where applicable, and contains nonempty text.
-
-6. Reject PENDING, PROCESSING, FAILED, missing, or unauthorized transcripts with appropriate responses. Never generate MoM from placeholder content.
-
-7. Pass the retrieved transcript text to the existing Azure OpenAI MoM generation service. Preserve the existing minutes generation, validation, review, approval, and persistence workflows.
-
-8. Preserve backward compatibility with existing input_content-based MoM requests.
-
-9. Support multiple uploaded transcripts per connect without accidentally mixing content. Use explicit selection or a clearly defined aggregation rule.
-
-10. Keep the real Azure OpenAI integration code. Credentials are not available yet, so defer live provider testing. Do not generate fake MoM output or claim live AI success.
-
-11. Verify that Phase 2 transcription completion actually persists transcript content and that the new MoM retrieval uses the same records.
-
-12. Add automated tests for transcript retrieval, ownership, authorization, incomplete transcripts, empty content, multiple transcripts, backward compatibility, and MoM persistence.
-
-13. Inspect whether a transcription retry API is already implemented. If missing, add a secure retry endpoint for FAILED or pending-provider transcription without duplicating media records.
-
-Constraints:
-- Modify only Praveen-owned T002 code.
-- Do not modify Arun's lifecycle code or nine canonical tables.
-- Reuse existing SQL Server database and services.
-- No duplicate tables, endpoints, or microservices.
-- No destructive data changes.
-- Use py -m for Python commands.
-- No frontend changes.
-- No live Azure calls until credentials are provided.
-
-Finally, report exact files changed, API request examples, SQL data flow, test results, and anything still pending manual or live provider verification.
+Test the fix and report results.
