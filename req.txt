@@ -1,28 +1,15 @@
-WITH ActionAging AS (
-    SELECT
-        DATEDIFF(DAY, CAST(created_at AS DATE), CAST(GETDATE() AS DATE)) AS age_days,
-        CASE
-            WHEN CAST(due_date AS DATE) < CAST(GETDATE() AS DATE)
-            THEN 1 ELSE 0
-        END AS is_overdue
-    FROM dbo.pm_actions
-    WHERE status <> 'CLOSED'
-      AND deleted_at IS NULL
-)
 SELECT
-    CASE
-        WHEN age_days < 3 THEN '0_3_days'
-        WHEN age_days < 7 THEN '3_7_days'
-        WHEN age_days < 14 THEN '7_14_days'
-        ELSE '14_plus_days'
-    END AS aging_bucket,
-    COUNT(*) AS action_count,
-    SUM(is_overdue) AS overdue_count
-FROM ActionAging
-GROUP BY
-    CASE
-        WHEN age_days < 3 THEN '0_3_days'
-        WHEN age_days < 7 THEN '3_7_days'
-        WHEN age_days < 14 THEN '7_14_days'
-        ELSE '14_plus_days'
-    END;
+    CAST(due_date AS DATE) AS due_date,
+    COUNT(*) AS action_count
+FROM dbo.pm_actions
+WHERE status <> 'CLOSED'
+  AND deleted_at IS NULL
+  AND CAST(due_date AS DATE) IN (
+      CAST(GETDATE() AS DATE),
+      DATEADD(DAY, 1, CAST(GETDATE() AS DATE)),
+      DATEADD(DAY, -1, CAST(GETDATE() AS DATE)),
+      DATEADD(DAY, -3, CAST(GETDATE() AS DATE)),
+      DATEADD(DAY, -7, CAST(GETDATE() AS DATE))
+  )
+GROUP BY CAST(due_date AS DATE)
+ORDER BY due_date;
