@@ -1,495 +1,711 @@
-# PEOPLECONNECT — T003-7 ACTION TRACKER LIST
-## COMPLETE IMPLEMENTATION PROMPT FOR CLAUDE CODE
+# PEOPLECONNECT — T003-8 DASHBOARD
+## COMPLETE DEVELOPMENT PROMPT FOR CLAUDE CODE
 
-You are working on the existing Tech Mahindra PeopleConnect project.
+You are working on the existing Tech Mahindra PeopleConnect application.
 
-**TASK ID:** T003-7  
-**TASK NAME:** Action Tracker List  
-**SCOPE:** Praveen-owned Module 3 backend only  
-**DATABASE:** Microsoft SQL Server — PeopleConnect_Dev  
-**DATABASE SCHEMA:** dbo  
-**MODE:** Inspect → Implement → Test → Report
+TASK ID: T003-8  
+TASK NAME: Dashboard  
+OWNER: Praveen — Module 3  
+ENVIRONMENT: Tech Mahindra Windows  
+DATABASE: Microsoft SQL Server — PeopleConnect_Dev  
+SCHEMA: dbo  
+ARCHITECTURE: Existing FastAPI backend and shared SQL Server database
 
-Your objective is to complete T003-7 according to the original requirements, existing application architecture, and UI expectations.
+OBJECTIVE:
 
-Do not implement unrelated tasks.
+Complete the remaining T003-8 Dashboard functionality according to the approved source documents, revised functional requirements, existing database architecture, and reference UI.
+
+Continue from the existing implementation. Do not rebuild the project or duplicate working functionality.
+
+CURRENT DEVELOPMENT STRATEGY:
+
+Complete all remaining development tasks with automated tests first. Full manual Swagger testing and external-provider integration verification will be performed later.
 
 ---
 
 ## 1. MANDATORY SOURCE DOCUMENTS
 
-Before writing or modifying code, locate and read all relevant project documents.
+Before making any code changes, locate and read the relevant project documents.
 
-**Primary source of truth:**
+The project contains source documents and UI reference materials. Search the repository for their actual paths rather than assuming filenames.
 
-1. Revised PeopleConnect Functional Requirements FR-01 through FR-28.
-2. Original T003-7 Action Tracker List task description, specifications, and acceptance criteria.
-3. PeopleConnect UI reference screenshots, especially Action Tracker screens.
-4. Existing API contract and backend design documents.
-5. Existing database schema and SQLAlchemy models.
+### Primary source documents
 
-**Supporting documents:**
+1. Revised Functional Requirements FR-01 through FR-28.
+2. Original PeopleConnect PRD / Product Requirements Document.
+3. Breakdown Planner containing T003-8 scope, deliverables, dependencies, and acceptance criteria.
+4. Requirements Traceability Matrix / Requirements Traceability document.
+5. Approved Dashboard UI screenshots and designs from the separate UI reference folder.
+6. Approved API contracts, if available.
 
-6. `COMPREHENSIVE_TASK_AUDIT.md`
-7. Existing T003 implementation notes and test reports.
-8. Relevant implementation and integration documentation.
+### Supporting documents
 
-**Source priority:**
+7. COMPREHENSIVE_TASK_AUDIT.md.
+8. Existing T003 implementation and integration reports.
+9. Arun lifecycle database documentation.
+10. Current SQL Server schema and SQLAlchemy models.
+11. Existing dashboard routes, schemas, services, queries, and tests.
+12. Relevant RBAC, IBU mapping, and data-visibility documentation.
 
-Revised FR-01–FR-28 → Original task specification → Approved UI/API contract → Existing implementation → Audit report.
+SOURCE PRIORITY:
 
-The audit report is a status reference, not a replacement for functional requirements.
+Revised FR-01–FR-28 → Approved PRD and task breakdown → Requirements Traceability → Approved UI/API contract → Existing implementation → Audit reports.
 
-If any document is unavailable, report exactly what is missing. Do not invent requirements or silently assume undocumented business rules.
+Do not treat an old audit status as proof of the current implementation state.
 
-Before implementation, identify which FR requirements and acceptance criteria apply to T003-7.
+If a required source document is missing, identify it clearly. Do not invent requirements, formulas, dashboard widgets, or API contracts.
 
----
+Before implementation, create a concise T003-8 requirements-to-implementation mapping showing:
 
-## 2. MANDATORY PROJECT OWNERSHIP RULES
+- Requirement reference
+- Required dashboard feature
+- Expected data source
+- Existing implementation
+- Missing implementation
+- Relevant UI component/API
+- Acceptance criteria
 
-This work belongs exclusively to Praveen's Module 3 scope.
-
-Arun owns the lifecycle implementation and its nine canonical tables:
-
-1. `plan_connect_initiations`
-2. `plan_connect_participants`
-3. `participant_snapshots`
-4. `plan_connect_file_uploads`
-5. `participant_upload_rows`
-6. `connect_types`
-7. `hr_roster`
-8. `users`
-9. `audit_logs`
-
-STRICTLY PROHIBITED:
-
-- Modifying Arun's lifecycle source code.
-- Modifying Arun's nine tables or their schemas.
-- Creating replacement lifecycle tables.
-- Reintroducing legacy lifecycle adapters.
-- Duplicating Arun's lifecycle functionality.
-- Changing lifecycle state transitions.
-- Modifying lifecycle RBAC behavior.
-- Creating a second database or service.
-
-Arun's tables may be queried read-only when required for authorized Connect information.
-
-Use existing integration patterns and the current canonical database architecture.
-
-Both BHR and BHR Leader can create Connects within their authorized scope. Do not alter this established permission rule.
+Use the actual source documents to determine the Dashboard scope.
 
 ---
 
-## 3. DATABASE REQUIREMENTS
+## 2. STRICT OWNERSHIP AND SCOPE RULES
 
-Use the existing Microsoft SQL Server database:
+Work only on Praveen-owned T003-8 Dashboard functionality.
 
-`PeopleConnect_Dev`
+Arun owns the lifecycle implementation and the following nine canonical tables:
+
+1. plan_connect_initiations
+2. plan_connect_participants
+3. participant_snapshots
+4. plan_connect_file_uploads
+5. participant_upload_rows
+6. connect_types
+7. hr_roster
+8. users
+9. audit_logs
+
+MANDATORY RESTRICTIONS:
+
+- Do not modify Arun's source code.
+- Do not modify the structure or data of Arun's nine canonical tables.
+- Do not recreate or duplicate Arun's lifecycle tables.
+- Do not change lifecycle workflows, states, transitions, or validation rules.
+- Do not introduce legacy lifecycle adapters or parallel lifecycle storage.
+- Do not modify Arun's existing lifecycle APIs.
+- Do not create a second backend service or database.
+- Do not modify unrelated modules.
+- Do not change existing authentication behavior.
+- Do not implement T003-9, T003-10, or T003-11 under this task.
+
+Read-only access to Arun's tables is allowed when required to calculate Dashboard metrics.
+
+All Dashboard functionality must integrate with the existing shared application architecture.
+
+---
+
+## 3. DATABASE RULES
+
+Use the existing SQL Server database:
+
+PeopleConnect_Dev
 
 Schema:
 
-`dbo`
+dbo
 
-Primary action table:
+Do not use SQLite or an in-memory database for production functionality.
 
-`dbo.pm_actions`
+Inspect the actual SQL Server schema before implementing queries.
 
-Inspect the actual table structure, SQLAlchemy model, relationships, and existing query patterns before implementation.
+Potential data sources include:
 
-Requirements:
+- Arun's canonical Connect lifecycle tables
+- Existing Praveen-owned action tables, including dbo.pm_actions
+- Existing minutes, meetings, documents, themes, insights, and related Module 3 tables
+- Existing configuration and reference tables
 
-- Use real persisted SQL Server data.
-- Do not use SQLite.
-- Do not use mock data in production code.
-- Do not create duplicate action tables.
-- Do not recreate existing database objects.
-- Do not alter existing data.
-- Do not perform destructive migrations.
-- Do not introduce schema changes unless strictly required by the original specification; report and request approval before applying any schema change.
-- Preserve existing action IDs, Connect IDs, ownership, timestamps, status, priority, due dates, and audit history.
+These are candidate sources only. Confirm the actual tables and columns from the database and project models.
 
-Support both standalone actions (`connect_id` NULL) and actions linked to valid Arun Connect IDs such as `PC-00001`.
+MANDATORY DATABASE RULES:
 
-Do not require a Connect ID for standalone actions.
+- Use existing SQLAlchemy session management.
+- Use parameterized SQLAlchemy queries.
+- Do not hardcode business records.
+- Do not return mock dashboard metrics.
+- Do not fabricate Connects, actions, meetings, employees, themes, or trends.
+- Do not create duplicate reporting tables.
+- Do not silently introduce migrations.
+- Do not change existing production data.
+- Do not modify Arun's tables.
+- Do not introduce unnecessary database dependencies.
+- Avoid N+1 queries and unbounded data loading.
+- Keep aggregation in SQL Server wherever practical.
+- Use the project's existing database connection configuration.
+- Ensure SQL Server compatibility.
+
+If a required metric cannot be calculated from existing data, identify the missing source and report the limitation instead of inventing a value.
 
 ---
 
-## 4. INSPECT EXISTING IMPLEMENTATION FIRST
+## 4. INSPECT EXISTING DASHBOARD IMPLEMENTATION
 
-Before creating any endpoint, inspect:
+Before coding, inspect:
 
-- Existing action routers and route registration.
-- Existing `GET /api/v1/actions` or equivalent endpoints.
-- Connect-specific action listing endpoints.
-- Action models and Pydantic schemas.
-- Action creation and editing services.
+- Existing Dashboard API endpoints.
+- Existing Dashboard service layer.
+- Existing dashboard response schemas.
+- Existing SQL queries and aggregation functions.
+- Existing frontend API expectations, read-only.
+- Approved Dashboard reference screenshots.
 - Existing authentication and authorization dependencies.
-- Existing pagination and filtering conventions.
-- Existing SQL Server query utilities.
-- Action Tracker UI contract and required fields.
-- Existing automated tests.
+- Existing tests.
+- Existing action and lifecycle integrations.
 
-Identify what is already implemented, what is partially implemented, and what is missing.
+Check whether these or equivalent routes already exist:
 
-Do not duplicate existing functionality.
+GET /api/v1/dashboard/summary
 
-Preserve these working capabilities:
+GET /api/v1/dashboard/metrics
 
-- `POST /api/v1/actions`
-- `PUT /api/v1/actions/{action_id}`
-- Action status management
-- Append-only change history
-- SLA-related functionality
-- Reminders and aging
-- Connect-linked action creation
-- Standalone action creation
+GET /api/v1/dashboard/options
 
-Do not introduce route conflicts with existing static paths such as `/api/v1/actions/aging/report`.
+Also inspect any other existing Dashboard routes.
+
+Do not assume these endpoints must all exist. Use the approved API contract and existing architecture.
+
+Do not create duplicate endpoints.
+
+Preserve existing routes and response compatibility unless an approved requirement explicitly requires a change.
+
+Document any compatibility impact before modifying an existing API contract.
 
 ---
 
-## 5. IMPLEMENT T003-7 — ACTION TRACKER LIST
+## 5. IMPLEMENT T003-8 DASHBOARD REQUIREMENTS
 
-Implement or complete the Action Tracker listing API according to the original task specification and approved UI contract.
+Implement only the Dashboard features required by the approved source documents.
 
-Expected endpoint, unless an approved contract specifies otherwise:
+### 5.1 Dashboard metrics
 
-`GET /api/v1/actions`
+Identify all required Dashboard KPI cards from the approved UI screenshots and requirements.
 
-The endpoint must return action records from `dbo.pm_actions`.
+Possible metrics may include:
 
-### 5.1 Required action information
+- Total Connects
+- Planned Connects
+- Completed Connects
+- Published Connects
+- Open Actions
+- Overdue Actions
+- Closed Actions
+- SLA-related metrics
+- Pending follow-ups
+- Other approved Dashboard KPIs
 
-Return the fields required by the approved UI contract, using actual model fields.
+This list is illustrative, not authorization to invent new requirements.
 
-Evaluate the following:
+Implement the exact approved metrics, labels, definitions, and data sources.
 
-- Action ID
-- Action title
-- Description
-- Connect ID
-- Owner ID
-- Owner name, if required and resolvable
-- Owner email, if required
-- Status
-- Priority
-- Due date
-- Created date
-- Updated date
+Every metric must use real database data.
+
+Do not count legacy or duplicate Connect records.
+
+Do not count soft-deleted records where the business rules exclude them.
+
+Do not substitute actions for Connect counts or vice versa.
+
+### 5.2 Dashboard charts and visualizations
+
+Inspect the UI reference screenshots and identify every required chart.
+
+Implement the backend API data required by those charts.
+
+Potential dimensions may include:
+
+- Connect type
+- Connect status
 - IBU
-- SLA/overdue information, if already supported and required
-- Other fields explicitly required by the original specification
-
-Do not invent model fields or fabricate missing values.
-
-### 5.2 Filtering
-
-Implement documented filters, including where required:
-
-- Status
+- Date or reporting period
+- Action status
 - Priority
-- Owner employee ID
-- Connect ID
+- SLA status
+- Theme or category
+
+Only implement dimensions supported by the approved requirements.
+
+Return structured API data suitable for the actual UI charts.
+
+Do not return hardcoded chart series.
+
+Do not fabricate trend values.
+
+### 5.3 Dashboard filters
+
+Implement approved Dashboard filters.
+
+Check the source documents for:
+
+- Date presets
+- Custom date ranges
 - IBU
-- Due-date start
-- Due-date end
-- Search by supported action fields
+- Connect type
+- Status
+- Other authorized dimensions
 
-Filters must work individually and in combination.
+Filters must work together.
 
-Handle NULL Connect IDs correctly for standalone actions.
-
-Use existing enum values and validation rules.
+All KPI cards and charts representing the same reporting scope must use consistent filter semantics.
 
 Invalid filter values must produce appropriate validation errors.
 
-### 5.3 Search
+Do not silently ignore unsupported filters.
 
-If required by the original specification or UI contract, implement case-insensitive search across approved searchable fields.
+### 5.4 Dashboard drill-down
 
-Use parameterized SQLAlchemy queries.
+If required by the approved UI and API contract, return the identifiers and filtering context needed for users to navigate from a Dashboard metric or chart to its underlying records.
 
-Do not use unsafe SQL string concatenation.
+Do not invent new frontend routes.
 
-### 5.4 Pagination
+Do not modify frontend code.
 
-Implement server-side pagination using the project's existing conventions.
+Use existing action and Connect APIs where possible.
 
-Support:
+### 5.5 Empty data handling
 
-- Page number
-- Page size/limit
-- Total matching records
-- Current page
-- Pagination metadata required by the UI
+When no records match the selected filters:
 
-Pagination must occur in SQL Server, not after loading all records into Python.
-
-Total counts must reflect the same authorization and filter conditions as the returned records.
-
-### 5.5 Sorting
-
-Implement documented sorting options.
-
-Potential fields include:
-
-- Due date
-- Created date
-- Updated date
-- Priority
-- Status
-
-Use only fields supported by the approved contract.
-
-Support ascending and descending order where required.
-
-Whitelist sortable fields.
-
-Use deterministic secondary ordering so pagination does not produce inconsistent results.
-
-### 5.6 Empty results
-
-When no actions match, return a successful response with an empty collection and correct pagination metadata.
-
-Do not return fabricated sample actions.
+- Return a valid response.
+- Return zero for applicable counts.
+- Return empty chart datasets where appropriate.
+- Return null or the documented equivalent for undefined percentages.
+- Do not invent sample records.
+- Do not raise unnecessary server errors.
 
 ---
 
-## 6. AUTHENTICATION, RBAC AND IBU SECURITY
+## 6. MANDATORY FR-24 REPORTING DIMENSIONS AND DATE PRESETS
 
-Preserve the existing JWT authentication mechanism.
+FR-24 is a critical source-of-truth requirement.
 
-Apply the application's established authorization and data-visibility rules.
+Read its complete revised wording and related traceability entries before implementation.
 
-Mandatory requirements:
+Apply all relevant FR-24 rules to T003-8.
 
-- Unauthenticated requests must be rejected.
-- Unauthorized roles must not access restricted data.
-- Users must see only actions within their authorized scope.
-- IBU restrictions must be enforced server-side.
-- An IBU query parameter must never expand a user's access.
-- Owner and Connect filters must not bypass authorization.
-- Pagination totals must not expose records from unauthorized IBUs.
-- Do not trust client-supplied role, user ID, or IBU values for authorization.
-- Preserve existing administrative visibility rules.
+Specifically:
 
-Read approved RBAC documentation before deciding which roles can see which actions.
+- Preserve the exact approved reporting dimensions.
+- Preserve the exact approved date presets.
+- Support approved custom date ranges.
+- Use the correct date field for each metric.
+- Apply consistent start/end boundaries.
+- Follow the documented reporting timezone.
+- Avoid incorrect inclusion or exclusion at date boundaries.
+- Ensure filter options are sourced from authorized, valid data.
+- Do not invent new date presets.
+- Do not silently omit a required reporting dimension.
 
-Do not invent new role permissions.
+Do not assume that created_at, scheduled_from, due_date, and published_at are interchangeable.
+
+Each metric must use the date semantics specified by the requirements.
+
+If FR-24 belongs partly to T003-9 Reporting, implement only the shared Dashboard behavior required by T003-8 and document the remaining dependency for T003-9.
 
 ---
 
-## 7. CONNECT INTEGRATION
+## 7. MANDATORY FR-25 DENOMINATOR AND PERCENTAGE RULES
 
-Action Tracker must support actions linked to Arun's canonical Connect records.
+FR-25 is another critical source-of-truth requirement.
+
+Read its complete revised wording before implementing percentage-based metrics.
+
+Mandatory rules:
+
+- Use the exact approved numerator.
+- Use the exact approved valid denominator.
+- Exclude invalid or ineligible records according to the requirements.
+- Do not automatically use all records as the denominator.
+- Do not count duplicates.
+- Do not include unauthorized records.
+- Handle zero denominators according to the approved contract.
+- Apply the documented rounding and display precision.
+- Ensure percentage values remain consistent across Dashboard widgets.
+- Do not calculate averages of percentages where the requirement calls for a ratio of totals.
+
+For each percentage metric, document:
+
+1. Numerator definition
+2. Denominator definition
+3. Exclusions
+4. Date filtering rules
+5. IBU filtering rules
+6. Rounding rule
+7. Zero-denominator behavior
+
+Do not invent denominator rules.
+
+---
+
+## 8. MANDATORY FR-26 ACTION ANALYTICS
+
+FR-26 must be followed exactly for Dashboard action analytics.
+
+Read the revised requirement and traceability entries.
+
+Use the real action records from existing Module 3 tables.
+
+Mandatory rules:
+
+- Preserve the exact required action analytics.
+- Use documented status definitions.
+- Distinguish open, overdue, completed, and other statuses correctly.
+- Apply the approved overdue-date calculation.
+- Use the correct reporting timezone.
+- Respect soft deletion.
+- Respect IBU and user scope.
+- Handle standalone actions correctly.
+- Avoid duplicate counts from joins.
+- Do not count action status-history rows as separate actions.
+- Do not invent SLA calculations.
+- Do not change existing action status transitions.
+
+Where T003-8 depends on T003-7 Action Tracker data, reuse existing validated service/query logic where appropriate.
+
+Do not rewrite or duplicate T003-7 unnecessarily.
+
+Where FR-26 also applies to T003-9 Reporting, preserve shared definitions and document the dependency.
+
+---
+
+## 9. RBAC, JWT AND IBU DATA ISOLATION
+
+Use existing JWT authentication and RBAC dependencies.
+
+Follow the approved authorization matrix.
+
+Mandatory rules:
+
+- Reject unauthenticated requests.
+- Enforce role-based access.
+- Enforce authorized IBU scope.
+- Do not expose cross-IBU data.
+- Do not allow a query parameter to expand access.
+- Do not trust client-provided role or IBU claims without server-side validation.
+- Ensure Dashboard counts and percentages use only authorized records.
+- Apply authorization before aggregation.
+- Prevent data leakage through filter options, totals, and chart series.
+- Preserve documented administrator visibility.
+- Preserve existing BHR and BHR Leader permissions.
+- Do not modify lifecycle role definitions.
+
+Both BHR and BHR Leader may create Connects within their authorized scope. Do not regress this existing rule.
+
+Do not assume every role can view every Dashboard metric.
+
+---
+
+## 10. CONNECT LIFECYCLE INTEGRATION
+
+Dashboard Connect metrics must use Arun's canonical lifecycle data.
+
+Inspect actual lifecycle table columns and approved status/stage definitions.
+
+Mandatory rules:
+
+- Use canonical Connect IDs such as PC-00001.
+- Respect existing Connect status and stage semantics.
+- Do not invent lifecycle status values.
+- Do not infer completion solely from action status.
+- Do not count duplicated Connect records from participant joins.
+- Apply participant-level metrics only when explicitly required.
+- Preserve existing lifecycle records.
+- Never mutate Arun's tables from Dashboard code.
+
+If a metric requires combining Connect and action data, use correct join keys and prevent multiplicative counts.
+
+---
+
+## 11. API DESIGN AND COMPATIBILITY
+
+Use the existing FastAPI architecture.
 
 Requirements:
 
-- Use existing `connect_id` references.
-- Preserve valid Connect IDs such as `PC-00001`.
-- Support actions without a Connect ID.
-- Do not change Arun's Connect records.
-- Do not duplicate lifecycle tables.
-- Do not introduce ORM foreign-key metadata errors.
-- Use read-only Connect lookups only when necessary for the approved response contract.
+- Follow existing route naming conventions.
+- Follow existing Pydantic schema conventions.
+- Reuse existing dependencies and services.
+- Preserve backward compatibility.
+- Return consistent response structures.
+- Include correct HTTP status codes.
+- Validate input parameters.
+- Handle database errors safely.
+- Do not expose SQL queries or internal exception details to API consumers.
+- Do not create decorative or unused endpoints.
+- Do not implement frontend changes.
+- Ensure each approved Dashboard UI widget has a real backend data contract.
 
-Do not modify existing action creation behavior.
+Before adding a new API, confirm that an existing endpoint cannot satisfy the requirement.
+
+If the approved UI contract conflicts with the existing API, report the conflict and implement only changes supported by the source documents.
 
 ---
 
-## 8. PERFORMANCE AND DATA CORRECTNESS
+## 12. PERFORMANCE REQUIREMENTS
+
+Dashboard queries may aggregate large datasets.
 
 Ensure:
 
-- SQL Server-compatible queries.
-- Database-side filtering.
-- Database-side pagination.
-- Accurate counts.
-- No unnecessary N+1 queries.
-- No unbounded full-table loading.
-- Correct handling of nullable values.
-- Consistent date filtering.
-- Proper treatment of soft-deleted actions.
-- Deterministic sorting.
-- No duplicate records caused by joins.
+- SQL Server-side aggregation where appropriate.
+- Efficient filtering.
+- Proper use of existing indexes.
+- No unnecessary full-table loads.
+- No N+1 database queries.
+- Correct handling of nullable fields.
+- Efficient grouped counts.
+- Stable response schemas.
+- No duplicate counts from joins.
+- No unnecessary repeated database queries.
 
-Use the project's existing SQLAlchemy architecture and coding conventions.
+Do not claim a specific response-time target without measured evidence.
 
----
-
-## 9. AUTOMATED TESTING
-
-Add focused tests for T003-7.
-
-Cover at least:
-
-1. Retrieve actions successfully.
-2. Empty result set.
-3. Filter by status.
-4. Filter by priority.
-5. Filter by owner.
-6. Filter by Connect ID.
-7. Standalone actions with NULL Connect ID.
-8. Filter by IBU.
-9. Due-date range.
-10. Combined filters.
-11. Search behavior, if applicable.
-12. Pagination.
-13. Accurate total count.
-14. Ascending sorting.
-15. Descending sorting.
-16. Invalid query parameters.
-17. Unauthenticated access.
-18. Unauthorized role access.
-19. Cross-IBU isolation.
-20. Soft-deleted action exclusion.
-21. SQL Server compatibility.
-22. Existing action creation regression.
-23. Existing action editing regression.
-24. Existing append-only history regression.
-25. Existing aging/report endpoint regression.
-
-Do not modify real business data merely to run tests.
-
-Use isolated test fixtures or the project's existing approved test strategy.
-
-Do not claim integration tests passed unless they actually executed.
+Do not add caching unless explicitly required or justified by the approved architecture.
 
 ---
 
-## 10. TECH MAHINDRA WINDOWS COMMAND RULE
+## 13. AUTOMATED TESTING — MANDATORY
 
-The Tech Mahindra environment does not support the `python` executable.
+Implement focused automated tests for all T003-8 functionality.
 
-Always use the Windows Python launcher.
+Cover:
 
-Examples:
+1. Successful Dashboard API response.
+2. Authentication required.
+3. Role-based authorization.
+4. IBU-level isolation.
+5. Administrator visibility.
+6. Empty dataset behavior.
+7. Correct total Connect count.
+8. Correct lifecycle status counts.
+9. Correct action counts.
+10. Correct overdue calculations.
+11. Correct soft-delete exclusion.
+12. Date preset filtering.
+13. Custom date range filtering.
+14. Date boundary behavior.
+15. Combined filters.
+16. Invalid filter handling.
+17. Chart aggregation correctness.
+18. Prevention of duplicate counts.
+19. Standalone action handling.
+20. Connect-linked action handling.
+21. FR-24 reporting dimension correctness.
+22. FR-25 numerator/denominator correctness.
+23. FR-25 zero-denominator behavior.
+24. FR-26 action analytics correctness.
+25. Cross-IBU aggregate leakage prevention.
+26. Existing Dashboard endpoint regression.
+27. T003-7 Action Tracker regression.
+28. Existing action creation/editing regression.
+29. Arun lifecycle integration compatibility.
+30. SQL Server query compatibility.
 
-`py -m pytest`
+Adjust the test list to the exact approved requirements. Do not invent test expectations that conflict with the source documents.
 
-`py -m pytest -v`
+Use isolated fixtures and the project's approved testing strategy.
 
-`py -m py_compile app/api/action_endpoints.py`
+Do not modify live business data for tests.
 
-`py -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
+Distinguish unit tests, mocked database tests, and real SQL Server integration tests in the report.
 
-Use the actual filenames and test paths discovered in the repository.
-
-Do not suggest commands beginning with `python` or `python3`.
+Do not claim a test passed unless it actually executed.
 
 ---
 
-## 11. STRICT SCOPE EXCLUSIONS
+## 14. TECH MAHINDRA WINDOWS COMMAND RULES
+
+Use the Windows Python launcher.
+
+The Tech Mahindra environment does not support the python executable.
+
+Use:
+
+py -m pytest
+
+py -m pytest -v
+
+py -m py_compile
+
+py -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+Use actual discovered file paths and test locations.
+
+Do not use commands beginning with python or python3.
+
+Do not reinstall dependencies unnecessarily.
+
+Do not change the environment configuration without a documented need.
+
+---
+
+## 15. STRICT EXCLUSIONS
 
 Do not work on:
 
-- Arun lifecycle implementation.
+- Arun's lifecycle implementation.
+- T002 Azure OpenAI integration.
+- Azure Communication Services live delivery.
+- T003-5 notification provider verification.
+- T003-6 reminder scheduler runtime verification.
+- T003-7 reimplementation.
+- T003-9 full Reporting implementation.
+- T003-10 Theme Insights implementation.
+- T003-11 Administration implementation.
 - Frontend redesign.
-- T002 Azure OpenAI issues.
-- Azure ACS live integration.
-- T003-5 notification delivery verification.
-- T003-6 scheduler execution verification.
-- T003-8 Dashboard.
-- T003-9 Reporting.
-- T003-10 Theme Insights.
-- T003-11 Administration.
+- Database migration.
+- Unrelated bug fixes.
 
-Known Azure OpenAI issues and T003-6 runtime verification are deferred until later.
+Existing T003-7 Action Tracker implementation has been reported complete. Inspect and reuse it, but do not rebuild it.
 
-Do not fix unrelated issues without approval.
+Do not run manual Swagger testing at this stage.
 
-Do not make broad architectural changes.
+Do not perform external email delivery or live Azure provider tests.
 
 ---
 
-## 12. IMPLEMENTATION WORKFLOW
+## 16. DEVELOPMENT WORKFLOW
 
-Follow this sequence:
+Follow this exact sequence.
 
-**Step 1 — Inspect**
+STEP 1 — SOURCE REVIEW
 
-Read mandatory source documents, actual backend code, models, database configuration, and tests.
+Read the relevant source documents, requirements, traceability, and UI references.
 
-**Step 2 — Gap analysis**
+STEP 2 — EXISTING CODE AUDIT
 
-Compare existing implementation against original T003-7 acceptance criteria.
+Inspect Dashboard endpoints, services, schemas, database models, and tests.
 
-Identify exactly which functionality is missing.
+STEP 3 — GAP ANALYSIS
 
-**Step 3 — Implement**
+Identify existing, missing, and partially implemented functionality.
 
-Make the smallest necessary changes to complete T003-7.
+STEP 4 — IMPLEMENTATION
 
-Preserve existing architecture and API compatibility.
+Complete only the missing T003-8 backend functionality.
 
-**Step 4 — Verify**
+STEP 5 — AUTOMATED VERIFICATION
 
-Run syntax checks and relevant automated tests.
+Run syntax checks, focused tests, and relevant regression tests.
 
-Run regression tests for affected action functionality.
+STEP 6 — REQUIREMENTS COMPLIANCE
 
-**Step 5 — Report**
+Compare implementation against the approved source documents and record any remaining gaps.
 
-Provide evidence-based implementation results.
+STEP 7 — FINAL REPORT
 
-Do not modify unrelated modules.
+Provide actual implementation and test evidence.
+
+Do not mark a requirement complete merely because code exists.
 
 ---
 
-## 13. MANDATORY FINAL REPORT
+## 17. MANDATORY FINAL REPORT
 
-After implementation, provide:
+After development, provide the following.
 
-### A. Source Documents Reviewed
-- Document names and paths
-- Relevant FR references
-- T003-7 acceptance criteria
+### A. Source Documents
 
-### B. Existing Functionality
-- What was already implemented
-- What was missing
+List actual documents and paths reviewed.
 
-### C. Implementation Summary
-- Exact files created
-- Exact files modified
-- What changed in each file
+### B. Requirements Traceability
 
-### D. API Contract
+Map every applicable T003-8 requirement to implementation files, endpoints, and tests.
+
+### C. Existing Implementation
+
+Explain what was already present before changes.
+
+### D. Implementation Changes
+
+List exact files created and modified.
+
+### E. Dashboard API Contracts
+
+For each API provide:
+
 - HTTP method
-- Full endpoint path
+- Endpoint path
 - Query parameters
-- Parameter types
-- Allowed values
+- Request validation
 - Response schema
-- Example successful response
-- Expected validation and authorization errors
+- Example response
+- Authentication requirements
+- Authorization rules
 
-### E. Database Verification
-- Tables queried
-- SQL Server compatibility
-- Confirmation that Arun's tables were not modified
-- Confirmation that no unintended database changes occurred
+### F. Database Integration
 
-### F. Automated Tests
-- Commands executed
-- Tests passed
-- Tests failed
-- Tests skipped
-- Any unresolved limitations
+Confirm:
 
-### G. Manual Swagger Verification
-Provide exact step-by-step instructions to test the API using:
+- Actual SQL Server tables queried
+- Correct canonical lifecycle integration
+- No duplicate lifecycle data
+- No modification to Arun's tables
+- No unintended migrations
+- No destructive database operations
 
-`http://127.0.0.1:8000/docs`
+### G. FR-24 Compliance
 
-Include example filter values based on available authorized test data.
+Document reporting dimensions, date presets, and date filtering behavior.
 
-### H. Final Task Status
-Mark T003-7 as COMPLETE only when the original acceptance criteria have been implemented and supported by passing tests.
+### H. FR-25 Compliance
 
-Otherwise mark PARTIAL and identify the exact remaining gaps.
+Document percentage formulas, valid denominators, exclusions, and zero-denominator behavior.
 
-Do not claim production readiness or manual Swagger verification unless independently confirmed.
+### I. FR-26 Compliance
 
-**START NOW: Inspect the project and source documents, then implement only the missing T003-7 Action Tracker List functionality.**
+Document action analytics definitions, filters, and aggregation logic.
+
+### J. Automated Test Evidence
+
+Provide:
+
+- Exact commands executed
+- Passed tests
+- Failed tests
+- Skipped tests
+- Coverage limitations
+- SQL Server integration verification status
+
+### K. Remaining Dependencies
+
+Identify requirements that belong to later tasks such as T003-9, without implementing them prematurely.
+
+### L. Final Status
+
+Mark T003-8 COMPLETE only when its approved requirements are implemented and automated verification supports the claim.
+
+Otherwise mark PARTIAL with exact unresolved gaps.
+
+Do not claim production readiness or manual Swagger verification.
+
+---
+
+## 18. FINAL MANDATORY INSTRUCTIONS
+
+- Preserve all existing working functionality.
+- Continue development from the current codebase.
+- Do not rebuild the project.
+- Do not invent missing requirements.
+- Do not modify Arun's lifecycle implementation.
+- Do not introduce mock business data.
+- Do not silently change database schemas.
+- Do not duplicate existing APIs.
+- Do not modify frontend code.
+- Do not implement unrelated tasks.
+- Do not hide failed tests.
+- Do not claim success without execution evidence.
+- Do not perform manual Swagger testing yet.
+
+START NOW.
+
+First review the source documents and existing T003-8 implementation. Then complete only the missing Dashboard functionality, execute automated tests, and provide the mandatory final report.
