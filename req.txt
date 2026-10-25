@@ -1,9 +1,17 @@
-Fix GET /api/v1/connects/{connect_id}/ai-history returning HTTP 500.
+Investigate HTTP 404 in PUT /api/v1/actions/{action_id}.
 
-Root cause: AIGenerationHistoryItem Pydantic validation rejects request_type="EXTRACT_INSIGHTS".
+Action ID: C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2
 
-Inspect the existing request type enum, database values, and AI history response schema. Make the smallest backward-compatible fix so existing EXTRACT_INSIGHTS records are returned correctly.
+GET /api/v1/connects/PC-00001/actions returned this action successfully, and PATCH /api/v1/actions/{action_id} returned HTTP 200.
 
-Do not modify Arun's lifecycle code or tables. Do not delete or update existing database records.
+However, PUT /api/v1/actions/{action_id} returns HTTP 404: "Action not found".
 
-Test the fix and report results.
+Compare PUT, PATCH and GET implementations. Verify which SQL Server tables, models, filters and database connections they use.
+
+Identify the exact root cause and implement the smallest safe fix in Praveen-owned code only.
+
+Do not modify Arun's lifecycle code or tables. Do not delete or recreate existing records.
+
+Run focused tests using py -m and report the changed files and test results.
+
+Do not claim Swagger testing passed. I will manually retest.
