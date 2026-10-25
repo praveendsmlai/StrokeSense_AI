@@ -1,40 +1,35 @@
-Implement PeopleConnect T002–T003 action integration, starting with Phase 1 only.
+Continue PeopleConnect T002–T003 integration with Phase 2 only.
 
-**Architecture decision:**
-- `dbo.pm_actions` is the single canonical table for published and active actions.
-- `dbo.connect_actions` remains the AI-generated draft/review source.
-- After human validation and publication, transfer actions to `pm_actions` using the original action ID.
-- No duplicate active actions, no independent action-management workflows.
+Phase 1 is reported complete. Verify its database changes and backup before proceeding.
 
-**Mandatory rules:**
+MANDATORY RULES:
 
-1. Work only on Praveen-owned T002/T003 code and tables.
-2. Do not modify Arun's lifecycle code or his 9 tables.
-3. Preserve all 418 existing `pm_actions` records and existing `connect_actions` records.
-4. Preserve action IDs, ownership, Connect relationships, status history, audit trails, SLA information and RBAC.
-5. Do not bypass human validation or publication.
-6. Do not change existing API contracts unnecessarily.
-7. Do not delete, truncate, rename or drop existing tables or columns.
-8. Do not execute destructive migrations.
-9. Use SQL Server `PeopleConnect_Dev`, schema `dbo`.
-10. Use `py -m` for Python commands.
-11. No mock data or hardcoded successful responses.
-12. Do not claim success without actual verification.
-13. Azure OpenAI and ACS live-provider testing can remain deferred.
-14. Preserve FR-01–FR-28 requirements, particularly FR-24, FR-25 and FR-26.
+1. dbo.pm_actions is the canonical table for published actions.
+2. dbo.connect_actions remains the AI draft/review source.
+3. Never migrate unvalidated or unpublished AI actions.
+4. Preserve original action IDs and all existing records.
+5. Do not modify Arun's lifecycle code or any of his 9 tables.
+6. Preserve RBAC, IBU scope, audit history, SLA and relationships.
+7. Do not delete, truncate or drop existing data.
+8. Do not generate duplicate actions.
+9. Use PeopleConnect_Dev, dbo schema and py -m commands.
+10. Do not change API routes in Phase 2.
+11. No mock data or hardcoded success.
+12. Do not claim success without SQL verification.
+13. Follow FR-01–FR-28 requirements.
+14. Do not modify unrelated modules.
 
-**Phase 1 implementation:**
+TASKS:
 
-1. Read `T002_T003_INTEGRATION_PLAN.md` and inspect actual SQLAlchemy models, database schemas and API dependencies.
-2. Verify the field mapping, original ID compatibility, relationships, constraints and existing records.
-3. Create a database backup or verified recovery checkpoint before any schema mutation.
-4. Implement only the minimum backward-compatible schema changes required in Praveen-owned tables, using a reviewed migration.
-5. Make migration idempotent and preserve existing data.
-6. Do not migrate action records or switch API read/write paths in this phase.
-7. Run migration verification, schema checks and relevant automated tests.
-8. Verify record counts before and after and confirm Arun's tables are unchanged.
-9. Stop after Phase 1 and report exact files changed, SQL changes, test results and remaining work.
+1. Verify Phase 1 schema, backup and existing 418 records.
+2. Verify all 9 Arun tables remain unchanged.
+3. Inspect the existing connect_actions record and its actual validation/publication state.
+4. Check field mappings, ID compatibility, constraints, ownership, status and audit requirements.
+5. If the action is validated and published, migrate it safely to pm_actions using an idempotent transaction.
+6. If it is not validated and published, do not migrate it. Report the exact blocker.
+7. Preserve the source record in connect_actions.
+8. Verify source and target records, counts, metadata and relationships using SQL.
+9. Run focused tests.
+10. Stop after Phase 2 and provide concise results.
 
-**Important:** If a required schema change could break existing data, foreign keys or Arun's integration, stop and explain the blocker instead of guessing.
-
-Do not generate another lengthy planning document. Execute Phase 1 safely and provide a concise implementation report.
+Do not start Phase 3 or modify Arun's code.
