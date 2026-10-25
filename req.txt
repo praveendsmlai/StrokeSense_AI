@@ -1,29 +1,81 @@
-Investigate PeopleConnect Action Management architecture.
+TASK: Prepare a detailed, read-only integration plan for T002 AI-generated actions and T003 Action Management.
 
-We have two suspected tables:
-1. dbo.connect_actions
-2. dbo.pm_actions
+CURRENT ISSUE:
+- dbo.connect_actions stores AI-generated Connect actions.
+- dbo.pm_actions stores T003-managed actions.
+- GET Connect Actions reads connect_actions.
+- PUT Action reads pm_actions.
+- This causes HTTP 404 when updating an AI-generated action.
 
-GET /api/v1/connects/PC-00001/actions returns action C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2.
+PROPOSED APPROACH:
+Evaluate dbo.pm_actions as the single canonical Action Management table.
 
-PUT /api/v1/actions/{action_id} returns 404 for this action.
+MANDATORY RULES:
 
-However, PUT succeeds for an action stored in dbo.pm_actions.
+1. Work only on Praveen-owned T002/T003 scope. Do not modify Arun's lifecycle implementation.
 
-Tasks:
+2. STRICTLY DO NOT modify, delete, rename, truncate, recreate or migrate Arun's nine lifecycle tables:
+   - plan_connect_initiations
+   - plan_connect_participants
+   - participant_snapshots
+   - plan_connect_file_uploads
+   - participant_upload_rows
+   - connect_types
+   - hr_roster
+   - users
+   - audit_logs
 
-1. Verify the actual tables and SQLAlchemy models used by all Action APIs.
-2. Identify which APIs read/write connect_actions and pm_actions.
-3. Check how T002 AI-generated actions become T003 managed actions.
-4. Check action relationships with Arun's plan_connect_initiations.
-5. Identify risks for Action Tracker, SLA, reminders, dashboard and reporting.
-6. Recommend ONE canonical action table based on existing requirements and architecture.
-7. Explain how existing data can be preserved during integration.
+3. Preserve all existing SQL Server data, relationships, action IDs and audit history. No destructive operations.
 
-STRICT RULES:
-- READ-ONLY investigation.
-- Do not modify code, database or migrations.
-- Do not delete or merge tables.
-- Do not modify Arun's lifecycle code or nine tables.
-- Provide exact file names, line numbers and evidence.
-- Clearly separate confirmed findings from assumptions.
+4. Use the existing PeopleConnect_Dev SQL Server database and dbo schema. Do not introduce SQLite, another database or a separate application.
+
+5. Do not create duplicate action records or introduce another independent Action Management workflow.
+
+6. Maintain compatibility with Arun's canonical Connect IDs and lifecycle records. Do not modify lifecycle statuses or transitions.
+
+7. Preserve the complete AI workflow: generation, human review, validation, publication and action management. Unvalidated AI-generated actions must not become active automatically.
+
+8. Preserve RBAC and authorized IBU/BHR scope. Do not bypass authentication or authorization.
+
+9. Follow FR-01 through FR-28 as the source of truth, including:
+   - FR-24: Reporting dimensions and date presets.
+   - FR-25: Valid denominator and percentage calculation rules.
+   - FR-26: Exact action analytics.
+
+10. Ensure consistent action data across GET, POST, PUT, PATCH, status history, SLA, reminders, escalation, notifications, action tracker, dashboards and reporting.
+
+11. Preserve existing API contracts wherever possible. Identify required changes before implementing them.
+
+12. No mock data, fake integrations, hardcoded success responses or fabricated test results.
+
+13. Use actual code, SQL schema and API evidence. Clearly distinguish confirmed findings from assumptions.
+
+14. Azure OpenAI and Azure Communication Services must retain real provider integration code. Live provider connectivity testing can be deferred.
+
+15. On Tech Mahindra Windows, use py -m for Python commands. Do not assume the python command works.
+
+16. Do not modify frontend code unless explicitly requested.
+
+17. Do not modify existing Alembic migrations. Propose new migrations only if necessary, with rollback and data-preservation plans.
+
+18. Do not execute database migrations, bulk updates, synchronization jobs or external notifications without explicit approval.
+
+19. Do not claim success based only on unit tests. Require actual Swagger API verification and SQL Server persistence checks.
+
+20. Do not change any code or database in this task. Investigation and planning ONLY.
+
+DELIVERABLES:
+A. Existing architecture and exact table dependencies.
+B. Proposed canonical data model.
+C. Field-by-field mapping between connect_actions and pm_actions.
+D. Safe migration and synchronization strategy preserving IDs and history.
+E. AI draft-to-published-action lifecycle design.
+F. Complete list of affected T002/T003 APIs and services.
+G. Risks, dependencies and rollback plan.
+H. Step-by-step implementation phases.
+I. Swagger and SQL Server regression test checklist.
+
+IMPORTANT:
+Do not start implementation.
+
+First provide the complete investigation and integration plan. Wait for my explicit approval before making changes.
