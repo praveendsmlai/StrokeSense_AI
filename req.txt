@@ -1,21 +1,21 @@
-GET /api/v1/admin/config?active_only=true still returns HTTP 500 after backend restart.
+URGENT: GET /api/v1/admin/config?active_only=true still returns HTTP 500 after restart and previous fixes.
 
-Both dbo.admin_configuration and dbo.admin_configuration_audit exist in SQL Server PeopleConnect_Dev.
+Both Admin tables already exist in SQL Server PeopleConnect_Dev.
 
-Your previous fix did not resolve the issue.
+Stop guessing the root cause.
 
-IMPORTANT: This is a Tech Mahindra Windows environment. Use `py -m` for all Python commands. Never use `python`, `python3`, or WindowsApps/python.exe.
+1. Capture the FULL Python traceback from the running backend for this exact request.
+2. Identify the precise failing file, line, SQL statement or exception.
+3. Fix the confirmed root cause in Praveen-owned code.
+4. Verify against the actual SQL Server schema.
+5. Report the exact exception and code changes.
 
-TASK:
-1. Inspect the actual backend exception and SQL error.
-2. Verify Admin model mappings, queries and response serialization.
-3. Identify the exact root cause and implement the fix.
-4. Verify the API returns HTTP 200.
-5. Report the exact exception, files changed and verification results.
-
-RULES:
-- Do not assume tables are missing.
-- Do not modify Arun's code or tables.
-- Do not delete or modify existing database records.
+IMPORTANT:
+- TechM Windows: use `py -m`, NEVER `python` or `python3`.
 - Do not read .env or expose credentials.
-- Do not claim success without actual API execution.
+- Do not modify Arun's code or tables.
+- Do not delete or insert database records.
+- Do not claim PASS based on unit tests or code inspection.
+- If authenticated execution is unavailable, report NOT VERIFIED.
+
+Keep the response short. Do not generate documents or lengthy reports.
