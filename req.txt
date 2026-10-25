@@ -1,11 +1,790 @@
-My Claude Code usage limit has already been extended.
+# PEOPLECONNECT — T003-9 REPORTING
+## COMPLETE DEVELOPMENT PROMPT FOR CLAUDE CODE
 
-Please check the currently available limit if you have access to that information. Do not assume the old 15M limit still applies.
+You are working on the existing Tech Mahindra PeopleConnect application.
 
-Proceed with Option A and start T003-8 Dashboard implementation immediately.
+**TASK ID:** T003-9  
+**TASK NAME:** Reporting  
+**OWNER:** Praveen — Module 3  
+**ENVIRONMENT:** Tech Mahindra Windows  
+**DATABASE:** Microsoft SQL Server — PeopleConnect_Dev  
+**SCHEMA:** dbo  
+**BACKEND:** Existing FastAPI application  
+**MODE:** Source Review → Existing Code Audit → Gap Analysis → Implementation → Automated Tests → Final Report
 
-Complete the service layer, all three APIs, schemas, and automated tests according to the approved source documents and mandatory rules.
+## OBJECTIVE
 
-Use py -m for Python commands. Do not modify Arun's code or tables. Do not perform manual Swagger testing yet.
+Complete T003-9 Reporting according to the approved project source documents, original task breakdown, revised FR-01–FR-28 requirements, Requirements Traceability Matrix, and approved UI reference screenshots.
 
-If an actual usage or context limit prevents completion, report the exact limitation and save the implementation progress.
+Continue development from the existing codebase.
+
+Do not rebuild the project.
+
+Do not duplicate working functionality.
+
+Do not implement unrelated tasks.
+
+Our development strategy is to complete all remaining backend tasks and automated tests before starting comprehensive manual Swagger testing.
+
+---
+
+## 1. MANDATORY SOURCE DOCUMENTS
+
+Before modifying any code, locate and read the actual project source documents.
+
+Search the repository for their correct locations.
+
+### Primary source documents
+
+1. Revised Functional Requirements FR-01 through FR-28 — PRIMARY SOURCE OF TRUTH.
+2. Original PeopleConnect Product Requirements Document (PRD).
+3. Breakdown Planner containing the original T003-9 Reporting task description, deliverables, dependencies, and acceptance criteria.
+4. Requirements Traceability Matrix / REQUIREMENTS_TRACEABILITY.md.
+5. Approved Reporting UI screenshots and reference designs from the separate UI folder.
+6. Approved Reporting API contracts, if available.
+
+### Supporting documents
+
+7. COMPREHENSIVE_TASK_AUDIT.md.
+8. T003-8 Dashboard implementation completion report.
+9. Existing Dashboard services, schemas, and API endpoints.
+10. Existing T003-7 Action Tracker implementation.
+11. Existing T003-2 SLA service.
+12. Arun lifecycle schema documentation.
+13. Current SQL Server schema and SQLAlchemy models.
+14. Existing Reporting implementation, if any.
+15. Existing authentication, RBAC, and IBU authorization documentation.
+
+### Source priority
+
+Revised FR-01–FR-28 → Approved PRD → Original T003-9 Breakdown Planner → Requirements Traceability → Approved UI/API contract → Existing code → Audit reports.
+
+Do not treat an old audit report as proof of current implementation status.
+
+If source documents conflict, identify the exact conflicting requirements and resolve them using the approved source priority. If the conflict cannot be resolved safely, report it rather than inventing business rules.
+
+If a mandatory document is unavailable, identify the missing document and affected requirements before proceeding.
+
+### Mandatory requirements mapping
+
+Before implementation, map every applicable T003-9 requirement to:
+
+- Requirement ID
+- Source document and section
+- Expected Reporting functionality
+- Required filters
+- Calculation rules
+- Data source
+- API contract
+- Existing implementation
+- Missing implementation
+- Automated test coverage
+
+Do not invent Reporting requirements.
+
+---
+
+## 2. STRICT TASK OWNERSHIP
+
+Work only on Praveen-owned T003-9 Reporting functionality.
+
+Arun owns the Connect lifecycle implementation.
+
+The following nine canonical tables belong to Arun:
+
+1. plan_connect_initiations
+2. plan_connect_participants
+3. participant_snapshots
+4. plan_connect_file_uploads
+5. participant_upload_rows
+6. connect_types
+7. hr_roster
+8. users
+9. audit_logs
+
+### Mandatory restrictions
+
+- Do not modify Arun's lifecycle source code.
+- Do not modify Arun's nine canonical tables.
+- Do not change their schemas, constraints, indexes, or data.
+- Do not create replacement lifecycle tables.
+- Do not introduce lifecycle adapters or duplicate lifecycle storage.
+- Do not modify lifecycle workflows or status transitions.
+- Do not change existing lifecycle APIs.
+- Do not create another backend service.
+- Do not create another database.
+- Do not change unrelated modules.
+
+Read-only queries against Arun's canonical tables are permitted when required for Reporting.
+
+Preserve the existing shared database architecture.
+
+Both BHR and BHR Leader are allowed to create Connects within their authorized scope. Do not regress existing lifecycle permissions.
+
+---
+
+## 3. DATABASE REQUIREMENTS
+
+Use the existing Microsoft SQL Server database:
+
+**PeopleConnect_Dev**
+
+Schema:
+
+**dbo**
+
+Inspect the actual database models, columns, relationships, and existing queries.
+
+Potential Reporting data sources include:
+
+- dbo.plan_connect_initiations
+- dbo.plan_connect_participants
+- dbo.participant_snapshots
+- dbo.pm_actions
+- Existing Praveen-owned minutes, meeting, intelligence, and related Module 3 tables
+- Existing approved reference/configuration tables
+
+These are candidate sources, not permission to invent table relationships.
+
+Confirm the actual schema before implementing queries.
+
+### Mandatory database rules
+
+- Use real SQL Server data.
+- Use existing SQLAlchemy session management.
+- Use parameterized queries.
+- Do not use SQLite for production Reporting.
+- Do not use mock data in production code.
+- Do not hardcode business records.
+- Do not fabricate report rows or percentages.
+- Do not duplicate lifecycle records.
+- Do not modify existing business data.
+- Do not introduce destructive migrations.
+- Do not create reporting tables unless explicitly required by the approved specification.
+- Do not silently modify database schemas.
+- Use SQL Server-compatible query syntax.
+- Apply soft-delete rules correctly.
+- Prevent duplicate counts caused by joins.
+- Use database-side aggregation and pagination where appropriate.
+- Avoid unnecessary N+1 queries.
+
+If a requirement needs a new database object, document the justification and obtain approval before applying the schema change.
+
+---
+
+## 4. INSPECT EXISTING IMPLEMENTATION FIRST
+
+Before writing new code, inspect:
+
+1. Existing Reporting routers and endpoints.
+2. Existing Dashboard endpoints and service.
+3. Existing action analytics and SLA calculations.
+4. Existing SQLAlchemy models.
+5. Existing Pydantic schemas.
+6. Existing date filtering utilities.
+7. Existing JWT and RBAC dependencies.
+8. Existing IBU-scoping logic.
+9. Existing tests.
+10. Approved Reporting UI screenshots and API contracts.
+
+Identify what is already implemented, partially implemented, and missing.
+
+Do not duplicate existing endpoints.
+
+Do not rewrite the T003-8 Dashboard implementation.
+
+Reuse existing shared calculations and filtering logic where appropriate.
+
+Preserve existing API compatibility.
+
+---
+
+## 5. IMPLEMENT T003-9 REPORTING
+
+Implement the exact Reporting functionality required by the original T003-9 task specification, revised functional requirements, and approved UI contract.
+
+Do not assume the Dashboard and Reporting modules have identical requirements.
+
+### 5.1 Report categories
+
+Inspect the source documents and identify every required report.
+
+Potential categories may include:
+
+- Connect reports
+- Action reports
+- SLA reports
+- Participation reports
+- Completion reports
+- Follow-up reports
+- Other approved Reporting categories
+
+This list is illustrative only.
+
+Implement only the report categories explicitly required by the approved documents.
+
+For each report, document:
+
+- Report name
+- Purpose
+- Authorized roles
+- Data source
+- Filters
+- Dimensions
+- Metrics
+- Calculation rules
+- Response schema
+- Sorting/pagination behavior
+- Export requirements, if applicable
+
+### 5.2 Reporting filters
+
+Implement the exact approved Reporting filters.
+
+Evaluate documented requirements for:
+
+- Date preset
+- Custom date range
+- IBU
+- Connect type
+- Connect status
+- Action status
+- Priority
+- Owner
+- Other approved dimensions
+
+Support valid combinations.
+
+Reject invalid values appropriately.
+
+Do not silently ignore filters.
+
+Ensure filter options are restricted to authorized data.
+
+### 5.3 Reporting dimensions
+
+Implement all dimensions required by FR-24 and the Reporting UI.
+
+Use the exact source-defined dimension names and values.
+
+Do not invent dimensions.
+
+Ensure grouped results do not contain duplicate counts.
+
+### 5.4 Report aggregation
+
+Calculate metrics using actual database records.
+
+Use SQL Server-side aggregation wherever practical.
+
+Ensure consistent grouping and filtering.
+
+Do not aggregate unrelated record types together.
+
+Do not count action history rows as separate actions.
+
+Do not count participant rows as separate Connects.
+
+### 5.5 Detailed reporting records
+
+If the approved Reporting UI requires detailed records, implement the necessary backend responses.
+
+Support documented:
+
+- Filtering
+- Search
+- Sorting
+- Pagination
+- Total counts
+- Drill-down identifiers
+
+Use database-side pagination for large result sets.
+
+Do not expose unauthorized records.
+
+### 5.6 Report exports
+
+Inspect the original T003-9 task specification and UI references to determine whether export functionality is required.
+
+If required, implement the exact approved export formats and columns.
+
+Possible formats include CSV, Excel, or PDF, but do not implement a format merely because it is listed here.
+
+Mandatory export rules:
+
+- Export only authorized records.
+- Apply the same filters as the displayed report.
+- Preserve the approved column order and labels.
+- Use correct date and number formatting.
+- Prevent CSV/Excel formula injection.
+- Handle large exports safely.
+- Do not expose internal database fields or secrets.
+- Use approved existing dependencies.
+- Do not add unnecessary packages.
+
+If export is not required by T003-9, do not implement it.
+
+---
+
+## 6. FR-24 — REPORTING DIMENSIONS AND DATE PRESETS
+
+FR-24 is mandatory.
+
+Read the complete revised requirement and its traceability entries.
+
+Implement its exact requirements.
+
+Mandatory rules:
+
+- Support all approved reporting dimensions.
+- Support all approved date presets.
+- Support approved custom date ranges.
+- Apply consistent reporting timezone rules.
+- Use the correct date column for each metric.
+- Handle inclusive/exclusive date boundaries correctly.
+- Avoid timezone-related off-by-one errors.
+- Ensure consistent filtering between Dashboard and Reporting.
+- Preserve authorized IBU scope.
+- Do not invent date presets or dimensions.
+
+Do not assume that created_at, scheduled_from, scheduled_to, published_at, completed_at, and due_date are interchangeable.
+
+Use the exact business-defined date semantics.
+
+Reuse the T003-8 date utilities only after verifying that their behavior matches the revised FR-24 requirement.
+
+---
+
+## 7. FR-25 — VALID DENOMINATORS AND PERCENTAGES
+
+FR-25 is mandatory.
+
+Read its exact revised wording.
+
+For every percentage-based report metric, document:
+
+1. Numerator.
+2. Valid denominator.
+3. Eligible population.
+4. Exclusions.
+5. Date filtering.
+6. IBU filtering.
+7. Rounding and precision.
+8. Zero-denominator behavior.
+
+Mandatory rules:
+
+- Do not use total records as the denominator unless explicitly required.
+- Exclude ineligible records according to FR-25.
+- Prevent duplicate counts.
+- Apply authorization before aggregation.
+- Use the documented rounding rules.
+- Do not calculate an average of percentages when the correct formula requires aggregated numerators and denominators.
+- Do not fabricate percentages for missing data.
+
+Verify that existing T003-8 percentage calculations match the source requirement before reusing them.
+
+If an existing calculation differs from FR-25, report the discrepancy. Do not silently change T003-8 as part of T003-9.
+
+---
+
+## 8. FR-26 — EXACT ACTION ANALYTICS
+
+FR-26 is mandatory.
+
+Read the revised requirement completely.
+
+Implement the exact action analytics required by the Reporting module.
+
+Mandatory rules:
+
+- Use existing Praveen-owned action records.
+- Respect documented status definitions.
+- Use the correct overdue calculation.
+- Respect action ownership.
+- Respect IBU authorization.
+- Handle standalone actions.
+- Handle Connect-linked actions.
+- Respect soft deletion.
+- Avoid duplicate counts from joins.
+- Do not count status-history entries as independent actions.
+- Do not invent SLA or escalation formulas.
+- Preserve existing action status behavior.
+
+Reuse existing T003-2 SLA and T003-7 Action Tracker functionality when appropriate.
+
+Do not rewrite those modules unnecessarily.
+
+If the approved Reporting requirements include action aging, status distribution, completion trends, SLA performance, or other analytics, implement them exactly as documented.
+
+---
+
+## 9. DASHBOARD AND REPORTING CONSISTENCY
+
+T003-8 Dashboard development has been reported complete.
+
+Existing Dashboard endpoints:
+
+GET /api/v1/dashboard/executive
+
+GET /api/v1/dashboard/bhr
+
+GET /api/v1/dashboard/employee
+
+Inspect the actual implementation before relying on it.
+
+Mandatory rules:
+
+- Reporting and Dashboard must use consistent business definitions.
+- Shared metrics must have consistent numerators and denominators.
+- Date presets must follow the same approved semantics.
+- IBU filters must not produce contradictory results.
+- Action analytics must use consistent status definitions.
+- Do not duplicate shared logic unnecessarily.
+- Do not modify existing Dashboard behavior without approval.
+- Preserve existing API compatibility.
+
+If a shared calculation is incorrect, document the issue and recommend the smallest safe fix.
+
+Do not expand the scope silently.
+
+---
+
+## 10. JWT, RBAC AND IBU SECURITY
+
+Use existing authentication and authorization infrastructure.
+
+Mandatory rules:
+
+- Reject unauthenticated requests.
+- Enforce approved role permissions.
+- Enforce IBU-level data isolation.
+- Do not trust client-supplied roles.
+- Do not trust client-supplied IBU values for authorization.
+- Prevent cross-IBU access.
+- Apply authorization before report aggregation.
+- Prevent information leakage through counts, percentages, chart groups, exports, and filter options.
+- Respect documented administrative access.
+- Respect employee-level data visibility.
+- Do not invent new permissions.
+- Preserve existing JWT configuration.
+- Do not introduce new authentication secrets.
+- Do not modify Arun's RBAC implementation.
+
+Both BHR and BHR Leader retain their existing authorized Connect creation permissions.
+
+Report access must follow the approved Reporting RBAC matrix, not assumed lifecycle permissions.
+
+---
+
+## 11. API DESIGN
+
+Use the existing FastAPI architecture and naming conventions.
+
+Implement only the Reporting endpoints required by the approved API contract.
+
+Do not invent endpoint paths without checking the source documents.
+
+Mandatory rules:
+
+- Reuse existing dependencies.
+- Use Pydantic request and response schemas.
+- Validate all query parameters.
+- Return appropriate HTTP status codes.
+- Use consistent error handling.
+- Do not expose internal exceptions.
+- Do not expose SQL statements or credentials.
+- Preserve existing routes.
+- Avoid route conflicts.
+- Use documented response structures.
+- Support empty results correctly.
+- Keep API contracts suitable for the approved Reporting UI.
+
+Do not modify frontend code.
+
+---
+
+## 12. PERFORMANCE AND RELIABILITY
+
+Ensure:
+
+- Efficient SQL Server queries.
+- Server-side aggregation.
+- Server-side pagination where applicable.
+- Parameterized filtering.
+- Correct use of existing indexes.
+- Deterministic sorting.
+- No unnecessary full-table loading.
+- No N+1 queries.
+- Correct nullable-field handling.
+- Safe handling of empty datasets.
+- No duplicate counts.
+- Proper database session cleanup.
+- Consistent response schemas.
+
+Do not claim performance benchmarks without actual measurements.
+
+---
+
+## 13. AUTOMATED TESTING — MANDATORY
+
+Create focused tests for T003-9.
+
+Cover all applicable approved requirements, including:
+
+1. Successful report retrieval.
+2. Authentication required.
+3. Role-based authorization.
+4. IBU isolation.
+5. Administrator access.
+6. Employee-level visibility where applicable.
+7. Empty datasets.
+8. Invalid filters.
+9. Date presets.
+10. Custom date ranges.
+11. Date boundary conditions.
+12. Combined filters.
+13. Grouped reporting dimensions.
+14. Accurate counts.
+15. Duplicate prevention.
+16. FR-25 valid denominators.
+17. FR-25 percentage calculations.
+18. Zero-denominator behavior.
+19. FR-26 action analytics.
+20. Overdue action calculations.
+21. Soft-delete exclusion.
+22. Standalone actions.
+23. Connect-linked actions.
+24. Correct lifecycle status aggregation.
+25. Pagination, if applicable.
+26. Sorting, if applicable.
+27. Search, if applicable.
+28. Export correctness, if required.
+29. Export authorization, if required.
+30. Cross-IBU data leakage prevention.
+31. T003-8 Dashboard regression.
+32. T003-7 Action Tracker regression.
+33. T003-2 SLA regression.
+34. Arun lifecycle integration compatibility.
+35. SQL Server query compatibility.
+
+Add additional tests for every original T003-9 acceptance criterion.
+
+Use isolated fixtures and the project's approved test strategy.
+
+Do not modify real business data for automated tests.
+
+Clearly distinguish:
+
+- Unit tests
+- Mocked database tests
+- Real SQL Server integration tests
+- Tests not executed
+
+Do not claim tests passed merely because test files were created.
+
+---
+
+## 14. TECH MAHINDRA WINDOWS COMMAND RULES
+
+The Tech Mahindra environment does not support the `python` executable.
+
+Use the Windows Python launcher.
+
+Examples:
+
+py -m pytest
+
+py -m pytest -v
+
+py -m py_compile
+
+py -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+
+Use the actual test paths discovered in the repository.
+
+Do not use commands beginning with python or python3.
+
+Do not unnecessarily reinstall dependencies or modify the environment.
+
+---
+
+## 15. STRICT EXCLUSIONS
+
+Do not work on:
+
+- Arun's lifecycle implementation.
+- T002 Azure OpenAI integration.
+- Azure Communication Services live delivery.
+- T003-5 notification provider verification.
+- T003-6 reminder scheduler runtime verification.
+- T003-7 reimplementation.
+- T003-8 Dashboard redevelopment.
+- T003-10 Theme Insights.
+- T003-11 Administration.
+- Frontend redesign.
+- Database migration.
+- Unrelated bug fixes.
+
+Do not run manual Swagger testing yet.
+
+Do not perform live Azure provider tests.
+
+Do not send real emails.
+
+Do not change production or shared business data.
+
+---
+
+## 16. IMPLEMENTATION WORKFLOW
+
+Follow this sequence:
+
+**STEP 1 — SOURCE REVIEW**
+
+Read the mandatory source documents and approved Reporting UI references.
+
+**STEP 2 — EXISTING IMPLEMENTATION AUDIT**
+
+Inspect existing Reporting code, Dashboard calculations, database models, and security dependencies.
+
+**STEP 3 — REQUIREMENTS GAP ANALYSIS**
+
+Identify exactly what is implemented and what remains missing.
+
+**STEP 4 — DEVELOPMENT**
+
+Implement the missing T003-9 functionality.
+
+Create or modify only necessary Praveen-owned backend files.
+
+**STEP 5 — AUTOMATED VERIFICATION**
+
+Run syntax checks, focused tests, and affected regression tests.
+
+**STEP 6 — COMPLIANCE REVIEW**
+
+Compare implemented functionality against every applicable T003-9 acceptance criterion.
+
+**STEP 7 — FINAL REPORT**
+
+Provide evidence-based results.
+
+Do not stop after planning unless an actual blocker prevents implementation.
+
+If a session or usage limit interrupts the work, save exact progress and remaining tasks so development can resume without duplication.
+
+---
+
+## 17. MANDATORY FINAL REPORT
+
+After implementation, provide:
+
+### A. Source Documents Reviewed
+
+List actual filenames and paths.
+
+### B. Requirements Traceability
+
+Map each applicable requirement to its implementation and tests.
+
+### C. Existing Functionality
+
+Explain what was already implemented.
+
+### D. Development Changes
+
+List exact files created and modified.
+
+### E. Reporting API Contracts
+
+For each endpoint provide:
+
+- HTTP method
+- Path
+- Query parameters
+- Response schema
+- Authentication
+- Authorization
+- Supported filters
+- Error responses
+
+### F. Report Definitions
+
+List all implemented reports, metrics, dimensions, and calculations.
+
+### G. FR-24 Compliance
+
+Document exact dimensions, date presets, and date filtering semantics.
+
+### H. FR-25 Compliance
+
+Document numerator, valid denominator, exclusions, rounding, and zero-denominator behavior.
+
+### I. FR-26 Compliance
+
+Document exact action analytics and aggregation logic.
+
+### J. Database Verification
+
+Confirm:
+
+- SQL Server tables used.
+- Canonical lifecycle integration.
+- No modifications to Arun's tables.
+- No unintended schema changes.
+- No destructive operations.
+
+### K. Security Verification
+
+Document JWT, RBAC, IBU isolation, and data leakage prevention.
+
+### L. Automated Test Evidence
+
+Provide:
+
+- Exact commands executed.
+- Number of tests collected.
+- Passed.
+- Failed.
+- Skipped.
+- Errors.
+- Regression test results.
+- SQL Server integration test status.
+
+### M. Remaining Gaps
+
+List incomplete requirements and dependencies.
+
+### N. Final Status
+
+Mark T003-9 COMPLETE only if the approved functionality is implemented and automated verification supports that status.
+
+Otherwise mark PARTIAL and explain the remaining work.
+
+Do not claim production readiness without full required verification.
+
+---
+
+## 18. FINAL MANDATORY INSTRUCTIONS
+
+- Continue from the existing codebase.
+- Do not rebuild the project.
+- Do not duplicate existing functionality.
+- Follow approved source documents.
+- Follow revised FR-01–FR-28.
+- Preserve FR-24, FR-25, and FR-26 exactly.
+- Do not modify Arun's lifecycle code or tables.
+- Use the existing SQL Server database.
+- Preserve JWT, RBAC, and IBU restrictions.
+- Do not modify frontend.
+- Do not create mock production data.
+- Do not change unrelated modules.
+- Do not silently introduce migrations.
+- Do not hide failed tests.
+- Do not claim tests passed without execution evidence.
+- Use py -m for Python commands.
+- Do not perform manual Swagger testing yet.
+- Complete development and automated tests before moving to the next task.
+
+**START NOW: Review the original T003-9 requirements and existing implementation, then complete the missing Reporting functionality, run automated tests, and provide the mandatory final report.**
