@@ -1,42 +1,47 @@
-Continue fixing the existing PeopleConnect T002–T003 Action Integration issue.
+Continue PeopleConnect T002-T003 Action Integration debugging.
 
-Do not perform PRD compliance verification.
+CRITICAL: The original issue is NOT FIXED.
 
-CURRENT ISSUE:
-AI-generated draft actions are stored in connect_actions, while published actions are managed through pm_actions. This causes inconsistent action visibility and PUT API 404 errors.
+Actual Swagger test:
+PUT /api/v1/actions/C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2
 
-Phase 3 already implemented:
-POST /api/v1/actions/publish-from-ai/{action_id}
+Response:
+HTTP 404
+{"detail":"Action not found"}
 
-REQUIRED FIX:
-1. Trace the existing action creation, publication, GET, PUT and status update flows.
-2. Treat successful Publish as final approval. Do not create a separate Approve API.
-3. Keep AI drafts in connect_actions until publication.
-4. On authorized publication, persist the action in pm_actions.
-5. Ensure published actions work with GET, PUT, PATCH status and Action Tracker.
-6. Fix any remaining 404 or table mismatch issues.
-7. Reuse existing services and avoid duplicate implementation.
-8. Verify publication idempotency and audit history.
+Previous changes added GET /actions/{action_id}, but the original PUT 404 remains.
 
 MANDATORY RULES:
-- Do not modify Arun's code or 9 lifecycle tables.
-- Preserve all 418 existing pm_actions records.
-- Preserve the existing connect_actions test record.
-- No destructive SQL operations.
-- Maintain RBAC and IBU authorization.
-- Block publication of invalid, rejected or unassigned actions.
-- Do not modify unrelated modules.
-- Do not invoke live Azure OpenAI or ACS.
-- Use py -m for Python commands.
-- Run focused tests and verify actual SQL Server persistence.
-- Never claim success without evidence.
+1. Do not modify Arun's code or 9 lifecycle tables.
+2. Do not delete, overwrite or modify existing action records during investigation.
+3. Do not migrate unvalidated AI draft actions.
+4. Preserve all existing pm_actions records.
+5. Do not create another GET or PUT endpoint.
+6. Do not bypass BHR approval or RBAC/IBU authorization.
+7. Do not change unrelated modules.
+8. Do not invoke Azure OpenAI or ACS.
+9. Use py -m for Python commands.
+10. Never claim success based only on unit tests.
 
-Implement only the necessary fixes.
+TASK:
+
+1. Trace PUT /api/v1/actions/{action_id} from router to SQLAlchemy query.
+2. Check which table PUT queries.
+3. Check the exact action ID in both dbo.connect_actions and dbo.pm_actions.
+4. Confirm the action's publication/validation status.
+5. Determine whether this ID is a draft action that should be updated through the draft review API rather than PUT /actions/{id}.
+6. Verify whether the intended PUT endpoint is restricted to published actions.
+7. Check why previous implementation claimed the issue was fixed despite the same 404.
+8. Identify the correct workflow for this exact action ID.
+
+Do not change code or database yet.
 
 OUTPUT:
-1. Root cause.
-2. Exact files changed.
-3. APIs verified.
-4. Test results.
-5. SQL Server record counts before and after.
-6. Any remaining blocker.
+- Exact root cause with code and SQL evidence.
+- Which table contains the action ID.
+- Whether the action is draft or published.
+- Correct API to update this action.
+- Whether the 404 is expected or a genuine bug.
+- Smallest safe fix if required.
+
+STOP after diagnosis. Do not claim FIXED until the same scenario passes an actual Swagger retest.
