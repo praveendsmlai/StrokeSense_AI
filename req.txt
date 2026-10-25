@@ -1,20 +1,16 @@
-Fix the 500 error in PUT /api/v1/connects/{connect_id}/actions/{action_id}.
+Fix the 500 Internal Server Error in GET /api/v1/dashboard/executive.
 
-Traceback:
-File: app/api/ai_endpoints.py
-Function: edit_draft_action
-Line: 945
-NameError: name 'PmAction' is not defined.
+Error:
+SQLAlchemy FROM expression expected, got TextClause object.
 
-Tasks:
-1. Find the actual SQLAlchemy model mapped to dbo.pm_actions.
-2. Add the correct import in ai_endpoints.py.
-3. Verify that the model and action_id field are correct.
-4. Check the entire edit_draft_action function for similar undefined names.
-5. Make only the minimal necessary changes.
-6. Do not modify Arun's lifecycle code or tables.
-7. Do not modify database schema or existing records.
-8. Run a focused test using py -m pytest.
-9. Report exact files changed and test results.
+Steps:
+1. Inspect app/api/dashboard_endpoints.py and its dashboard service/query dependencies.
+2. Locate the exact SQLAlchemy query causing the error.
+3. Fix the incorrect usage of text() in the FROM clause using valid SQLAlchemy constructs.
+4. Preserve SQL Server compatibility and existing response structure.
+5. Do not modify Arun's lifecycle code or his 9 tables.
+6. Do not modify database schema or existing data.
+7. Run focused tests using py -m pytest.
+8. Report changed files and test results.
 
-Do not claim the API works until runtime verification.
+Fix only this error. Do not modify other APIs.
