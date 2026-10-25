@@ -1,9 +1,9 @@
-SELECT
-    ci.insight_type,
-    COUNT(*) AS total_insights,
-    COUNT(pci.id) AS matching_connects
+SELECT TOP (20)
+    ci.id AS insight_id,
+    ci.plan_connect_id AS insight_connect_id,
+    pci.id AS arun_connect_id,
+    ci.insight_type
 FROM dbo.connect_insights ci
 LEFT JOIN dbo.plan_connect_initiations pci
     ON ci.plan_connect_id = pci.id
-GROUP BY ci.insight_type
-ORDER BY ci.insight_type;
+ORDER BY ci.id;
