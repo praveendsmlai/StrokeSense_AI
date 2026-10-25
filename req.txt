@@ -1,13 +1,663 @@
-Investigate T003-6 aging report bucket calculation in `GET /api/v1/actions/aging/report`.
+# PEOPLECONNECT — T003-6 REMINDERS & AGING
+## COMPLETE VERIFICATION, GAP FIXING AND TESTING
 
-Swagger returns total_pending=182, total_overdue=4, with 0_3_days overdue_count=1 and 3_7_days overdue_count=3.
+You are working on the existing Tech Mahindra PeopleConnect project.
 
-SQL Server confirms all 4 overdue actions have due_date=2026-10-24, meaning each is exactly 1 day overdue on 2026-10-25.
+**Task:** T003-6 — Reminders & Aging
 
-Read the original PRD and REQUIREMENTS_TRACEABILITY.md from the Source Document folder. Determine whether aging buckets represent action age or overdue duration.
+**Objective:** Verify the existing implementation against the original approved requirements, identify genuine functional gaps, implement only required fixes, execute automated tests, and provide manual Swagger verification steps.
 
-Inspect the existing SLAService implementation and explain the discrepancy. Do not modify code yet.
+Do not rebuild the module. Do not assume it is incomplete merely because a previous audit marked it PARTIALLY COMPLETE.
 
-Follow mandatory rules: do not modify Arun's lifecycle code/tables, authentication, or existing working APIs. Use `py -m` for Python commands.
+## 1. MANDATORY SOURCE-OF-TRUTH RULES
 
-Report the exact root cause, source requirement, and proposed correction. Clearly distinguish verified findings from assumptions.
+Before modifying any code, inspect:
+
+1. Original PeopleConnect PRD in the `Source Document` folder.
+2. Original Task Breakdown Planner in the `Source Document` folder.
+3. Original Requirements Traceability document in the `Source Document` folder.
+4. Approved UI screenshots/reference images in the separate `UI` folder.
+5. Existing backend implementation, database models, services, API endpoints, configuration, and tests.
+6. Existing task audit and implementation reports, including `COMPREHENSIVE_TASK_AUDIT.md`, if present.
+
+**IMPORTANT:**
+
+- `Source Document` contains the original functional documents.
+- `UI` contains approved UI references.
+- Do not assume the UI screenshots are inside `Source Document`.
+- These original documents and approved UI references are the only functional sources of truth.
+- Existing code is evidence of implementation, not authority to invent requirements.
+- If documents conflict, identify the exact conflict and stop only when it prevents safe implementation.
+- Do not invent business rules, API contracts, reminder schedules, escalation recipients, SLA thresholds, or database fields.
+- Preserve every source-supported requirement.
+
+## 2. MANDATORY PROJECT OWNERSHIP RULES
+
+Work exclusively on **Praveen-owned T003-6 functionality**.
+
+Arun owns the lifecycle implementation, including:
+
+- `plan_connect_initiations`
+- `plan_connect_participants`
+- `participant_snapshots`
+- `plan_connect_file_uploads`
+- `participant_upload_rows`
+- `connect_types`
+- `hr_roster`
+- `users`
+- `audit_logs`
+
+**STRICTLY PROHIBITED:**
+
+- Modifying Arun's Python code.
+- Modifying Arun's SQL Server tables or columns.
+- Renaming or recreating Arun's tables.
+- Introducing replacement lifecycle tables.
+- Introducing lifecycle adapters or duplicate lifecycle models.
+- Changing Arun's lifecycle workflows.
+- Modifying Abhishek-owned functionality.
+- Rebuilding unrelated modules.
+
+Read existing canonical lifecycle data when necessary through established project patterns.
+
+If a fix requires changes to Arun/Abhishek-owned code or schema, report the dependency and do not implement that change.
+
+## 3. MANDATORY TECHNICAL RULES
+
+Existing technology:
+
+- Backend: FastAPI
+- ORM: SQLAlchemy
+- Database: Microsoft SQL Server
+- Database name: `PeopleConnect_Dev`
+- Schema: `dbo`
+- Authentication: Existing JWT
+- Authorization: Existing RBAC and IBU-based access restrictions
+- Scheduler: APScheduler
+- Notification integration: Existing notification service and Azure Communication Services implementation
+
+Preserve the existing single-backend-service architecture.
+
+Do not:
+
+- Switch to SQLite.
+- Create a second database.
+- Create mock production data.
+- Hardcode employee identities, BHR recipients, email addresses, or IBU values.
+- Bypass JWT/RBAC.
+- Remove existing functionality.
+- Modify unrelated endpoints.
+- Introduce destructive database migrations.
+- Change the database schema without proving that the approved requirement cannot be met using the existing schema.
+
+Use the existing SQL Server tables and established services.
+
+### Critical Windows command requirement
+
+This is the **Tech Mahindra Windows environment**.
+
+The `python` command is not supported.
+
+Use `py -m` for all Python-related commands.
+
+Examples:
+
+`py -m pytest`
+
+`py -m pip`
+
+`py -m py_compile`
+
+`py -m uvicorn`
+
+Never instruct the user to run `python`, `python3`, or Unix-specific commands.
+
+## 4. HISTORICAL IMPLEMENTATION STATUS
+
+Previous audit marked:
+
+**T003-6 Reminders & Aging — PARTIALLY COMPLETE (60%).**
+
+That percentage is historical, not independently verified.
+
+Existing screenshots show:
+
+`app/services/scheduler_service.py`
+
+`app/tasks/reminder_tasks.py`
+
+Implemented functions include:
+
+- `send_due_date_reminders()`
+- `send_overdue_alerts()`
+- `send_escalation_alerts()`
+- `init_scheduler()`
+- `add_reminder_jobs()`
+- `start_scheduler()`
+- `stop_scheduler()`
+- `get_scheduler()`
+
+Observed behavior:
+
+- APScheduler registers three background jobs.
+- Due-date reminders scheduled at 02:00.
+- Overdue alerts scheduled at 02:05.
+- Escalation alerts scheduled at 02:10.
+- SQL queries use `dbo.pm_actions`.
+- Closed and soft-deleted actions are excluded.
+- NotificationService is called for sending notifications.
+- Escalation contacts are resolved using RecipientService.
+- Idempotency keys are constructed.
+- Backend startup and scheduler startup were observed working.
+
+**Do not recreate working functionality.**
+
+Also preserve historical statuses of other tasks:
+
+- T002: Previously marked COMPLETE; live Azure OpenAI behavior remains unverified and known failures are deferred.
+- T003-1: COMPLETE; standalone and connect-linked action creation verified against SQL Server.
+- T003-2: PARTIAL; SLA gaps remain.
+- T003-3: Previously marked COMPLETE.
+- T003-4: Previously marked COMPLETE; append-only history verified.
+- T003-5: PARTIAL; live ACS delivery unverified.
+- T003-7: Previously marked NOT STARTED; verify actual code before future implementation.
+- T003-8: Previously BLOCKED.
+- T003-9: Previously BLOCKED.
+- T003-10: Previously BLOCKED.
+- T003-11: Previously NOT STARTED.
+- T003-12: IN PROGRESS.
+
+Do not change other task statuses without code evidence.
+
+## 5. VERIFY EXACT REMINDER REQUIREMENTS
+
+Inspect original requirements and determine the approved behavior for:
+
+### A. Upcoming due-date reminders
+
+Verify:
+
+- Due-date reminder offsets.
+- Whether reminders are required one day before, on the due date, or at other intervals.
+- Eligible action statuses.
+- Correct action owners.
+- Required notification channels.
+- Required email template.
+- Correct timezone.
+- Duplicate prevention.
+- Handling of missing owner email.
+- Whether standalone actions and connect-linked actions are both supported.
+
+The existing code appears to use `REMINDER_DAYS_BEFORE_DUE`.
+
+Verify its actual configured values against the original requirements.
+
+### B. Overdue reminders
+
+Verify:
+
+- Exact overdue milestones.
+- Whether reminders are required at 1, 3, and 7 days overdue.
+- Whether reminders should repeat.
+- Eligible statuses.
+- Owner resolution.
+- Email templates.
+- Notification audit records.
+- Duplicate prevention.
+
+The existing code appears to use `REMINDER_DAYS_AFTER_DUE`.
+
+Do not change its values without source-document evidence.
+
+### C. Escalation
+
+IMPORTANT OBSERVED DISCREPANCY:
+
+The scheduler currently displays:
+
+`Send escalation alerts (30+ days)`
+
+However, the reminder task documentation states:
+
+`Escalation: After 7 days overdue, escalate to manager`
+
+The implementation also refers to `ESCALATION_DAYS_OVERDUE`.
+
+Verify the approved escalation threshold in the original documents.
+
+Determine whether:
+
+1. The scheduler label is incorrect.
+2. The escalation constant is incorrect.
+3. The escalation logic is incorrect.
+4. Different escalation levels are required.
+
+Fix only the source-supported discrepancy.
+
+Verify whether the required recipient is:
+
+- Reporting manager
+- BHR
+- BHR Leader
+- Another authorized escalation contact
+
+Do not assume these roles are interchangeable.
+
+Verify the escalation contact using existing canonical data and approved mappings.
+
+Do not hardcode recipients.
+
+## 6. VERIFY SCHEDULER CORRECTNESS
+
+Inspect the full scheduler lifecycle.
+
+Verify:
+
+- Scheduler initializes once.
+- Scheduler starts once.
+- Jobs are registered correctly.
+- Jobs have stable IDs.
+- Application shutdown stops the scheduler cleanly.
+- No duplicate job registration.
+- Correct behavior after application restart.
+- Correct timezone.
+- Correct handling of missed executions.
+- Correct behavior with multiple Uvicorn workers/processes.
+- Correct behavior when database or notification provider is temporarily unavailable.
+
+The application currently uses `BackgroundScheduler`.
+
+Do not replace it unnecessarily.
+
+If multiple processes can execute the same scheduled jobs, implement an approved, minimal duplicate-execution prevention mechanism within Praveen-owned code, or clearly document the deployment constraint if a safe implementation requires external infrastructure approval.
+
+Do not introduce Redis, Celery, a new service, or additional infrastructure without a source-supported need and approval.
+
+## 7. VERIFY ASYNC NOTIFICATION EXECUTION
+
+Existing reminder tasks call asynchronous notification methods using:
+
+`asyncio.run(...)`
+
+Inspect the actual execution context.
+
+Verify:
+
+- Whether this is safe in the existing APScheduler worker threads.
+- Whether an event loop may already be running.
+- Whether NotificationService uses async database sessions or synchronous sessions.
+- Whether SQLAlchemy sessions are shared unsafely across threads.
+- Whether each scheduled execution properly closes its database session.
+- Whether exceptions are handled without corrupting notification state.
+
+Only change the async execution pattern if a concrete defect is identified.
+
+Preserve existing notification behavior.
+
+## 8. VERIFY SQL SERVER QUERIES
+
+Inspect every SQL query in reminder tasks.
+
+Verify:
+
+- Correct schema and table names.
+- Correct columns.
+- Correct date comparisons.
+- Correct action status filtering.
+- Correct handling of `NULL` due dates.
+- Correct handling of soft-deleted records.
+- Correct SQL Server parameter binding.
+- Correct behavior for standalone actions where `connect_id IS NULL`.
+- Correct behavior for connect-linked actions.
+- No unintended duplicate records.
+- No SQL injection.
+- No unauthorized cross-IBU data exposure.
+
+Verify whether `dbo.employee_master` exists and is the approved employee source.
+
+Do not assume it is correct merely because the SQL query references it.
+
+Where possible, reuse existing employee resolution services rather than introducing duplicate employee queries.
+
+Do not modify employee master tables.
+
+## 9. VERIFY TIMEZONE AND DATE BOUNDARIES
+
+Existing code uses:
+
+`datetime.utcnow().date()`
+
+Determine the approved business timezone from original requirements or existing configuration.
+
+Verify:
+
+- Today and tomorrow calculations.
+- Due-date comparisons.
+- Overdue day calculations.
+- Scheduler timezone.
+- SQL Server date values.
+- UTC versus local-time boundaries.
+- Month-end and year-end transitions.
+
+Do not assume the timezone is IST unless the approved configuration requires it.
+
+Do not silently change timezone behavior without evidence.
+
+## 10. VERIFY IDEMPOTENCY AND DUPLICATE PREVENTION
+
+Inspect existing notification persistence and idempotency handling.
+
+For each notification category:
+
+- Due-date reminder
+- Overdue reminder
+- Escalation
+
+Verify:
+
+- Stable idempotency keys.
+- Correct uniqueness scope.
+- Correct milestone-specific behavior.
+- Safe retries after failure.
+- No duplicate sends after restart.
+- No duplicate sends from overlapping scheduler executions.
+- Correct notification status persistence.
+
+Existing escalation key appears to include the current date:
+
+`{action_id}_escalation_7d_{today}`
+
+Verify whether this incorrectly permits repeated escalation notifications on successive days.
+
+If the requirement specifies a one-time milestone escalation, use a stable milestone-based idempotency key.
+
+If repeated escalation is explicitly required, preserve the approved repeat frequency.
+
+Do not guess.
+
+## 11. VERIFY ERROR HANDLING AND NOTIFICATION AUDIT
+
+Check:
+
+- Database failures.
+- Missing employee records.
+- Missing email addresses.
+- Missing escalation recipients.
+- Missing email templates.
+- ACS provider unavailability.
+- Notification failures.
+- Partial batch failures.
+- Retry behavior.
+- Transaction handling.
+- Audit/history persistence.
+
+Do not silently mark failed notifications as successful.
+
+Do not expose credentials or sensitive employee information in logs.
+
+Ensure one failed notification does not unnecessarily prevent unrelated notifications from being processed.
+
+Preserve existing notification audit/history structures.
+
+## 12. VERIFY AGING ANALYTICS
+
+The previous audit identified missing or incomplete aging analytics.
+
+Inspect existing APIs before creating anything new.
+
+Check whether T003-6 requires:
+
+- Aging buckets.
+- Open-action aging counts.
+- Overdue counts.
+- Due-soon counts.
+- Aging by owner.
+- Aging by IBU.
+- Aging by status.
+- Aging by priority.
+- Date filters.
+- Dashboard/reporting integration.
+
+Implement only the functionality explicitly assigned to T003-6.
+
+Do not implement T003-8 Dashboard or T003-9 Reporting in this task.
+
+If aging analytics are already implemented, verify their calculations and tests.
+
+If a required endpoint is missing, implement it using existing project conventions and documented response contracts.
+
+Preserve FR-24, FR-25, and FR-26 reporting requirements for their assigned tasks.
+
+## 13. PRESERVE AUTHENTICATION AND AUTHORIZATION
+
+Any newly added or modified endpoint must preserve:
+
+- Existing JWT authentication.
+- Existing role-based permissions.
+- IBU scoping.
+- Existing employee identity handling.
+- Existing access-denied behavior.
+
+BHR and BHR Leader permissions must follow the approved role matrix.
+
+Both BHR and BHR Leader can create Connects within authorized scope; do not regress this existing rule.
+
+Do not introduce admin-only restrictions without requirements evidence.
+
+Scheduler jobs must use authorized, server-side recipient resolution rather than trusting client-provided identity or IBU.
+
+## 14. IMPLEMENTATION INSTRUCTIONS
+
+Execute this sequence:
+
+**Step 1 — Inspect**
+
+Read original documents, UI references, existing implementation, SQL Server schema, services, and tests.
+
+**Step 2 — Verify**
+
+Compare every T003-6 requirement with actual code.
+
+Classify each requirement as:
+
+- COMPLETE
+- PARTIALLY COMPLETE
+- MISSING
+- DEFECTIVE
+- BLOCKED BY EXTERNAL CONFIGURATION
+
+Include file paths and function names as evidence.
+
+**Step 3 — Fix**
+
+Implement every confirmed, source-supported T003-6 gap that can be safely fixed within Praveen-owned code.
+
+Do not stop after writing an audit report.
+
+Do not rewrite working functionality.
+
+**Step 4 — Test**
+
+Run relevant automated tests.
+
+Fix regressions caused by your changes.
+
+**Step 5 — Report**
+
+Provide an accurate implementation and verification report.
+
+Do not claim success without actual test evidence.
+
+## 15. MANDATORY AUTOMATED TESTS
+
+Cover at least the applicable scenarios:
+
+1. Upcoming due-date reminders.
+2. Due-today reminders.
+3. Overdue milestones.
+4. Escalation threshold.
+5. Correct escalation recipients.
+6. Closed actions excluded.
+7. Soft-deleted actions excluded.
+8. Standalone actions.
+9. Connect-linked actions.
+10. Missing owner email.
+11. Missing escalation contact.
+12. Idempotency and duplicate prevention.
+13. Scheduler restart.
+14. Multiple scheduler initialization attempts.
+15. Notification provider failure.
+16. SQL Server query parameterization.
+17. Timezone and date boundaries.
+18. Month/year transitions.
+19. Correct aging buckets.
+20. Correct overdue counts.
+21. RBAC and IBU isolation for any related APIs.
+22. Existing action creation/update/history regression tests.
+
+Use mocks or test doubles for external ACS network calls in automated tests only.
+
+Do not insert fabricated records into production/development business tables merely to make tests pass.
+
+Run Python commands using `py -m`.
+
+Do not report tests as passed unless they actually ran.
+
+If any test cannot run, state the exact reason.
+
+## 16. AZURE ACS AND AI DEFERRAL RULE
+
+Azure Communication Services live delivery testing is deferred until valid Tech Mahindra credentials/configuration are available.
+
+Do not:
+
+- Replace ACS with fake production email delivery.
+- Hardcode ACS credentials.
+- Claim emails were delivered without provider confirmation.
+- Change unrelated Azure OpenAI integration.
+- Attempt to fix deferred T002 AI issues.
+
+Previously observed Azure OpenAI failures in action extraction, insights generation, and AI history remain deferred until final integration testing.
+
+They are outside this task.
+
+## 17. STRICT CHANGE BOUNDARIES
+
+Allowed changes:
+
+- Praveen-owned reminder task implementation.
+- Praveen-owned scheduler service.
+- Praveen-owned notification integration, only where directly required.
+- Praveen-owned aging analytics, if explicitly required.
+- Relevant tests.
+- Necessary non-destructive configuration fixes.
+
+Do not change unrelated code.
+
+Do not modify Arun or Abhishek-owned files.
+
+Do not create unnecessary tables, APIs, abstractions, or dependencies.
+
+Do not modify frontend implementation.
+
+## 18. FINAL REPORT FORMAT
+
+After implementation, provide:
+
+### A. Requirement compliance
+
+For each T003-6 requirement:
+
+- Original document reference.
+- Requirement description.
+- Previous implementation status.
+- Actual verified status.
+- Evidence from code/tests.
+- Fix performed, if applicable.
+
+### B. Issues discovered
+
+For each issue:
+
+- Root cause.
+- File and function.
+- Impact.
+- Fix applied.
+- Test evidence.
+
+### C. Files changed
+
+List exact files and summarize changes.
+
+Explicitly confirm whether Arun/Abhishek-owned files were untouched.
+
+### D. Database changes
+
+State whether any schema/data changes occurred.
+
+If none, explicitly report:
+
+`No SQL Server schema changes performed.`
+
+### E. Test results
+
+Report:
+
+- Commands executed.
+- Number of tests passed.
+- Number failed.
+- Number skipped.
+- Any unresolved issues.
+
+### F. Swagger verification
+
+Provide exact API methods, paths, authentication requirements, query parameters, expected responses, and one-at-a-time manual test instructions for any T003-6 endpoints.
+
+Do not invent Swagger endpoints.
+
+For scheduled jobs that are not exposed through Swagger, provide a safe, non-production manual verification procedure without triggering real emails unintentionally.
+
+### G. Remaining dependencies
+
+Separate:
+
+- Code defects still unresolved.
+- External Azure ACS configuration.
+- Deployment/infrastructure dependencies.
+- Requirements ambiguities.
+
+### H. Final task status
+
+Classify T003-6 as:
+
+- COMPLETE
+- PARTIALLY COMPLETE
+- BLOCKED
+
+Provide evidence for the classification.
+
+**IMPORTANT:**
+
+A successful scheduler startup does not prove that reminder emails were delivered.
+
+Passing unit tests does not prove live ACS delivery.
+
+Do not claim T003-6 is fully production-verified while required external integration tests remain outstanding.
+
+---
+
+## EXECUTION DIRECTIVE
+
+Start now.
+
+Inspect the original documents from `Source Document`, approved screenshots from `UI`, and actual existing backend code.
+
+Identify all source-supported gaps in T003-6.
+
+Implement all safe fixes within Praveen-owned scope.
+
+Run automated tests using `py -m`.
+
+Provide the complete report and exact next manual verification steps.
+
+Do not ask for confirmation between inspection and implementation unless a critical requirements conflict, ownership boundary, or destructive database change makes proceeding unsafe.
