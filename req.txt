@@ -1,16 +1,25 @@
-Continue PeopleConnect Insights investigation.
+Implement a safe pytest database isolation fix for PeopleConnect.
 
-You identified that tests/test_t003_10_insights.py generates random UUID plan_connect_id values and may have inserted 156 orphaned records into SQL Server.
+Confirmed issue:
+Tests currently connect to PeopleConnect_Dev, commit records, and leave orphaned test data.
 
-Before modifying anything:
+Requirements:
 
-1. Inspect pytest database fixtures and SQLAlchemy session configuration.
-2. Confirm whether tests connect to PeopleConnect_Dev.
-3. Determine whether test transactions are committed or rolled back.
-4. Identify why test records persist after execution.
-5. Recommend a safe isolated test database strategy.
-6. Do not hardcode PC-00001 in test fixtures.
-7. Do not delete or update existing records.
-8. Do not modify Arun's lifecycle tables or code.
+1. Never run database-writing tests against PeopleConnect_Dev.
+2. Add fail-closed protection in tests/conftest.py to reject PeopleConnect_Dev and any non-test database.
+3. Support a separately configured PeopleConnect_Test database.
+4. Do not create, drop, truncate, delete, or modify any existing SQL Server database.
+5. Do not automatically create PeopleConnect_Test. If unavailable, fail with a clear setup error.
+6. Do not hardcode PC-00001.
+7. Preserve production database configuration and API behavior.
+8. Do not modify Arun's lifecycle code or tables.
+9. Do not delete the existing 156 orphaned records.
+10. Do not execute database-writing tests until isolation is verified.
 
-READ-ONLY investigation. Report exact findings and the smallest safe fix.
+First inspect the complete pytest database configuration and identify all test fixtures that commit data.
+
+Implement only the minimal test configuration and safety guards.
+
+After implementation, perform read-only verification and report changed files, safeguards, and any remaining setup requirements.
+
+Use py -m commands on Tech Mahindra Windows.
