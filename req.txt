@@ -1,9 +1,21 @@
-SELECT TOP (20)
-    ci.id AS insight_id,
-    ci.plan_connect_id AS insight_connect_id,
-    pci.id AS arun_connect_id,
-    ci.insight_type
-FROM dbo.connect_insights ci
-LEFT JOIN dbo.plan_connect_initiations pci
-    ON ci.plan_connect_id = pci.id
-ORDER BY ci.id;
+SELECT 'connect_insights' AS table_name,
+       plan_connect_id AS connect_id
+FROM dbo.connect_insights
+
+UNION ALL
+
+SELECT 'connect_minutes',
+       plan_connect_id
+FROM dbo.connect_minutes
+
+UNION ALL
+
+SELECT 'connect_actions',
+       plan_connect_id
+FROM dbo.connect_actions
+
+UNION ALL
+
+SELECT 'ai_generation_requests',
+       plan_connect_id
+FROM dbo.ai_generation_requests;
