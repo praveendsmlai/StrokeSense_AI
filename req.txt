@@ -1,101 +1,61 @@
-# PEOPLECONNECT — T003-11 ADMINISTRATION & CONFIGURATION
-## COMPLETE CLAUDE CODE DEVELOPMENT PROMPT
+# PEOPLECONNECT — T003-11 DATABASE TABLE CREATION & TEST FIXES
 
-You are working on the existing Tech Mahindra PeopleConnect project.
+Continue the existing T003-11 Administration & Configuration implementation.
 
-**Task:** T003-11 — Administration & Configuration  
-**Owner:** Praveen (Module 3 only)  
-**Environment:** Tech Mahindra Windows  
-**Backend:** Existing FastAPI application  
-**Database:** Microsoft SQL Server — PeopleConnect_Dev  
-**Schema:** dbo  
-**Mode:** Source Review → Existing Code Audit → Gap Analysis → Complete Development → Automated Tests → Evidence-Based Report
+**Objective:** Identify and create all genuinely missing Praveen-owned database tables required by the implemented backend modules, using safe SQL Server migrations. Resolve the database-related test errors.
 
-## 1. PRIMARY OBJECTIVE
+## 1. Mandatory source review
 
-Complete the full Praveen-owned T003-11 Administration & Configuration backend implementation.
+Before making changes:
 
-This is a DEVELOPMENT task, not a readiness-analysis-only task.
+- Locate and read the actual Source Document folder.
+- Locate and review the approved UI Reference folder.
+- Read revised FR-01–FR-28 requirements.
+- Read the original T003 task breakdown and T003-11 requirements.
+- Read REQUIREMENTS_TRACEABILITY.md.
+- Review the existing SQL Server database schema.
+- Review T003-11 implementation and test files.
+- Review existing Alembic migration history.
 
-Inspect the existing code first. Preserve working functionality and implement only missing requirements.
+Do not invent tables or fields.
 
-Do not rebuild the project, create a parallel backend, duplicate APIs, or implement Arun-owned lifecycle administration.
+## 2. Inspect existing SQL Server database
 
-Complete development and automated tests before stopping, unless a genuine technical blocker prevents progress.
+Database: PeopleConnect_Dev
 
-Manual Swagger testing will be performed later, after all remaining development tasks are completed.
+Schema: dbo
 
-## 2. MANDATORY SOURCE DOCUMENT FOLDER
+Inspect the actual SQL Server connection and determine whether these tables exist:
 
-Before writing or modifying code:
+- dbo.admin_configuration
+- dbo.admin_configuration_audit
 
-1. Locate the actual **Source Document** folder in the current project or approved accessible project directories.
-2. Inspect its folder structure and list relevant files.
-3. Read the original PeopleConnect PRD.
-4. Read the revised FR-01 through FR-28 functional requirements.
-5. Read the original T003 task breakdown/planner.
-6. Read the complete T003-11 task definition, dependencies, deliverables, and acceptance criteria.
-7. Read the Requirements Traceability Matrix, including REQUIREMENTS_TRACEABILITY.md if present.
-8. Read approved RBAC, authorization, configuration, administration, audit, and notification specifications.
-9. Read approved API contracts and database specifications.
+These are candidate names. Confirm actual SQLAlchemy `__tablename__` values before creating anything.
 
-**Mandatory:** Do not rely only on previous Claude summaries, historical task reports, or memory.
+Also inspect the database requirements of all existing Praveen-owned T002 and T003 modules.
 
-Read the actual source documents.
+Identify any other missing tables required by implemented functionality.
 
-The revised FR-01–FR-28 requirements are the primary source of truth.
+Create a report showing:
 
-Resolve conflicts using this priority:
+- Required table
+- Owning module
+- SQLAlchemy model
+- Existing or missing
+- Required columns
+- Primary keys
+- Foreign keys
+- Indexes
+- Constraints
+- Migration status
 
-Revised FR-01–FR-28 → Approved PRD → Original T003-11 Task Specification → Requirements Traceability → Approved UI/API Contracts → Existing Code.
+Do not recreate existing tables.
 
-If documents conflict, report the exact conflicting sections. Do not silently invent a resolution.
+Do not create unnecessary tables.
 
-If the Source Document folder cannot be found, search the repository and approved accessible directories, then report the missing location.
+## 3. Protect Arun's lifecycle tables
 
-Do not invent requirements when the source is unavailable.
-
-## 3. MANDATORY UI REFERENCE FOLDER
-
-Locate the actual **UI Reference folder** containing the approved PeopleConnect screenshots.
-
-This is mandatory even though the current task is backend-only.
-
-Inspect all Administration and Configuration reference screens and relevant screens that depend on configuration.
-
-Identify:
-
-- Administration menu items.
-- Configuration sections.
-- Forms and fields.
-- Dropdown options.
-- Search and filter options.
-- Save, edit, activate, deactivate, and other permitted operations.
-- Validation messages.
-- Role-specific visibility.
-- Data displayed in tables.
-- Required API request and response fields.
-- Configuration dependencies used by other modules.
-
-Compare the approved UI requirements against existing backend endpoints.
-
-Create a UI-to-API mapping.
-
-Every required Administration UI operation must have a real backend capability.
-
-Do not invent controls, fields, endpoints, or configuration options not supported by the approved documents.
-
-Do not modify frontend code in this task.
-
-If an approved UI screenshot is missing, identify the exact missing reference and continue only with requirements that can be established reliably.
-
-## 4. STRICT TASK OWNERSHIP
-
-Work exclusively on Praveen-owned T003-11 functionality.
-
-Arun owns the Connect lifecycle and its related administration.
-
-The following nine canonical tables are Arun-owned:
+The following nine tables are Arun-owned:
 
 1. plan_connect_initiations
 2. plan_connect_participants
@@ -107,556 +67,161 @@ The following nine canonical tables are Arun-owned:
 8. users
 9. audit_logs
 
-### Absolute restrictions
+Mandatory restrictions:
 
-- Do not modify Arun's lifecycle source code.
-- Do not modify these nine tables or their data.
-- Do not change their schemas, indexes, constraints, or relationships.
-- Do not insert, update, or delete records in Arun-owned tables.
-- Do not create duplicate lifecycle tables.
-- Do not recreate Connect Types, HR roster, users, or lifecycle audit storage.
-- Do not introduce legacy lifecycle adapters.
-- Do not create parallel lifecycle workflows.
-- Do not change Arun-owned lifecycle APIs.
-- Do not modify Arun-owned configuration endpoints.
+- Do not modify these tables.
+- Do not create replacements.
+- Do not change their data.
+- Do not change their schema.
+- Do not modify Arun's code.
+- Do not introduce lifecycle adapters.
 
-Read-only access to these tables is allowed where required and authorized.
+Read-only integration is allowed.
 
-If T003-11 requirements appear to demand writing to Arun-owned tables or changing Arun-owned APIs, mark that requirement as an ownership dependency or blocker.
+## 4. Create missing Praveen-owned tables safely
 
-Do not bypass ownership restrictions.
+Use SQLAlchemy models and Alembic migrations.
 
-Do not silently implement a duplicate workaround.
+Do not use `Base.metadata.create_all()` against the shared development database.
 
-Both BHR and BHR Leader are permitted to create Connects within their authorized scope. Preserve this existing RBAC rule.
+For every missing Praveen-owned table:
 
-## 5. EXISTING IMPLEMENTATION AUDIT
+1. Confirm its approved requirement.
+2. Verify the existing SQLAlchemy model.
+3. Verify table and column names.
+4. Inspect existing Alembic revision history.
+5. Create a new migration only when necessary.
+6. Include required keys, constraints, and indexes.
+7. Ensure migration is SQL Server compatible.
+8. Ensure existing data is preserved.
+9. Avoid duplicate table creation.
+10. Provide a rollback strategy.
 
-Before implementing anything, inspect the current backend.
+Do not automatically apply migrations to PeopleConnect_Dev.
 
-Review:
+First generate the migration and show the exact proposed DDL and affected objects for approval.
 
-- Existing administration routers.
-- Existing configuration services.
-- Existing database models.
-- Existing notification configuration.
-- Existing SLA configuration.
-- Existing escalation configuration.
-- Existing theme taxonomy.
-- Existing AI configuration.
-- Existing dashboard/reporting configuration.
-- Existing role and permission handling.
-- Existing audit/history services.
-- Existing configuration validation.
-- Existing tests.
-- Existing API registration.
-- Existing SQL Server integration.
+Never drop or alter existing Arun-owned tables.
 
-Identify the exact existing functionality.
+Do not use Alembic stamp to bypass missing schema changes.
 
-Classify every T003-11 requirement as:
+## 5. Fix automated test database initialization
 
-- Already implemented and verified.
-- Partially implemented.
-- Missing.
-- Blocked by Arun-owned dependencies.
-- Blocked by missing approved requirements.
+The current T003-11 test results are:
 
-Do not assume that a missing UI feature means its backend is missing.
+- 27 collected
+- 15 passed
+- 4 failed
+- 8 errors
 
-Do not duplicate an existing endpoint.
+The 8 errors reportedly occur because administration tables do not exist in the test environment.
 
-Do not rewrite functioning modules unnecessarily.
+Investigate whether the actual cause is:
 
-## 6. REQUIREMENTS TRACEABILITY
+- Missing SQLAlchemy model registration.
+- Missing migration.
+- Incorrect test database setup.
+- Missing test schema initialization.
+- Incorrect SQL Server schema.
+- Incorrect connection configuration.
 
-Create a complete T003-11 requirements-to-implementation mapping.
+Do not assume the root cause before inspecting it.
 
-For each applicable requirement record:
+Use isolated test database setup and cleanup.
 
-- Requirement ID.
-- Source document.
-- Source section/page.
-- Approved UI reference.
-- Business rule.
-- Required endpoint.
-- HTTP method.
-- Request fields.
-- Response fields.
-- Data source.
-- Role permissions.
-- IBU restrictions.
-- Existing implementation status.
-- Required code changes.
-- Acceptance criteria.
-- Automated test coverage.
+Do not modify shared development data while running automated tests.
 
-Read the original T003-11 task specification before deciding the implementation scope.
+Fix the 4 JWT fixture-related failures separately.
 
-Do not use a generic administration feature list as a substitute for the actual approved task.
+Do not disable or skip failing tests to claim success.
 
-## 7. ADMINISTRATION & CONFIGURATION IMPLEMENTATION
+## 6. Cross-module database audit
 
-Implement the exact functionality required by the approved T003-11 scope.
+Check whether existing T002 and T003 backend functionality requires any other missing Praveen-owned tables.
 
-The following are areas to inspect, not permission to create unrelated features.
+Include:
 
-### 7.1 SLA configuration
+- AI generation and validation
+- Action Management
+- Status and SLA
+- Action history
+- Notifications
+- Reminders and aging
+- Action Tracker
+- Dashboard
+- Reporting
+- Theme Insights
+- Administration
 
-If T003-11 includes SLA administration:
+Do not redesign these modules.
 
-- Inspect existing SLA rules and services.
-- Reuse existing T003-2 SLA calculations.
-- Implement only approved configuration capabilities.
-- Validate required fields.
-- Enforce approved value ranges.
-- Preserve existing SLA semantics.
-- Avoid changing historical action records unintentionally.
-- Prevent duplicate active configurations where prohibited.
-- Respect effective dates if specified.
-- Do not invent SLA durations or thresholds.
+Do not modify their business logic unnecessarily.
 
-Do not modify Arun-owned lifecycle SLA configuration.
+Only identify missing schema objects and implement approved migrations where required.
 
-### 7.2 Escalation configuration
+## 7. Mandatory TechM environment rules
 
-If required:
+Use the existing Microsoft SQL Server PeopleConnect_Dev database.
 
-- Support approved escalation configuration.
-- Validate escalation levels and triggers.
-- Use documented escalation recipients.
-- Preserve existing T003-6 reminder and aging behavior.
-- Do not invent escalation thresholds.
-- Do not send live notifications during development.
-- Avoid duplicate escalation events.
-- Preserve idempotency.
+Use schema dbo.
 
-Do not modify Arun-owned escalation configuration.
+Use the existing FastAPI and SQLAlchemy architecture.
 
-### 7.3 Notification configuration
-
-If required:
-
-- Inspect existing notification templates.
-- Inspect Azure Communication Services integration.
-- Implement approved configuration capabilities.
-- Validate template variables.
-- Preserve idempotency.
-- Preserve notification audit/history.
-- Do not expose credentials.
-- Do not send real emails.
-- Do not replace ACS with a fake production sender.
-
-Live ACS verification remains deferred.
-
-### 7.4 Theme taxonomy administration
-
-If required:
-
-- Reuse approved theme taxonomy.
-- Preserve existing AI classifications.
-- Implement approved taxonomy administration operations.
-- Validate uniqueness and active/inactive states.
-- Preserve historical references.
-- Avoid breaking T003-10 Theme Insights.
-- Do not invent theme names.
-- Do not silently reclassify historical intelligence.
-
-If taxonomy is owned by Arun or another module, report the ownership dependency.
-
-### 7.5 AI configuration
-
-If required:
-
-- Reuse existing AI provider architecture.
-- Preserve existing Azure OpenAI integration.
-- Support only approved configuration settings.
-- Validate non-secret configuration fields.
-- Never expose API keys, secrets, or credentials.
-- Never hardcode secrets.
-- Do not log sensitive provider configuration.
-- Do not create a second AI provider implementation.
-- Do not replace real provider integration with mock production behavior.
-
-Live Azure OpenAI testing remains deferred.
-
-### 7.6 Other approved administration capabilities
-
-Implement any additional T003-11 requirements explicitly present in the approved source documents and assigned to Praveen.
-
-Do not omit requirements merely because they are not listed in this prompt.
-
-Do not implement unrelated administration features.
-
-## 8. DATABASE RULES
-
-Use the existing Microsoft SQL Server database:
-
-**PeopleConnect_Dev**
-
-Schema:
-
-**dbo**
-
-Mandatory rules:
-
-- Use existing SQLAlchemy architecture.
-- Use existing session and transaction management.
-- Use SQL Server-compatible queries.
-- Use parameterized queries.
-- Preserve existing database records.
-- Respect soft-delete behavior.
-- Respect existing foreign keys.
-- Avoid duplicate configuration records.
-- Preserve auditability.
-- Do not use SQLite as the production database.
-- Do not create another database.
-- Do not perform destructive schema changes.
-- Do not modify Arun's tables.
-- Do not change unrelated models.
-- Do not create unnecessary migrations.
-
-Before proposing any schema change:
-
-1. Identify the exact approved requirement.
-2. Inspect existing tables and columns.
-3. Determine whether existing storage can satisfy the requirement.
-4. Document the proposed change.
-5. Confirm the table belongs to Praveen.
-6. Identify backward-compatibility implications.
-7. Prepare a migration and rollback plan.
-
-Do not execute schema-changing migrations without explicit approval.
-
-If implementation can proceed without schema changes, complete it using existing approved structures.
-
-## 9. JWT, RBAC AND IBU SECURITY
-
-Follow the approved role-permission matrix exactly.
-
-Mandatory rules:
-
-- Require authentication for protected endpoints.
-- Use existing JWT validation.
-- Never trust a client-supplied role.
-- Never trust a client-supplied IBU without authorization.
-- Enforce administration permissions at the backend.
-- Apply IBU scope where required.
-- Prevent privilege escalation.
-- Prevent unauthorized configuration updates.
-- Prevent cross-IBU data leakage.
-- Return appropriate 401 and 403 responses.
-- Validate all request inputs.
-- Avoid exposing internal exceptions.
-- Do not expose credentials or sensitive configuration.
-- Preserve existing audit trails.
-
-Do not assume every ADMIN role has unrestricted access unless the approved RBAC matrix explicitly permits it.
-
-Preserve BHR and BHR Leader permissions according to approved requirements.
-
-## 10. API CONTRACT RULES
-
-Inspect existing routes and approved UI requirements.
-
-For every required API:
-
-- Use the existing FastAPI application.
-- Preserve established route prefixes.
-- Use correct HTTP methods.
-- Use Pydantic request/response schemas.
-- Validate required fields.
-- Validate ranges and enumerations.
-- Handle missing records.
-- Handle duplicate configurations.
-- Handle unauthorized access.
-- Handle inactive configurations.
-- Return consistent error responses.
-- Preserve backward compatibility.
-- Avoid route collisions.
-- Register routers correctly.
-- Do not expose secrets.
-- Do not create unused endpoints.
-
-Implement only approved API operations.
-
-Do not guess endpoint names if an approved API contract already exists.
-
-## 11. AUDITABILITY AND HISTORY
-
-Where approved T003-11 requirements mandate audit/history:
-
-- Record authorized configuration changes.
-- Record the authenticated actor.
-- Record timestamps.
-- Preserve previous and updated values where approved.
-- Never log passwords, API keys, tokens, or secrets.
-- Preserve immutable history where required.
-- Do not alter Arun's audit_logs table.
-- Reuse an existing Praveen-owned audit mechanism where appropriate.
-- Avoid duplicate audit records.
-
-If the required audit storage belongs to Arun, report the dependency rather than writing to Arun's table.
-
-## 12. CROSS-MODULE COMPATIBILITY
-
-Ensure T003-11 changes do not break:
-
-- T002 AI Output Generation.
-- T003-1 Action Creation & Editing.
-- T003-2 Status Management & SLA.
-- T003-3 Connect Closure.
-- T003-4 Append-Only History.
-- T003-5 Notifications.
-- T003-6 Reminders & Aging.
-- T003-7 Action Tracker.
-- T003-8 Dashboard.
-- T003-9 Reporting.
-- T003-10 Theme Insights.
-
-Do not modify these modules unless a directly necessary, narrowly scoped integration change is supported by the approved requirements.
-
-Document every cross-module modification.
-
-Do not silently fix unrelated issues.
-
-## 13. FR-24, FR-25 AND FR-26
-
-Read the complete revised requirements.
-
-### FR-24
-
-Preserve exact reporting dimensions, date presets, custom-date semantics, and authorized IBU filtering wherever administration configuration affects reporting.
-
-### FR-25
-
-Preserve exact valid-denominator rules, percentage definitions, zero-denominator behavior, and approved rounding.
-
-Do not invent calculations.
-
-### FR-26
-
-Preserve exact action analytics, status definitions, overdue logic, and approved aggregation semantics.
-
-Do not modify existing metrics without a documented requirement.
-
-T003-11 must not introduce configuration changes that silently alter approved dashboard, reporting, or insights calculations.
-
-## 14. AUTOMATED TESTING
-
-Create focused automated tests for every applicable T003-11 requirement.
-
-Include relevant scenarios such as:
-
-- Authentication.
-- Role authorization.
-- IBU authorization.
-- Allowed configuration reads.
-- Allowed configuration updates.
-- Unauthorized writes.
-- Input validation.
-- Missing configuration.
-- Duplicate configuration.
-- Active/inactive behavior.
-- SLA rule validation.
-- Escalation rule validation.
-- Notification template validation.
-- Theme taxonomy validation.
-- AI configuration security.
-- Audit/history behavior.
-- Secret redaction.
-- SQL Server compatibility.
-- Cross-module regression.
-- Arun lifecycle compatibility.
-
-Only create tests for features actually required by the approved T003-11 scope.
-
-Use isolated fixtures and test databases where appropriate.
-
-Do not alter shared SQL Server business data during tests.
-
-Do not send real ACS emails.
-
-Do not call live Azure OpenAI.
-
-External providers may be mocked within isolated automated tests only.
-
-Do not use mock business data in production functionality.
-
-### Mandatory test reporting
-
-Report separately:
-
-- Tests collected.
-- Tests executed.
-- Tests passed.
-- Tests failed.
-- Tests skipped.
-- Tests with errors.
-- Tests blocked by environment.
-- Unit tests.
-- Integration tests.
-- Real SQL Server tests.
-- Mocked provider tests.
-
-**Important:** Previous T003-8, T003-9 and T003-10 reports included partial critical-path test execution and skipped tests.
-
-Do not repeat the mistake of claiming all tests passed when only a subset was executed.
-
-If JWT fixtures or test infrastructure cause skips, identify the exact reason and report the remaining unverified scenarios.
-
-Do not silently skip tests.
-
-## 15. TECH MAHINDRA WINDOWS — MANDATORY PYTHON COMMANDS
-
-The Tech Mahindra Windows environment does not support the `python` command.
-
-Always use the Windows Python launcher.
+Use `py -m` for Python commands.
 
 Examples:
 
-`py -m pytest`
+`py -m pytest tests/test_t003_11_configuration.py -v`
 
-`py -m pytest -v`
+`py -m alembic current`
 
-`py -m py_compile`
-
-`py -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
-
-Use actual repository paths when executing commands.
+`py -m alembic heads`
 
 Do not use `python` or `python3`.
 
 Do not reinstall dependencies unnecessarily.
 
-Do not change the Python environment without a valid reason.
+Do not change environment variables without justification.
 
-## 16. STRICT EXCLUSIONS
+## 8. Mandatory verification
 
-Do not:
+After fixing the isolated test environment:
 
-- Rebuild PeopleConnect.
-- Modify frontend.
-- Modify Arun's lifecycle code.
-- Modify Arun's nine canonical tables.
-- Change Arun-owned administration APIs.
-- Introduce lifecycle adapters.
-- Create duplicate configuration systems.
-- Create another database.
-- Migrate databases.
-- Change unrelated task implementations.
-- Invent business rules.
-- Invent configuration defaults.
-- Invent API endpoints.
-- Invent test results.
-- Hide failures.
-- Claim production readiness without evidence.
-- Send live emails.
-- Call live Azure OpenAI.
-- Perform manual Swagger testing yet.
-
-## 17. REQUIRED DEVELOPMENT WORKFLOW
-
-Execute the following sequence.
-
-**Step 1 — Source Documents**
-
-Locate and read the actual Source Document folder.
-
-**Step 2 — UI References**
-
-Locate and inspect the actual UI Reference folder.
-
-**Step 3 — Task Scope**
-
-Read the original T003-11 task specification and traceability.
-
-**Step 4 — Code Audit**
-
-Inspect existing administration/configuration implementation.
-
-**Step 5 — Gap Analysis**
-
-Identify implemented, missing, partial, and blocked requirements.
-
-**Step 6 — Development**
-
-Implement missing Praveen-owned T003-11 functionality.
-
-**Step 7 — Automated Testing**
-
-Run focused tests and affected regression tests.
-
-**Step 8 — Requirements Verification**
-
-Check all applicable acceptance criteria.
-
-**Step 9 — Completion Report**
-
-Provide exact implementation and verification evidence.
-
-Do not stop after readiness analysis.
-
-If a source document is unavailable or an ownership conflict prevents part of the task, continue implementing the independently supported, authorized requirements and report the blocked items.
-
-## 18. MANDATORY FINAL REPORT
-
-Create:
-
-`T003_11_IMPLEMENTATION_COMPLETION_REPORT.md`
-
-Include:
-
-1. Source Document folder path.
-2. Actual source documents reviewed.
-3. UI Reference folder path.
-4. UI screenshots reviewed.
-5. Original T003-11 requirements.
-6. Requirements-to-API mapping.
-7. Existing functionality identified.
-8. New functionality implemented.
-9. Exact files created.
-10. Exact files modified.
-11. API endpoints and contracts.
-12. Configuration data sources.
-13. SQL Server tables used.
-14. Arun ownership compliance.
-15. JWT/RBAC/IBU verification.
-16. Audit/history implementation.
-17. Cross-module compatibility.
-18. Automated test commands.
-19. Collected/passed/failed/skipped/error counts.
-20. Unverified scenarios.
-21. Deferred live provider testing.
-22. Remaining blockers and dependencies.
-23. Exact final development status.
-
-Mark T003-11 COMPLETE only if every approved Praveen-owned requirement is implemented and supported by adequate verification.
-
-Otherwise mark PARTIAL and identify the exact gaps.
-
-Do not claim production-ready status merely because a small critical-path test subset passed.
-
-## 19. FINAL INSTRUCTION
-
-START IMPLEMENTATION NOW.
-
-First locate and read the actual Source Document and UI Reference folders.
-
-Then inspect the original T003-11 specification, traceability, existing code, and database.
-
-Implement all missing authorized T003-11 functionality.
-
-Preserve Arun's lifecycle ownership.
-
-Use SQL Server PeopleConnect_Dev.
-
-Use `py -m` for Python commands.
-
-Run automated tests and affected regression tests.
+- Run the complete T003-11 test suite.
+- Report exact passed, failed, skipped and error counts.
+- Run affected regression tests.
+- Verify the SQL Server migration is valid.
+- Verify no Arun-owned tables were modified.
+- Verify no existing business data was lost.
 
 Do not perform manual Swagger testing yet.
 
-Do not stop after producing a plan.
+Do not perform live Azure OpenAI or ACS testing.
 
-Finally, provide the complete evidence-based implementation report.
+## 9. Final report
+
+Create:
+
+`T003_11_DATABASE_SCHEMA_AND_TEST_FIX_REPORT.md`
+
+Include:
+
+1. Source documents reviewed.
+2. UI references reviewed.
+3. Actual SQL Server database and schema inspected.
+4. Missing tables identified.
+5. Tables already existing.
+6. SQLAlchemy models checked.
+7. Alembic migrations created.
+8. Proposed DDL.
+9. Test environment fixes.
+10. JWT fixture fixes.
+11. Test execution results.
+12. Regression results.
+13. Arun-owned tables protection evidence.
+14. Remaining issues.
+15. Migration application instructions.
+
+**IMPORTANT:** Do not claim the task is fully verified if tests still fail or error.
+
+**START NOW. Inspect the actual schema, create the necessary safe migration files, fix the isolated test environment, and report results. Stop before applying migrations to PeopleConnect_Dev until I explicitly approve the DDL.**
