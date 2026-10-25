@@ -1,35 +1,29 @@
-Inspect `backend/app/services/scheduler_service.py` and `backend/app/tasks/reminder_tasks.py` in READ-ONLY mode.
+Investigate PeopleConnect T003-6 Reminder Notification Execution in READ-ONLY mode.
 
-We are verifying PeopleConnect T003-6 (Reminders & Aging), FR-14.
+1. Inspect:
+   - backend/app/services/scheduler_service.py
+   - backend/app/tasks/reminder_tasks.py
+   - NotificationService implementation
+   - Email notification database model
 
-Current backend startup logs show these registered jobs:
-- "Send due date reminders (T-3 days)"
-- "Send overdue alerts"
-- "Send escalation alerts (30+ days)"
+2. Determine why dbo.email_notifications contains zero ACTION_DUE_REMINDER, ACTION_OVERDUE and ACTION_ESCALATION records despite eligible actions.
 
-Expected rules:
-- Due tomorrow and due today
-- 1, 3 and 7 days overdue
-- Escalation after 7 days overdue
-- Correct scheduler timezone and execution times as defined in REQUIREMENTS_TRACEABILITY.md
+3. Verify:
+   - Whether scheduled jobs have actually executed
+   - Whether NotificationService persists records when Azure ACS is unavailable
+   - Whether errors are logged or silently swallowed
+   - Whether idempotency keys incorrectly skip notifications
+   - Whether actions with valid owner emails are eligible
+   - Whether scheduler timezone and execution times are correct
 
-Please verify:
-1. Actual job functions registered.
-2. Cron triggers, timezone and next execution times.
-3. Whether the labels are outdated or actual logic is incorrect.
-4. Whether jobs execute automatically after startup.
-5. Whether notification records are persisted to `dbo.email_notifications`.
-6. Why 43 eligible actions have owner emails but no reminder notification records.
+4. Identify the exact root cause supported by code or runtime evidence. Clearly distinguish confirmed findings from possibilities.
 
-MANDATORY RULES:
-- READ-ONLY investigation. Do not modify any files or database records.
-- Do not modify Arun's lifecycle code or nine tables.
-- Do not modify Abhishek's authentication.
-- Preserve RBAC and IBU authorization.
-- Use SQL Server `PeopleConnect_Dev`, not SQLite.
-- Use `py -m` for every Python command.
-- Do not change database schema.
-- Do not touch unrelated T002/T003 tasks.
-- Do not claim notification delivery is verified without actual execution and database evidence.
+5. Recommend a safe test procedure that does not send real emails or modify production-like data.
 
-Report exact findings with file paths and line numbers. Identify required fixes, but wait for my approval before implementing.
+IMPORTANT:
+- READ-ONLY investigation. Do not modify code or database.
+- Do not execute reminder jobs yet.
+- Do not modify Arun's lifecycle code or tables.
+- Work only within Praveen-owned T003-6 scope.
+- Use `py -m` for all Python commands on Tech Mahindra Windows.
+- Provide exact file names, line numbers, findings and recommended fixes.
