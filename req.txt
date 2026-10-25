@@ -1,72 +1,20 @@
-Continue the existing PeopleConnect T002–T003 Action Integration fix.
+Fix the 500 error in PUT /api/v1/connects/{connect_id}/actions/{action_id}.
 
-We need one unified Action Management workflow for both manual and AI-generated actions.
+Traceback:
+File: app/api/ai_endpoints.py
+Function: edit_draft_action
+Line: 945
+NameError: name 'PmAction' is not defined.
 
-IMPORTANT DESIGN DECISION:
+Tasks:
+1. Find the actual SQLAlchemy model mapped to dbo.pm_actions.
+2. Add the correct import in ai_endpoints.py.
+3. Verify that the model and action_id field are correct.
+4. Check the entire edit_draft_action function for similar undefined names.
+5. Make only the minimal necessary changes.
+6. Do not modify Arun's lifecycle code or tables.
+7. Do not modify database schema or existing records.
+8. Run a focused test using py -m pytest.
+9. Report exact files changed and test results.
 
-dbo.pm_actions must be the single source of truth for all published/manageable actions.
-
-Keep dbo.connect_actions only for AI-extracted action drafts, review and validation.
-
-Do NOT insert AI actions into both tables during extraction.
-
-REQUIRED FLOWS:
-
-FLOW 1: MANUAL ACTIONS
-
-1. POST /api/v1/actions creates manual actions directly in dbo.pm_actions.
-2. Existing GET, PUT, PATCH, history, reminders and reporting APIs must work.
-3. Do not require publish-from-ai for manually created actions.
-4. Preserve existing authorization and audit rules.
-
-FLOW 2: AI-GENERATED ACTIONS
-
-1. AI extraction creates draft actions in dbo.connect_actions.
-2. BHR reviews, edits, assigns owners and validates actions.
-3. Existing POST /api/v1/actions/publish-from-ai/{action_id} must read the source action from dbo.connect_actions.
-4. Validate required fields, owner assignment, reviewer approval and authorization.
-5. Insert the approved action into dbo.pm_actions.
-6. Preserve original action ID and Connect association.
-7. Prevent duplicate publication through idempotency checks.
-8. After publication, all existing T003 Action Management APIs must work.
-9. Rejected/unapproved AI actions must never enter pm_actions.
-
-CURRENT ISSUE:
-
-AI action ID:
-C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2
-
-Exists in dbo.connect_actions but not dbo.pm_actions.
-
-Its owner_employee_id and owner_email are NULL.
-
-Inspect existing review/edit/validation APIs. If owner assignment is missing, implement the smallest necessary API extension.
-
-DO NOT:
-- Modify Arun's lifecycle code or nine canonical tables.
-- Delete or recreate existing tables.
-- Migrate existing records unnecessarily.
-- Create another action-management table.
-- Bypass human approval.
-- Trigger real emails.
-- Modify unrelated modules.
-
-FIRST:
-Inspect current code and report the exact integration problem.
-
-THEN:
-Implement the smallest safe fix.
-
-TEST:
-1. Manual action creation and retrieval.
-2. AI draft creation.
-3. Owner assignment and validation.
-4. AI action publication.
-5. SQL Server pm_actions insertion.
-6. GET, PUT and PATCH on published AI actions.
-7. Duplicate publication prevention.
-8. Audit history and RBAC.
-
-Use py -m for Python commands.
-
-Provide actual test results and exact modified files. Do not claim success without verification.
+Do not claim the API works until runtime verification.
