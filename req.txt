@@ -1,29 +1,495 @@
-Investigate PeopleConnect T003-6 Reminder Notification Execution in READ-ONLY mode.
+# PEOPLECONNECT — T003-7 ACTION TRACKER LIST
+## COMPLETE IMPLEMENTATION PROMPT FOR CLAUDE CODE
 
-1. Inspect:
-   - backend/app/services/scheduler_service.py
-   - backend/app/tasks/reminder_tasks.py
-   - NotificationService implementation
-   - Email notification database model
+You are working on the existing Tech Mahindra PeopleConnect project.
 
-2. Determine why dbo.email_notifications contains zero ACTION_DUE_REMINDER, ACTION_OVERDUE and ACTION_ESCALATION records despite eligible actions.
+**TASK ID:** T003-7  
+**TASK NAME:** Action Tracker List  
+**SCOPE:** Praveen-owned Module 3 backend only  
+**DATABASE:** Microsoft SQL Server — PeopleConnect_Dev  
+**DATABASE SCHEMA:** dbo  
+**MODE:** Inspect → Implement → Test → Report
 
-3. Verify:
-   - Whether scheduled jobs have actually executed
-   - Whether NotificationService persists records when Azure ACS is unavailable
-   - Whether errors are logged or silently swallowed
-   - Whether idempotency keys incorrectly skip notifications
-   - Whether actions with valid owner emails are eligible
-   - Whether scheduler timezone and execution times are correct
+Your objective is to complete T003-7 according to the original requirements, existing application architecture, and UI expectations.
 
-4. Identify the exact root cause supported by code or runtime evidence. Clearly distinguish confirmed findings from possibilities.
+Do not implement unrelated tasks.
 
-5. Recommend a safe test procedure that does not send real emails or modify production-like data.
+---
 
-IMPORTANT:
-- READ-ONLY investigation. Do not modify code or database.
-- Do not execute reminder jobs yet.
-- Do not modify Arun's lifecycle code or tables.
-- Work only within Praveen-owned T003-6 scope.
-- Use `py -m` for all Python commands on Tech Mahindra Windows.
-- Provide exact file names, line numbers, findings and recommended fixes.
+## 1. MANDATORY SOURCE DOCUMENTS
+
+Before writing or modifying code, locate and read all relevant project documents.
+
+**Primary source of truth:**
+
+1. Revised PeopleConnect Functional Requirements FR-01 through FR-28.
+2. Original T003-7 Action Tracker List task description, specifications, and acceptance criteria.
+3. PeopleConnect UI reference screenshots, especially Action Tracker screens.
+4. Existing API contract and backend design documents.
+5. Existing database schema and SQLAlchemy models.
+
+**Supporting documents:**
+
+6. `COMPREHENSIVE_TASK_AUDIT.md`
+7. Existing T003 implementation notes and test reports.
+8. Relevant implementation and integration documentation.
+
+**Source priority:**
+
+Revised FR-01–FR-28 → Original task specification → Approved UI/API contract → Existing implementation → Audit report.
+
+The audit report is a status reference, not a replacement for functional requirements.
+
+If any document is unavailable, report exactly what is missing. Do not invent requirements or silently assume undocumented business rules.
+
+Before implementation, identify which FR requirements and acceptance criteria apply to T003-7.
+
+---
+
+## 2. MANDATORY PROJECT OWNERSHIP RULES
+
+This work belongs exclusively to Praveen's Module 3 scope.
+
+Arun owns the lifecycle implementation and its nine canonical tables:
+
+1. `plan_connect_initiations`
+2. `plan_connect_participants`
+3. `participant_snapshots`
+4. `plan_connect_file_uploads`
+5. `participant_upload_rows`
+6. `connect_types`
+7. `hr_roster`
+8. `users`
+9. `audit_logs`
+
+STRICTLY PROHIBITED:
+
+- Modifying Arun's lifecycle source code.
+- Modifying Arun's nine tables or their schemas.
+- Creating replacement lifecycle tables.
+- Reintroducing legacy lifecycle adapters.
+- Duplicating Arun's lifecycle functionality.
+- Changing lifecycle state transitions.
+- Modifying lifecycle RBAC behavior.
+- Creating a second database or service.
+
+Arun's tables may be queried read-only when required for authorized Connect information.
+
+Use existing integration patterns and the current canonical database architecture.
+
+Both BHR and BHR Leader can create Connects within their authorized scope. Do not alter this established permission rule.
+
+---
+
+## 3. DATABASE REQUIREMENTS
+
+Use the existing Microsoft SQL Server database:
+
+`PeopleConnect_Dev`
+
+Schema:
+
+`dbo`
+
+Primary action table:
+
+`dbo.pm_actions`
+
+Inspect the actual table structure, SQLAlchemy model, relationships, and existing query patterns before implementation.
+
+Requirements:
+
+- Use real persisted SQL Server data.
+- Do not use SQLite.
+- Do not use mock data in production code.
+- Do not create duplicate action tables.
+- Do not recreate existing database objects.
+- Do not alter existing data.
+- Do not perform destructive migrations.
+- Do not introduce schema changes unless strictly required by the original specification; report and request approval before applying any schema change.
+- Preserve existing action IDs, Connect IDs, ownership, timestamps, status, priority, due dates, and audit history.
+
+Support both standalone actions (`connect_id` NULL) and actions linked to valid Arun Connect IDs such as `PC-00001`.
+
+Do not require a Connect ID for standalone actions.
+
+---
+
+## 4. INSPECT EXISTING IMPLEMENTATION FIRST
+
+Before creating any endpoint, inspect:
+
+- Existing action routers and route registration.
+- Existing `GET /api/v1/actions` or equivalent endpoints.
+- Connect-specific action listing endpoints.
+- Action models and Pydantic schemas.
+- Action creation and editing services.
+- Existing authentication and authorization dependencies.
+- Existing pagination and filtering conventions.
+- Existing SQL Server query utilities.
+- Action Tracker UI contract and required fields.
+- Existing automated tests.
+
+Identify what is already implemented, what is partially implemented, and what is missing.
+
+Do not duplicate existing functionality.
+
+Preserve these working capabilities:
+
+- `POST /api/v1/actions`
+- `PUT /api/v1/actions/{action_id}`
+- Action status management
+- Append-only change history
+- SLA-related functionality
+- Reminders and aging
+- Connect-linked action creation
+- Standalone action creation
+
+Do not introduce route conflicts with existing static paths such as `/api/v1/actions/aging/report`.
+
+---
+
+## 5. IMPLEMENT T003-7 — ACTION TRACKER LIST
+
+Implement or complete the Action Tracker listing API according to the original task specification and approved UI contract.
+
+Expected endpoint, unless an approved contract specifies otherwise:
+
+`GET /api/v1/actions`
+
+The endpoint must return action records from `dbo.pm_actions`.
+
+### 5.1 Required action information
+
+Return the fields required by the approved UI contract, using actual model fields.
+
+Evaluate the following:
+
+- Action ID
+- Action title
+- Description
+- Connect ID
+- Owner ID
+- Owner name, if required and resolvable
+- Owner email, if required
+- Status
+- Priority
+- Due date
+- Created date
+- Updated date
+- IBU
+- SLA/overdue information, if already supported and required
+- Other fields explicitly required by the original specification
+
+Do not invent model fields or fabricate missing values.
+
+### 5.2 Filtering
+
+Implement documented filters, including where required:
+
+- Status
+- Priority
+- Owner employee ID
+- Connect ID
+- IBU
+- Due-date start
+- Due-date end
+- Search by supported action fields
+
+Filters must work individually and in combination.
+
+Handle NULL Connect IDs correctly for standalone actions.
+
+Use existing enum values and validation rules.
+
+Invalid filter values must produce appropriate validation errors.
+
+### 5.3 Search
+
+If required by the original specification or UI contract, implement case-insensitive search across approved searchable fields.
+
+Use parameterized SQLAlchemy queries.
+
+Do not use unsafe SQL string concatenation.
+
+### 5.4 Pagination
+
+Implement server-side pagination using the project's existing conventions.
+
+Support:
+
+- Page number
+- Page size/limit
+- Total matching records
+- Current page
+- Pagination metadata required by the UI
+
+Pagination must occur in SQL Server, not after loading all records into Python.
+
+Total counts must reflect the same authorization and filter conditions as the returned records.
+
+### 5.5 Sorting
+
+Implement documented sorting options.
+
+Potential fields include:
+
+- Due date
+- Created date
+- Updated date
+- Priority
+- Status
+
+Use only fields supported by the approved contract.
+
+Support ascending and descending order where required.
+
+Whitelist sortable fields.
+
+Use deterministic secondary ordering so pagination does not produce inconsistent results.
+
+### 5.6 Empty results
+
+When no actions match, return a successful response with an empty collection and correct pagination metadata.
+
+Do not return fabricated sample actions.
+
+---
+
+## 6. AUTHENTICATION, RBAC AND IBU SECURITY
+
+Preserve the existing JWT authentication mechanism.
+
+Apply the application's established authorization and data-visibility rules.
+
+Mandatory requirements:
+
+- Unauthenticated requests must be rejected.
+- Unauthorized roles must not access restricted data.
+- Users must see only actions within their authorized scope.
+- IBU restrictions must be enforced server-side.
+- An IBU query parameter must never expand a user's access.
+- Owner and Connect filters must not bypass authorization.
+- Pagination totals must not expose records from unauthorized IBUs.
+- Do not trust client-supplied role, user ID, or IBU values for authorization.
+- Preserve existing administrative visibility rules.
+
+Read approved RBAC documentation before deciding which roles can see which actions.
+
+Do not invent new role permissions.
+
+---
+
+## 7. CONNECT INTEGRATION
+
+Action Tracker must support actions linked to Arun's canonical Connect records.
+
+Requirements:
+
+- Use existing `connect_id` references.
+- Preserve valid Connect IDs such as `PC-00001`.
+- Support actions without a Connect ID.
+- Do not change Arun's Connect records.
+- Do not duplicate lifecycle tables.
+- Do not introduce ORM foreign-key metadata errors.
+- Use read-only Connect lookups only when necessary for the approved response contract.
+
+Do not modify existing action creation behavior.
+
+---
+
+## 8. PERFORMANCE AND DATA CORRECTNESS
+
+Ensure:
+
+- SQL Server-compatible queries.
+- Database-side filtering.
+- Database-side pagination.
+- Accurate counts.
+- No unnecessary N+1 queries.
+- No unbounded full-table loading.
+- Correct handling of nullable values.
+- Consistent date filtering.
+- Proper treatment of soft-deleted actions.
+- Deterministic sorting.
+- No duplicate records caused by joins.
+
+Use the project's existing SQLAlchemy architecture and coding conventions.
+
+---
+
+## 9. AUTOMATED TESTING
+
+Add focused tests for T003-7.
+
+Cover at least:
+
+1. Retrieve actions successfully.
+2. Empty result set.
+3. Filter by status.
+4. Filter by priority.
+5. Filter by owner.
+6. Filter by Connect ID.
+7. Standalone actions with NULL Connect ID.
+8. Filter by IBU.
+9. Due-date range.
+10. Combined filters.
+11. Search behavior, if applicable.
+12. Pagination.
+13. Accurate total count.
+14. Ascending sorting.
+15. Descending sorting.
+16. Invalid query parameters.
+17. Unauthenticated access.
+18. Unauthorized role access.
+19. Cross-IBU isolation.
+20. Soft-deleted action exclusion.
+21. SQL Server compatibility.
+22. Existing action creation regression.
+23. Existing action editing regression.
+24. Existing append-only history regression.
+25. Existing aging/report endpoint regression.
+
+Do not modify real business data merely to run tests.
+
+Use isolated test fixtures or the project's existing approved test strategy.
+
+Do not claim integration tests passed unless they actually executed.
+
+---
+
+## 10. TECH MAHINDRA WINDOWS COMMAND RULE
+
+The Tech Mahindra environment does not support the `python` executable.
+
+Always use the Windows Python launcher.
+
+Examples:
+
+`py -m pytest`
+
+`py -m pytest -v`
+
+`py -m py_compile app/api/action_endpoints.py`
+
+`py -m uvicorn app.main:app --host 127.0.0.1 --port 8000`
+
+Use the actual filenames and test paths discovered in the repository.
+
+Do not suggest commands beginning with `python` or `python3`.
+
+---
+
+## 11. STRICT SCOPE EXCLUSIONS
+
+Do not work on:
+
+- Arun lifecycle implementation.
+- Frontend redesign.
+- T002 Azure OpenAI issues.
+- Azure ACS live integration.
+- T003-5 notification delivery verification.
+- T003-6 scheduler execution verification.
+- T003-8 Dashboard.
+- T003-9 Reporting.
+- T003-10 Theme Insights.
+- T003-11 Administration.
+
+Known Azure OpenAI issues and T003-6 runtime verification are deferred until later.
+
+Do not fix unrelated issues without approval.
+
+Do not make broad architectural changes.
+
+---
+
+## 12. IMPLEMENTATION WORKFLOW
+
+Follow this sequence:
+
+**Step 1 — Inspect**
+
+Read mandatory source documents, actual backend code, models, database configuration, and tests.
+
+**Step 2 — Gap analysis**
+
+Compare existing implementation against original T003-7 acceptance criteria.
+
+Identify exactly which functionality is missing.
+
+**Step 3 — Implement**
+
+Make the smallest necessary changes to complete T003-7.
+
+Preserve existing architecture and API compatibility.
+
+**Step 4 — Verify**
+
+Run syntax checks and relevant automated tests.
+
+Run regression tests for affected action functionality.
+
+**Step 5 — Report**
+
+Provide evidence-based implementation results.
+
+Do not modify unrelated modules.
+
+---
+
+## 13. MANDATORY FINAL REPORT
+
+After implementation, provide:
+
+### A. Source Documents Reviewed
+- Document names and paths
+- Relevant FR references
+- T003-7 acceptance criteria
+
+### B. Existing Functionality
+- What was already implemented
+- What was missing
+
+### C. Implementation Summary
+- Exact files created
+- Exact files modified
+- What changed in each file
+
+### D. API Contract
+- HTTP method
+- Full endpoint path
+- Query parameters
+- Parameter types
+- Allowed values
+- Response schema
+- Example successful response
+- Expected validation and authorization errors
+
+### E. Database Verification
+- Tables queried
+- SQL Server compatibility
+- Confirmation that Arun's tables were not modified
+- Confirmation that no unintended database changes occurred
+
+### F. Automated Tests
+- Commands executed
+- Tests passed
+- Tests failed
+- Tests skipped
+- Any unresolved limitations
+
+### G. Manual Swagger Verification
+Provide exact step-by-step instructions to test the API using:
+
+`http://127.0.0.1:8000/docs`
+
+Include example filter values based on available authorized test data.
+
+### H. Final Task Status
+Mark T003-7 as COMPLETE only when the original acceptance criteria have been implemented and supported by passing tests.
+
+Otherwise mark PARTIAL and identify the exact remaining gaps.
+
+Do not claim production readiness or manual Swagger verification unless independently confirmed.
+
+**START NOW: Inspect the project and source documents, then implement only the missing T003-7 Action Tracker List functionality.**
