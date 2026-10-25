@@ -1,16 +1,15 @@
-Fix the 500 Internal Server Error in GET /api/v1/dashboard/executive.
+Fix the 500 Internal Server Error in GET /api/v1/dashboard/employee.
 
-Error:
-SQLAlchemy FROM expression expected, got TextClause object.
+Backend logs show:
+"FROM expression, such as a Table or alias() object expected, got TextClause object."
 
-Steps:
-1. Inspect app/api/dashboard_endpoints.py and its dashboard service/query dependencies.
-2. Locate the exact SQLAlchemy query causing the error.
-3. Fix the incorrect usage of text() in the FROM clause using valid SQLAlchemy constructs.
-4. Preserve SQL Server compatibility and existing response structure.
-5. Do not modify Arun's lifecycle code or his 9 tables.
-6. Do not modify database schema or existing data.
-7. Run focused tests using py -m pytest.
-8. Report changed files and test results.
+1. Inspect the employee dashboard queries in app/services/dashboard_service.py.
+2. Fix the SQLAlchemy TextClause usage using the correct SQLAlchemy 2.x query pattern.
+3. Check all queries used by the employee dashboard for the same issue.
+4. Preserve existing response structure, RBAC, and SQL Server compatibility.
+5. Do not modify Arun's lifecycle code or database tables.
+6. Do not modify any database records.
+7. Run compilation and relevant tests using py -m.
+8. Report the exact changes and test results.
 
-Fix only this error. Do not modify other APIs.
+Do not modify unrelated modules.
