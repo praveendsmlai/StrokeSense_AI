@@ -1,22 +1,16 @@
-Investigate PeopleConnect connect_insights ID mismatch.
+Continue PeopleConnect Insights investigation.
 
-SQL Server findings:
-- plan_connect_initiations uses IDs like PC-00001.
-- connect_minutes uses PC-00001.
-- connect_actions uses PC-00001.
-- ai_generation_requests uses PC-00001.
-- connect_insights contains 156 records with UUID plan_connect_id values.
-- None of these 156 insights match Arun's connect IDs.
+You identified that tests/test_t003_10_insights.py generates random UUID plan_connect_id values and may have inserted 156 orphaned records into SQL Server.
 
-Tasks:
-1. Find every code path that inserts into connect_insights.
-2. Identify why UUID IDs are being stored instead of canonical PC-xxxxx IDs.
-3. Check AI generation and Insights APIs for incorrect ID handling.
-4. Verify whether existing insights are test data or generated records.
-5. Recommend the smallest safe fix.
+Before modifying anything:
 
-READ-ONLY investigation only.
-Do not modify code or database.
-Do not modify Arun's tables or lifecycle code.
-Do not delete or migrate existing insights.
-Report exact files, functions and root cause.
+1. Inspect pytest database fixtures and SQLAlchemy session configuration.
+2. Confirm whether tests connect to PeopleConnect_Dev.
+3. Determine whether test transactions are committed or rolled back.
+4. Identify why test records persist after execution.
+5. Recommend a safe isolated test database strategy.
+6. Do not hardcode PC-00001 in test fixtures.
+7. Do not delete or update existing records.
+8. Do not modify Arun's lifecycle tables or code.
+
+READ-ONLY investigation. Report exact findings and the smallest safe fix.
