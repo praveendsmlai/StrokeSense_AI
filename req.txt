@@ -1,44 +1,15 @@
-Continue the existing PeopleConnect T003-10 Insights API investigation from where the previous Claude Code session stopped.
+Continue T003-10 Insights hotspots issue.
 
-Project path: C:\FinalProject\peopleconnect
-Backend path: C:\FinalProject\peopleconnect\backend
+GET /api/v1/insights/hotspots returns 200 with hotspots=[] when tested through authenticated Swagger.
 
-Current issue:
-GET /api/v1/insights/hotspots returns HTTP 200 but `hotspots: []`.
+Inspect only the Insights API code, database queries, and AI-to-Insights persistence logic.
 
-Previous findings:
-1. Arun's `plan_connect_initiations` table contains valid IDs PC-00001 through PC-00007.
-2. `connect_insights` contains 156 orphaned records with UUID `plan_connect_id` values.
-3. Previous investigation traced these records to `tests/test_t003_10_insights.py`, whose fixtures generated random UUIDs.
-4. Pytest was writing test data into the shared PeopleConnect_Dev database.
-5. Database isolation protection was subsequently added to `tests/conftest.py`.
-6. Existing 156 records must remain untouched.
+Find why valid PC-xxxxx Connect insights are not appearing.
 
-The previous session stopped because:
-- Python was invoked through WindowsApps/python.exe and failed with exit code 49.
-- A subsequent operation was blocked by Claude Code.
+Fix confirmed Insights code defects only.
 
-Continue from this exact point.
+Do not read .env, access credentials, start servers, call APIs, run tests, or modify database records.
 
-Instructions:
-1. First inspect the current code and existing changes. Do not repeat completed investigations.
-2. Use `py -m` instead of `python` for Python commands.
-3. Trace the actual hotspots API query, filters, joins, and data sources.
-4. Determine whether empty hotspots are caused by invalid test records, missing valid insight records, filtering logic, or an API implementation defect.
-5. Fix only confirmed defects in Praveen's Insights implementation.
-6. Do not modify Arun's lifecycle code or tables.
-7. Do not delete or update the existing 156 records.
-8. Do not run pytest against PeopleConnect_Dev.
-9. Do not create test records in PeopleConnect_Dev without explicit approval.
-10. Preserve existing APIs, SQL Server configuration, and RBAC.
+Do not modify Arun's code or tables.
 
-Goal:
-Make the Insights hotspots API return correct database-backed results when qualifying valid data exists, without fabricating data or weakening filters.
-
-After the investigation, report:
-- Exact root cause
-- Files changed
-- Verification results
-- Whether hotspots now returns actual data or remains empty due to missing qualifying records
-
-Do not claim the issue is resolved without verification.
+Report exact findings and changes.
