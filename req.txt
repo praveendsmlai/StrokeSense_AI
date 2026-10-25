@@ -1,49 +1,28 @@
-Perform a STRICT READ-ONLY compliance audit of the completed PeopleConnect backend.
+Perform a STRICT READ-ONLY API inventory reconciliation for Praveen-owned PeopleConnect tasks T002 and T003-1 through T003-11.
 
-**Mandatory source references:**
-1. Original PRD and revised FR-01 to FR-28 requirements.
-2. Task Breakdown Planner, including all Praveen-owned T002 and T003 tasks.
-3. Requirements Traceability Matrix.
-4. All UI reference screenshots/images from the UI reference folder.
-5. All approved source documents from the source documents folder.
-6. Actual backend source code, registered FastAPI endpoints, SQL Server schema and test results.
+Compare:
+1. Original PRD
+2. Task Breakdown Planner Excel
+3. Requirements Traceability
+4. All supplied UI reference screenshots
+5. FINAL_PRD_TASK_UI_COMPLIANCE_AUDIT.md
+6. Actual registered FastAPI OpenAPI endpoints
 
-First locate and read the actual source documents and UI image folders. Do not assume their contents. Report any missing or inaccessible references.
+Use the running application's OpenAPI specification or registered routes as the source of truth for actual API paths.
 
-**Mandatory rules:**
-- Audit ONLY Praveen-owned tasks.
-- Do NOT modify Arun's lifecycle code or his 9 canonical tables.
-- Use Arun's existing tables as the source of truth wherever required.
-- Use SQL Server PeopleConnect_Dev, dbo schema. No SQLite.
-- Do not create mock APIs, fake data or invented requirements.
-- Verify FR-24, FR-25 and FR-26 against their exact approved definitions.
-- Verify RBAC, IBU scoping and data security.
-- Compare every UI screenshot's relevant fields, filters, charts, buttons and workflows with actual backend API support.
-- Verify request/response schemas, data sources and persistence.
-- Do not modify code, database, tests or documents during this audit.
-- Use `py -m` for Python commands.
+For every required operation, report:
+- Task ID and requirement
+- Expected functionality
+- API path claimed in the compliance audit
+- Actual registered HTTP method and API path
+- Request/response schema compatibility
+- Whether the required UI functionality is supported
+- Status: MATCH, DIFFERENT_PATH_COMPATIBLE, MISSING, or NEEDS_VERIFICATION
 
-**Required output:**
+Identify missing endpoints, duplicate operations, incorrect mappings, and UI integration mismatches.
 
-Create a detailed compliance matrix containing:
+Do not modify code, database, tests, configurations, or Arun-owned lifecycle modules/tables.
 
-Task ID | PRD/FR Reference | UI Reference | Required Functionality | Actual API | Source Code File | SQL Table | Test Evidence | Status | Gap
+Do not claim 100% completeness without requirement-level evidence.
 
-Classify every requirement as:
-PASS / PARTIAL / FAIL / NOT VERIFIED.
-
-Clearly distinguish implementation evidence from automated test results and manual Swagger verification.
-
-Identify missing APIs, UI-to-API mismatches, incomplete business rules, missing database mappings and untested functionality.
-
-Do not claim 100% compliance or production readiness without supporting evidence.
-
-Finally, provide:
-1. Overall compliance percentage based on verified requirements.
-2. Complete gap list with priorities.
-3. Required fixes limited to Praveen-owned modules.
-4. Items pending manual Swagger or live Azure provider testing.
-
-Save the detailed report as FINAL_PRD_TASK_UI_COMPLIANCE_AUDIT.md.
-
-Do not implement any fixes yet. Wait for my approval.
+Generate API_INVENTORY_RECONCILIATION.md with a summary of missing APIs and mismatches.
