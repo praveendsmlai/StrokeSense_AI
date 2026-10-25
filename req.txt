@@ -1,81 +1,40 @@
-TASK: Prepare a detailed, read-only integration plan for T002 AI-generated actions and T003 Action Management.
+Implement PeopleConnect T002–T003 action integration, starting with Phase 1 only.
 
-CURRENT ISSUE:
-- dbo.connect_actions stores AI-generated Connect actions.
-- dbo.pm_actions stores T003-managed actions.
-- GET Connect Actions reads connect_actions.
-- PUT Action reads pm_actions.
-- This causes HTTP 404 when updating an AI-generated action.
+**Architecture decision:**
+- `dbo.pm_actions` is the single canonical table for published and active actions.
+- `dbo.connect_actions` remains the AI-generated draft/review source.
+- After human validation and publication, transfer actions to `pm_actions` using the original action ID.
+- No duplicate active actions, no independent action-management workflows.
 
-PROPOSED APPROACH:
-Evaluate dbo.pm_actions as the single canonical Action Management table.
+**Mandatory rules:**
 
-MANDATORY RULES:
+1. Work only on Praveen-owned T002/T003 code and tables.
+2. Do not modify Arun's lifecycle code or his 9 tables.
+3. Preserve all 418 existing `pm_actions` records and existing `connect_actions` records.
+4. Preserve action IDs, ownership, Connect relationships, status history, audit trails, SLA information and RBAC.
+5. Do not bypass human validation or publication.
+6. Do not change existing API contracts unnecessarily.
+7. Do not delete, truncate, rename or drop existing tables or columns.
+8. Do not execute destructive migrations.
+9. Use SQL Server `PeopleConnect_Dev`, schema `dbo`.
+10. Use `py -m` for Python commands.
+11. No mock data or hardcoded successful responses.
+12. Do not claim success without actual verification.
+13. Azure OpenAI and ACS live-provider testing can remain deferred.
+14. Preserve FR-01–FR-28 requirements, particularly FR-24, FR-25 and FR-26.
 
-1. Work only on Praveen-owned T002/T003 scope. Do not modify Arun's lifecycle implementation.
+**Phase 1 implementation:**
 
-2. STRICTLY DO NOT modify, delete, rename, truncate, recreate or migrate Arun's nine lifecycle tables:
-   - plan_connect_initiations
-   - plan_connect_participants
-   - participant_snapshots
-   - plan_connect_file_uploads
-   - participant_upload_rows
-   - connect_types
-   - hr_roster
-   - users
-   - audit_logs
+1. Read `T002_T003_INTEGRATION_PLAN.md` and inspect actual SQLAlchemy models, database schemas and API dependencies.
+2. Verify the field mapping, original ID compatibility, relationships, constraints and existing records.
+3. Create a database backup or verified recovery checkpoint before any schema mutation.
+4. Implement only the minimum backward-compatible schema changes required in Praveen-owned tables, using a reviewed migration.
+5. Make migration idempotent and preserve existing data.
+6. Do not migrate action records or switch API read/write paths in this phase.
+7. Run migration verification, schema checks and relevant automated tests.
+8. Verify record counts before and after and confirm Arun's tables are unchanged.
+9. Stop after Phase 1 and report exact files changed, SQL changes, test results and remaining work.
 
-3. Preserve all existing SQL Server data, relationships, action IDs and audit history. No destructive operations.
+**Important:** If a required schema change could break existing data, foreign keys or Arun's integration, stop and explain the blocker instead of guessing.
 
-4. Use the existing PeopleConnect_Dev SQL Server database and dbo schema. Do not introduce SQLite, another database or a separate application.
-
-5. Do not create duplicate action records or introduce another independent Action Management workflow.
-
-6. Maintain compatibility with Arun's canonical Connect IDs and lifecycle records. Do not modify lifecycle statuses or transitions.
-
-7. Preserve the complete AI workflow: generation, human review, validation, publication and action management. Unvalidated AI-generated actions must not become active automatically.
-
-8. Preserve RBAC and authorized IBU/BHR scope. Do not bypass authentication or authorization.
-
-9. Follow FR-01 through FR-28 as the source of truth, including:
-   - FR-24: Reporting dimensions and date presets.
-   - FR-25: Valid denominator and percentage calculation rules.
-   - FR-26: Exact action analytics.
-
-10. Ensure consistent action data across GET, POST, PUT, PATCH, status history, SLA, reminders, escalation, notifications, action tracker, dashboards and reporting.
-
-11. Preserve existing API contracts wherever possible. Identify required changes before implementing them.
-
-12. No mock data, fake integrations, hardcoded success responses or fabricated test results.
-
-13. Use actual code, SQL schema and API evidence. Clearly distinguish confirmed findings from assumptions.
-
-14. Azure OpenAI and Azure Communication Services must retain real provider integration code. Live provider connectivity testing can be deferred.
-
-15. On Tech Mahindra Windows, use py -m for Python commands. Do not assume the python command works.
-
-16. Do not modify frontend code unless explicitly requested.
-
-17. Do not modify existing Alembic migrations. Propose new migrations only if necessary, with rollback and data-preservation plans.
-
-18. Do not execute database migrations, bulk updates, synchronization jobs or external notifications without explicit approval.
-
-19. Do not claim success based only on unit tests. Require actual Swagger API verification and SQL Server persistence checks.
-
-20. Do not change any code or database in this task. Investigation and planning ONLY.
-
-DELIVERABLES:
-A. Existing architecture and exact table dependencies.
-B. Proposed canonical data model.
-C. Field-by-field mapping between connect_actions and pm_actions.
-D. Safe migration and synchronization strategy preserving IDs and history.
-E. AI draft-to-published-action lifecycle design.
-F. Complete list of affected T002/T003 APIs and services.
-G. Risks, dependencies and rollback plan.
-H. Step-by-step implementation phases.
-I. Swagger and SQL Server regression test checklist.
-
-IMPORTANT:
-Do not start implementation.
-
-First provide the complete investigation and integration plan. Wait for my explicit approval before making changes.
+Do not generate another lengthy planning document. Execute Phase 1 safely and provide a concise implementation report.
