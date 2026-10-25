@@ -1,47 +1,72 @@
-Continue PeopleConnect T002-T003 Action Integration debugging.
+Continue the existing PeopleConnect T002–T003 Action Integration fix.
 
-CRITICAL: The original issue is NOT FIXED.
+We need one unified Action Management workflow for both manual and AI-generated actions.
 
-Actual Swagger test:
-PUT /api/v1/actions/C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2
+IMPORTANT DESIGN DECISION:
 
-Response:
-HTTP 404
-{"detail":"Action not found"}
+dbo.pm_actions must be the single source of truth for all published/manageable actions.
 
-Previous changes added GET /actions/{action_id}, but the original PUT 404 remains.
+Keep dbo.connect_actions only for AI-extracted action drafts, review and validation.
 
-MANDATORY RULES:
-1. Do not modify Arun's code or 9 lifecycle tables.
-2. Do not delete, overwrite or modify existing action records during investigation.
-3. Do not migrate unvalidated AI draft actions.
-4. Preserve all existing pm_actions records.
-5. Do not create another GET or PUT endpoint.
-6. Do not bypass BHR approval or RBAC/IBU authorization.
-7. Do not change unrelated modules.
-8. Do not invoke Azure OpenAI or ACS.
-9. Use py -m for Python commands.
-10. Never claim success based only on unit tests.
+Do NOT insert AI actions into both tables during extraction.
 
-TASK:
+REQUIRED FLOWS:
 
-1. Trace PUT /api/v1/actions/{action_id} from router to SQLAlchemy query.
-2. Check which table PUT queries.
-3. Check the exact action ID in both dbo.connect_actions and dbo.pm_actions.
-4. Confirm the action's publication/validation status.
-5. Determine whether this ID is a draft action that should be updated through the draft review API rather than PUT /actions/{id}.
-6. Verify whether the intended PUT endpoint is restricted to published actions.
-7. Check why previous implementation claimed the issue was fixed despite the same 404.
-8. Identify the correct workflow for this exact action ID.
+FLOW 1: MANUAL ACTIONS
 
-Do not change code or database yet.
+1. POST /api/v1/actions creates manual actions directly in dbo.pm_actions.
+2. Existing GET, PUT, PATCH, history, reminders and reporting APIs must work.
+3. Do not require publish-from-ai for manually created actions.
+4. Preserve existing authorization and audit rules.
 
-OUTPUT:
-- Exact root cause with code and SQL evidence.
-- Which table contains the action ID.
-- Whether the action is draft or published.
-- Correct API to update this action.
-- Whether the 404 is expected or a genuine bug.
-- Smallest safe fix if required.
+FLOW 2: AI-GENERATED ACTIONS
 
-STOP after diagnosis. Do not claim FIXED until the same scenario passes an actual Swagger retest.
+1. AI extraction creates draft actions in dbo.connect_actions.
+2. BHR reviews, edits, assigns owners and validates actions.
+3. Existing POST /api/v1/actions/publish-from-ai/{action_id} must read the source action from dbo.connect_actions.
+4. Validate required fields, owner assignment, reviewer approval and authorization.
+5. Insert the approved action into dbo.pm_actions.
+6. Preserve original action ID and Connect association.
+7. Prevent duplicate publication through idempotency checks.
+8. After publication, all existing T003 Action Management APIs must work.
+9. Rejected/unapproved AI actions must never enter pm_actions.
+
+CURRENT ISSUE:
+
+AI action ID:
+C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2
+
+Exists in dbo.connect_actions but not dbo.pm_actions.
+
+Its owner_employee_id and owner_email are NULL.
+
+Inspect existing review/edit/validation APIs. If owner assignment is missing, implement the smallest necessary API extension.
+
+DO NOT:
+- Modify Arun's lifecycle code or nine canonical tables.
+- Delete or recreate existing tables.
+- Migrate existing records unnecessarily.
+- Create another action-management table.
+- Bypass human approval.
+- Trigger real emails.
+- Modify unrelated modules.
+
+FIRST:
+Inspect current code and report the exact integration problem.
+
+THEN:
+Implement the smallest safe fix.
+
+TEST:
+1. Manual action creation and retrieval.
+2. AI draft creation.
+3. Owner assignment and validation.
+4. AI action publication.
+5. SQL Server pm_actions insertion.
+6. GET, PUT and PATCH on published AI actions.
+7. Duplicate publication prevention.
+8. Audit history and RBAC.
+
+Use py -m for Python commands.
+
+Provide actual test results and exact modified files. Do not claim success without verification.
