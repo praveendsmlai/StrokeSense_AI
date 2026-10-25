@@ -1,102 +1,303 @@
-# PEOPLECONNECT — RESUME EXISTING DEVELOPMENT
+# PEOPLECONNECT — T003-6: REMINDERS & AGING
+## COMPLETE PARTIALLY IMPLEMENTED FUNCTIONALITY
 
-Continue the PeopleConnect project from the previous Claude Code session in `C:\FinalProject\peopleconnect`.
+### OBJECTIVE
 
-The previous session was interrupted after implementing the T003-7 Action Tracker List admin authorization fix. Do not restart development or repeat completed work.
+Continue development of **T003-6 — Reminders & Aging** in the existing PeopleConnect project.
 
-## 1. RECOVER CURRENT STATE
+Project location: `C:\FinalProject\peopleconnect`
 
-First inspect the actual project files and these reports:
+**CURRENT STATUS: PARTIALLY COMPLETE (approximately 60% according to previous audit).**
 
-- `COMPREHENSIVE_TASK_AUDIT.md`
-- `T003_7_SOURCE_DOCUMENT_VERIFICATION_AUDIT.md`
-- `T003_7_IMPLEMENTATION_COMPLETE.md`
-- `T003_7_ADMIN_QUERY_ROOT_CAUSE_ANALYSIS.md`
-- `T003_7_AUTHORIZATION_FIX_SUMMARY.md`
+The existing reminder scheduler and some aging functionality were previously implemented. T003-2 Status Management & SLA was recently implemented, including an SLA service and aging report endpoint.
 
-Locate files if their names or paths differ.
+These are historical findings. Verify the actual implementation before making changes.
 
-The previous session reported that `GET /api/v1/actions` was implemented and the PLATFORM_ADMIN IBU filtering issue was fixed.
+**DO NOT restart T003-6 from scratch. Preserve all completed functionality and implement ONLY missing requirements.**
 
-Verify the actual code and test results. Do not assume reported success means everything passed.
+---
 
-## 2. VERIFY T003-7 FIX
+## 1. SOURCE OF TRUTH — MANDATORY
 
-Inspect `app/api/action_endpoints.py` and confirm that:
+Read the original project documents from their correct folders.
 
-- PLATFORM_ADMIN visibility follows existing RBAC authorization rules.
-- Non-admin users remain restricted to authorized IBUs.
-- Existing filters, pagination, sorting and soft-delete behavior remain intact.
-- No authentication or lifecycle code was modified.
+### A. Source Document folder
 
-Run focused automated tests using `py -m pytest`.
+Locate and thoroughly review:
 
-Do not recreate the endpoint or rewrite working code.
+- Original PeopleConnect PRD, including applicable FR-01–FR-28 requirements.
+- Original PeopleConnect Task Breakdown Planner.
+- Requirements Traceability document.
+- Relevant functional specifications and acceptance criteria.
 
-If T003-7 is ready, mark it as **IMPLEMENTED — MANUAL SWAGGER RETEST PENDING**.
+### B. UI folder — SEPARATE FOLDER
 
-Do not repeat completed tests unnecessarily.
+Locate and review the approved UI reference images/screenshots relevant to T003-6.
 
-## 3. CONTINUE PENDING PRAVEEN TASKS
+**IMPORTANT: UI images are in the `UI` folder, NOT in the `Source Document` folder.**
 
-After verifying T003-7, continue developing the remaining Praveen-owned backend tasks according to their actual dependencies and original Breakdown Planner:
+Use the UI images to understand required page behavior, displayed data, filters, buttons, reminder indicators and aging information, where applicable.
 
-- T003-2 — Status Management and SLA
-- T003-5 — Notifications
-- T003-6 — Reminders and Aging
-- T003-8 — Dashboards
-- T003-9 — Reporting
-- T003-10 — Theme Insights
-- T003-11 — Administration Configuration
-- T003-12 — Testing and Fixes
+### Source-document rules
 
-Inspect existing implementations first. Complete only missing, source-approved functionality.
+1. The original PRD and Breakdown Planner define the approved functional scope.
+2. Requirements Traceability provides requirement mapping.
+3. The UI folder contains the approved visual references.
+4. Do not invent APIs, fields, reminder intervals, SLA thresholds, aging categories, workflows, response structures or business rules.
+5. If documents conflict, do not silently choose one interpretation.
+6. Report critical conflicts requiring clarification.
+7. Do not treat earlier ChatGPT suggestions as approved requirements.
+8. If a required feature is not specified clearly, identify the gap rather than inventing behavior.
 
-Do not reimplement completed tasks.
+---
 
-## 4. ALL MANDATORY RULES
+## 2. VERIFY EXISTING PARTIAL IMPLEMENTATION
 
-1. Original PRD, Breakdown Planner, Requirements Traceability and UI reference screenshots are the source of truth.
-2. Work ONLY on Praveen-owned tasks.
-3. Never modify Arun's lifecycle code, models, APIs, migrations or database tables.
-4. Do not modify Abhishek's authentication code.
-5. Preserve Microsoft SQL Server `PeopleConnect_Dev`, existing SQLAlchemy models, JWT, RBAC, IBU authorization and audit history.
-6. Do not invent requirements, API contracts, database fields or workflows.
-7. Do not create duplicate services, tables or adapters.
-8. Do not change database schema or run destructive migrations without approval.
-9. Do not modify frontend code.
-10. Preserve all working APIs and database records.
-11. Use `py -m` for all Python module commands on Tech Mahindra Windows. Never use `python` or `python -m`.
-12. Implement real provider integration code where required, but do not claim live Azure integration success without testing.
-13. Keep previously identified Azure OpenAI failures for final integration testing.
-14. Run focused tests and relevant regression tests.
-15. Do not claim success without evidence.
+Before modifying any file, inspect the current codebase.
 
-## 5. EXECUTION INSTRUCTIONS
+Specifically inspect:
 
-For each pending task:
+1. Existing reminder scheduler implementation.
+2. Existing reminder services and background jobs.
+3. Existing aging calculations.
+4. Existing notification services and delivery interfaces.
+5. Existing T003-2 SLA service.
+6. Existing `GET /api/v1/actions/aging/report` endpoint, if present.
+7. Existing action status management.
+8. Existing escalation logic.
+9. Existing SQLAlchemy models and SQL Server tables.
+10. Existing tests, API schemas and dependencies.
+11. Existing JWT, RBAC and IBU authorization mechanisms.
+12. Existing append-only history and audit logging.
 
-1. Read its exact PRD and Breakdown Planner requirements.
-2. Inspect existing code and identify gaps.
-3. Implement missing functionality.
-4. Run automated tests.
-5. Record results.
-6. Continue to the next task automatically.
+Identify:
 
-Do not stop after each task for approval unless there is a critical ambiguity, authorization conflict or destructive database operation.
+- Requirements already implemented.
+- Requirements partially implemented.
+- Requirements completely missing.
+- Existing reusable code.
+- Genuine integration gaps.
+- Existing defects directly preventing T003-6 functionality.
 
-Keep implementation focused and avoid unnecessary long reports that consume context.
+Do not assume that previously reported completion percentages are exact.
 
-## 6. FINAL OUTPUT
+**Preserve existing working code. Do not rebuild or duplicate existing functionality.**
 
-Update `PRAVEEN_PENDING_TASKS_IMPLEMENTATION_REPORT.md` with:
+---
 
-- Task-wise completion status
-- Source requirement references
-- Files changed
-- APIs implemented
-- Tests passed/failed
-- Remaining blockers
-- Pending manual Swagger tests
+## 3. IMPLEMENT ONLY MISSING T003-6 REQUIREMENTS
 
-**Resume from the existing codebase. Preserve all completed work. Continue implementation without restarting the project.**
+After verification, immediately implement the missing functionality according to the original PRD, Breakdown Planner, Requirements Traceability and applicable UI references.
+
+Where explicitly required by the approved documents:
+
+### Reminder processing
+
+- Identify actions eligible for reminders.
+- Apply approved reminder scheduling rules.
+- Use existing action due dates and status information.
+- Integrate existing SLA calculations.
+- Prevent inappropriate reminders for completed or closed actions.
+- Preserve existing notification and reminder history.
+- Reuse existing scheduler infrastructure.
+
+### Aging calculations
+
+- Use approved aging calculation rules.
+- Integrate existing T003-2 SLA functionality.
+- Calculate overdue and aging information correctly.
+- Handle relevant date boundaries and time zones according to documented requirements.
+- Reuse existing aging endpoints where possible.
+
+### Escalations
+
+- Apply only documented escalation conditions.
+- Reuse existing escalation configuration and services.
+- Preserve existing escalation history.
+- Avoid duplicate processing where idempotency is required.
+
+### API integration
+
+- Reuse existing endpoints and response contracts.
+- Implement missing APIs only when required by source documents.
+- Ensure API responses use real SQL Server data.
+- Preserve authentication and authorization.
+- Avoid duplicate endpoints and services.
+
+### Notification integration
+
+- Reuse the existing notification provider interfaces.
+- Do not recreate T003-5 Notifications.
+- Integrate reminders with the existing notification mechanism only as required by T003-6.
+- Do not send real emails during automated tests.
+- If Azure ACS credentials are unavailable, complete the provider-independent implementation and document live testing as pending.
+
+**Do not implement functionality merely because it is listed as a possible example above. Every change must be supported by the approved source documents.**
+
+---
+
+## 4. MANDATORY PROJECT RULES
+
+Follow ALL rules strictly.
+
+1. Work ONLY on Praveen-owned T003-6 functionality.
+2. Do not start or implement another task.
+3. Never modify Arun's lifecycle code, services, APIs, models, migrations or nine lifecycle tables.
+4. Arun's lifecycle data may only be read through existing authorized mechanisms when required.
+5. Never modify Abhishek's authentication code.
+6. Preserve existing Microsoft SQL Server database `PeopleConnect_Dev`.
+7. Do not introduce SQLite or another database.
+8. Preserve existing SQLAlchemy architecture.
+9. Preserve JWT authentication and existing RBAC permissions.
+10. Preserve IBU authorization and data isolation.
+11. Preserve employee master integration.
+12. Preserve append-only action history and audit records.
+13. Do not modify existing database schemas, tables, constraints or migrations without explicit approval.
+14. Do not drop, truncate, delete or recreate existing tables.
+15. Do not modify existing production records unnecessarily.
+16. Do not introduce mock or hardcoded production data.
+17. Do not create duplicate SLA services, reminder schedulers, notification providers or lifecycle adapters.
+18. Reuse existing working APIs and services.
+19. Do not change established API contracts without a documented requirement.
+20. Do not modify frontend code.
+21. Do not implement requirements based on assumptions.
+22. Preserve all existing completed and partially completed functionality.
+23. Do not modify previously deferred Azure OpenAI issues.
+24. Do not claim Azure ACS delivery works without actual live verification.
+25. Do not install or upgrade dependencies unnecessarily.
+26. Do not make unrelated refactors.
+27. Do not claim task completion without evidence.
+
+### Tech Mahindra Windows — Mandatory command rule
+
+The `python` and `python3` commands are unavailable.
+
+Use:
+
+- `py -m pytest`
+- `py -m py_compile`
+- `py -m pip`
+- `py -m uvicorn`
+- `py -c` for inline Python when necessary.
+
+Never use `python`, `python3` or `python -m`.
+
+---
+
+## 5. PRESERVE PREVIOUS TASK PROGRESS
+
+Do not reimplement other tasks.
+
+Previous reported status:
+
+| Task | Status |
+|---|---|
+| T002 — AI Output Generation | Implemented; Azure live testing pending |
+| T003-1 — Action Creation & Editing | COMPLETE |
+| T003-2 — Status Management & SLA | Implemented; manual testing pending |
+| T003-3 — Connect Closure | COMPLETE |
+| T003-4 — Append-Only History | COMPLETE |
+| T003-5 — Notifications | PARTIALLY COMPLETE |
+| T003-6 — Reminders & Aging | PARTIALLY COMPLETE — CURRENT TASK |
+| T003-7 — Action Tracker | Implemented; manual retesting pending |
+| T003-8 — Dashboards | PENDING |
+| T003-9 — Reporting | PENDING |
+| T003-10 — Theme Insights | PENDING; verify actual implementation |
+| T003-11 — Admin Configuration | PENDING |
+| T003-12 — Testing & Fixes | PARTIALLY COMPLETE |
+
+These are historical audit statuses, not proof of current completion.
+
+Only T003-6 is in scope for development.
+
+---
+
+## 6. AUTOMATED TESTING AND VERIFICATION
+
+After implementing the missing requirements:
+
+1. Run syntax checks for changed Python files.
+2. Run focused T003-6 automated tests.
+3. Run relevant T003-2 SLA regression tests.
+4. Run relevant T003-5 notification integration tests without sending real emails.
+5. Verify existing T003-7 functionality remains unaffected.
+6. Verify scheduler and reminder behavior.
+7. Verify aging calculations and boundary conditions.
+8. Verify duplicate reminder prevention where required.
+9. Verify completed-action exclusion where required.
+10. Verify JWT, RBAC and IBU restrictions.
+11. Verify Swagger/OpenAPI registration for relevant endpoints.
+12. Verify SQL Server compatibility without destructive operations.
+
+Use `py -m pytest` and other approved Windows commands.
+
+Do not run destructive tests against `PeopleConnect_Dev`.
+
+Clearly distinguish:
+
+- Automated tests passed.
+- Real SQL Server integration verified.
+- Manual Swagger testing pending.
+- Azure ACS live testing pending.
+
+---
+
+## 7. FINAL REPORT
+
+After implementation, provide:
+
+### A. Source requirement mapping
+
+For each T003-6 requirement:
+
+- Source document and reference.
+- Existing implementation status.
+- Missing functionality identified.
+- Changes implemented.
+- Verification status.
+
+### B. Files modified
+
+List exact file paths and reasons.
+
+### C. API changes
+
+List endpoints added or updated, only where required.
+
+### D. Automated testing
+
+Provide exact commands and pass/fail counts.
+
+### E. Database verification
+
+State whether actual SQL Server integration was tested or only isolated fixtures were used.
+
+### F. Remaining gaps
+
+Clearly identify any requirements still partially implemented, blocked or unverified.
+
+### G. Manual Swagger testing
+
+Provide exact API endpoints, request examples and expected results based on the approved requirements.
+
+Update the existing `PRAVEEN_PENDING_TASKS_IMPLEMENTATION_REPORT.md` without overwriting unrelated task history.
+
+---
+
+## FINAL EXECUTION INSTRUCTION
+
+**T003-6 is PARTIALLY COMPLETE.**
+
+First inspect the Source Document folder, the separate UI folder and existing backend code.
+
+Identify completed and missing T003-6 requirements.
+
+Then **directly implement ONLY the missing approved functionality**, run focused tests and provide the final report.
+
+Do not stop after verification if requirements are clear.
+
+Do not request approval for routine, non-destructive changes.
+
+Stop only for critical requirement conflicts, security concerns or changes requiring explicit approval.
+
+**Do not start T003-8 or any other task. Stop after T003-6 is implemented and tested.**
