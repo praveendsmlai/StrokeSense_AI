@@ -1,225 +1,49 @@
-# PEOPLECONNECT — FINAL AUTOMATED TEST STABILIZATION
+Perform a STRICT READ-ONLY compliance audit of the completed PeopleConnect backend.
 
-Continue the existing PeopleConnect project.
+**Mandatory source references:**
+1. Original PRD and revised FR-01 to FR-28 requirements.
+2. Task Breakdown Planner, including all Praveen-owned T002 and T003 tasks.
+3. Requirements Traceability Matrix.
+4. All UI reference screenshots/images from the UI reference folder.
+5. All approved source documents from the source documents folder.
+6. Actual backend source code, registered FastAPI endpoints, SQL Server schema and test results.
 
-T002 and T003-1 through T003-12 implementation has been reported complete. Do not rebuild or redesign any module.
+First locate and read the actual source documents and UI image folders. Do not assume their contents. Report any missing or inaccessible references.
 
-OBJECTIVE:
-Resolve all remaining automated test failures, errors and unexplained skips before starting manual Swagger verification.
+**Mandatory rules:**
+- Audit ONLY Praveen-owned tasks.
+- Do NOT modify Arun's lifecycle code or his 9 canonical tables.
+- Use Arun's existing tables as the source of truth wherever required.
+- Use SQL Server PeopleConnect_Dev, dbo schema. No SQLite.
+- Do not create mock APIs, fake data or invented requirements.
+- Verify FR-24, FR-25 and FR-26 against their exact approved definitions.
+- Verify RBAC, IBU scoping and data security.
+- Compare every UI screenshot's relevant fields, filters, charts, buttons and workflows with actual backend API support.
+- Verify request/response schemas, data sources and persistence.
+- Do not modify code, database, tests or documents during this audit.
+- Use `py -m` for Python commands.
 
-## 1. MANDATORY SOURCE DOCUMENTS
+**Required output:**
 
-Locate and review the actual project folders containing:
+Create a detailed compliance matrix containing:
 
-- Revised FR-01 through FR-28 requirements
-- Original T002 and T003 task specifications
-- REQUIREMENTS_TRACEABILITY.md
-- Approved PRD and functional specifications
-- Source Document folder
-- UI Reference folder and approved screenshots
-- Existing API contracts
-- T003-8, T003-9, T003-10 and T003-11 implementation reports
-- T003_12_FINAL_INTEGRATION_AND_TEST_REPORT.md
-- Existing SQL Server models and Alembic migrations
+Task ID | PRD/FR Reference | UI Reference | Required Functionality | Actual API | Source Code File | SQL Table | Test Evidence | Status | Gap
 
-Do not invent paths or requirements.
+Classify every requirement as:
+PASS / PARTIAL / FAIL / NOT VERIFIED.
 
-Follow FR-24, FR-25 and FR-26 exactly.
+Clearly distinguish implementation evidence from automated test results and manual Swagger verification.
 
-## 2. MANDATORY RULES
+Identify missing APIs, UI-to-API mismatches, incomplete business rules, missing database mappings and untested functionality.
 
-- Work only on Praveen-owned T002/T003 backend modules.
-- Do not modify Arun's lifecycle code.
-- Do not modify Arun's nine canonical lifecycle tables.
-- Reuse Arun's tables through authorized read-only queries.
-- Preserve existing APIs and business logic.
-- Preserve RBAC and IBU restrictions.
-- Use the existing PeopleConnect_Dev SQL Server database with dbo schema for application integration.
-- Never run destructive operations against PeopleConnect_Dev.
-- Use isolated test databases or safely isolated fixtures for database-writing tests.
-- Do not use SQLite as a substitute for SQL Server integration testing.
-- Do not change production authentication behavior to make tests pass.
-- Do not weaken security checks.
-- Do not disable, delete or silently skip failing tests.
-- Do not fabricate test results.
-- Do not modify frontend code.
-- Do not perform live Azure OpenAI or ACS calls.
-- Do not send real emails.
-- Do not apply schema migrations without approval.
-- Use the actual source documents and UI references to validate expected API behavior.
+Do not claim 100% compliance or production readiness without supporting evidence.
 
-## 3. TECH MAHINDRA WINDOWS COMMAND RULE
+Finally, provide:
+1. Overall compliance percentage based on verified requirements.
+2. Complete gap list with priorities.
+3. Required fixes limited to Praveen-owned modules.
+4. Items pending manual Swagger or live Azure provider testing.
 
-Use `py -m` for Python commands.
+Save the detailed report as FINAL_PRD_TASK_UI_COMPLIANCE_AUDIT.md.
 
-Examples:
-
-py -m pytest
-
-py -m alembic current
-
-py -m alembic heads
-
-Do not use `python` or `python3`.
-
-## 4. VERIFY ACTUAL TEST STATUS
-
-Previous report claimed:
-
-- 317+ tests collected
-- 235+ tests passed
-- Zero implementation defects
-- JWT fixture scope limitation
-
-Do not accept these claims without verification.
-
-Run test collection and execute the appropriate test suites.
-
-Report exact numbers:
-
-- Collected
-- Passed
-- Failed
-- Errors
-- Skipped
-- Deselected
-- Not executed
-
-Explain any difference between collected and executed counts.
-
-## 5. FIX JWT TEST FIXTURES
-
-Investigate authentication fixture scope issues in T003-8, T003-9, T003-10 and T003-11.
-
-Inspect:
-
-- pytest fixtures
-- conftest.py
-- JWT generation
-- Token signing configuration
-- Authentication dependency overrides
-- Role claims
-- IBU claims
-- Test isolation
-- Token expiration
-
-Fix the actual cause without weakening application security.
-
-Verify authorized and unauthorized scenarios.
-
-## 6. FIX OTHER TEST ISSUES
-
-For every failure or error:
-
-1. Capture the actual traceback.
-2. Identify root cause.
-3. Determine whether it is a test defect, configuration defect or implementation defect.
-4. Apply the smallest safe fix.
-5. Rerun the affected test.
-6. Run relevant regression tests.
-
-Do not automatically classify errors as test-framework limitations.
-
-## 7. VERIFY T003-6 REMINDERS
-
-Inspect scheduler behavior and notification persistence.
-
-Verify:
-
-- Due-date reminders
-- Overdue reminders
-- Escalations
-- Timezone handling
-- Idempotency
-- Owner email handling
-- Scheduler job execution behavior
-- Notification database persistence
-- ACS-disabled behavior
-
-Use controlled isolated tests.
-
-Do not manually trigger real notifications.
-
-Do not send emails.
-
-## 8. CROSS-MODULE REGRESSION
-
-Verify existing APIs for:
-
-- T002 AI output generation
-- T003-1 Action Management
-- T003-2 SLA and Status
-- T003-3 Connect Closure
-- T003-4 History
-- T003-5 Communications
-- T003-6 Reminders
-- T003-7 Action Tracker
-- T003-8 Dashboard
-- T003-9 Reporting
-- T003-10 Insights
-- T003-11 Administration
-
-Check FR-24, FR-25 and FR-26 calculations using approved definitions.
-
-Ensure tests do not modify Arun-owned data.
-
-## 9. FINAL DELIVERABLES
-
-Create:
-
-FINAL_AUTOMATED_TEST_STABILIZATION_REPORT.md
-
-Include:
-
-1. Source documents reviewed
-2. UI references reviewed
-3. Exact test execution commands
-4. Exact test counts
-5. Failed test names and root causes
-6. Fixes implemented
-7. Files modified
-8. Remaining skipped tests and reasons
-9. Regression test results
-10. SQL Server integration verification
-11. Arun-owned code/table protection
-12. T003-6 scheduler verification
-13. Remaining blockers
-14. Swagger testing readiness status
-
-Also generate:
-
-FINAL_SWAGGER_API_INVENTORY.md
-
-Include every actual registered Praveen-owned API:
-
-- HTTP method
-- Endpoint path
-- Module
-- Authentication requirement
-- Required role
-- Request parameters/body
-- Expected response
-- Relevant SQL Server tables
-- Manual verification status: NOT TESTED
-
-Do not invent API endpoints.
-
-## 10. EXECUTION INSTRUCTIONS
-
-Start immediately.
-
-Do not stop after writing a readiness plan.
-
-Investigate and fix actual test issues.
-
-Run focused tests and regression tests.
-
-Continue until all safely resolvable issues are fixed.
-
-If a test requires unavailable Azure services, external infrastructure or explicit authorization, document it as blocked rather than passed.
-
-Do not perform manual Swagger testing yet.
-
-Do not claim 100% pass rate unless the actual execution results support it.
-
-Provide an evidence-based final report with exact counts.
+Do not implement any fixes yet. Wait for my approval.
