@@ -1,21 +1,22 @@
-SELECT 'connect_insights' AS table_name,
-       plan_connect_id AS connect_id
-FROM dbo.connect_insights
+Investigate PeopleConnect connect_insights ID mismatch.
 
-UNION ALL
+SQL Server findings:
+- plan_connect_initiations uses IDs like PC-00001.
+- connect_minutes uses PC-00001.
+- connect_actions uses PC-00001.
+- ai_generation_requests uses PC-00001.
+- connect_insights contains 156 records with UUID plan_connect_id values.
+- None of these 156 insights match Arun's connect IDs.
 
-SELECT 'connect_minutes',
-       plan_connect_id
-FROM dbo.connect_minutes
+Tasks:
+1. Find every code path that inserts into connect_insights.
+2. Identify why UUID IDs are being stored instead of canonical PC-xxxxx IDs.
+3. Check AI generation and Insights APIs for incorrect ID handling.
+4. Verify whether existing insights are test data or generated records.
+5. Recommend the smallest safe fix.
 
-UNION ALL
-
-SELECT 'connect_actions',
-       plan_connect_id
-FROM dbo.connect_actions
-
-UNION ALL
-
-SELECT 'ai_generation_requests',
-       plan_connect_id
-FROM dbo.ai_generation_requests;
+READ-ONLY investigation only.
+Do not modify code or database.
+Do not modify Arun's tables or lifecycle code.
+Do not delete or migrate existing insights.
+Report exact files, functions and root cause.
