@@ -1,21 +1,9 @@
-Fix GET /api/v1/insights/hotspots returning HTTP 500.
-
-Confirmed traceback:
-File: app/api/insights_endpoints.py
-Line: 275
-
-AttributeError: 'CurrentUser' object has no attribute 'role'. Did you mean 'roles'?
-
-Requirements:
-
-1. Inspect the actual CurrentUser model and existing RBAC implementation.
-2. Correct the role-checking logic using the supported roles structure.
-3. Preserve Employee, BHR, BHR Leader, Executive and other authorized role-based access restrictions.
-4. Check other Insights endpoints for the same incorrect role attribute usage.
-5. Do not modify Arun's lifecycle code or tables.
-6. Do not modify database schema or existing data.
-7. Add regression tests for the affected authorization logic.
-8. Run tests using py -m pytest.
-9. Report exact files changed and actual test results.
-
-Do not modify sentiment calculations or unrelated functionality in this fix.
+SELECT
+    ci.insight_type,
+    COUNT(*) AS total_insights,
+    COUNT(pci.id) AS matching_connects
+FROM dbo.connect_insights ci
+LEFT JOIN dbo.plan_connect_initiations pci
+    ON ci.plan_connect_id = pci.id
+GROUP BY ci.insight_type
+ORDER BY ci.insight_type;
