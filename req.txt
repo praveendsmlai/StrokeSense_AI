@@ -1,27 +1,42 @@
-Verify PeopleConnect Phase 3 integration before Phase 4.
+Continue fixing the existing PeopleConnect T002–T003 Action Integration issue.
+
+Do not perform PRD compliance verification.
+
+CURRENT ISSUE:
+AI-generated draft actions are stored in connect_actions, while published actions are managed through pm_actions. This causes inconsistent action visibility and PUT API 404 errors.
+
+Phase 3 already implemented:
+POST /api/v1/actions/publish-from-ai/{action_id}
+
+REQUIRED FIX:
+1. Trace the existing action creation, publication, GET, PUT and status update flows.
+2. Treat successful Publish as final approval. Do not create a separate Approve API.
+3. Keep AI drafts in connect_actions until publication.
+4. On authorized publication, persist the action in pm_actions.
+5. Ensure published actions work with GET, PUT, PATCH status and Action Tracker.
+6. Fix any remaining 404 or table mismatch issues.
+7. Reuse existing services and avoid duplicate implementation.
+8. Verify publication idempotency and audit history.
 
 MANDATORY RULES:
 - Do not modify Arun's code or 9 lifecycle tables.
-- Do not delete or modify existing 418 pm_actions records.
-- Preserve RBAC, IBU scope, audit history and existing API contracts.
-- Follow FR-01–FR-28.
-- Do not send real emails or invoke live AI providers.
-- Use py -m commands.
-- Do not claim success without evidence.
+- Preserve all 418 existing pm_actions records.
+- Preserve the existing connect_actions test record.
+- No destructive SQL operations.
+- Maintain RBAC and IBU authorization.
+- Block publication of invalid, rejected or unassigned actions.
+- Do not modify unrelated modules.
+- Do not invoke live Azure OpenAI or ACS.
+- Use py -m for Python commands.
+- Run focused tests and verify actual SQL Server persistence.
+- Never claim success without evidence.
 
-TASK:
+Implement only the necessary fixes.
 
-1. Trace the existing T002 AI action validation and Connect publication workflow.
-2. Verify whether publishing a Connect automatically persists its approved AI actions into dbo.pm_actions.
-3. Check whether the new publish-from-ai endpoint is integrated into the existing publication workflow or requires a separate manual call.
-4. Verify that unvalidated, rejected or unpublished actions cannot enter pm_actions.
-5. Verify repeated publication cannot create duplicate actions.
-6. Verify action GET, PUT, PATCH, SLA, reminders and reporting read published actions consistently.
-7. Confirm BHR authorization and IBU-level access restrictions.
-8. Verify that existing records and Arun's tables remain unchanged.
-
-FIRST perform read-only investigation.
-
-If automatic integration is missing, report the exact gap and smallest safe implementation approach. Do not modify code or database yet.
-
-Provide evidence from actual code paths, tests and SQL queries.
+OUTPUT:
+1. Root cause.
+2. Exact files changed.
+3. APIs verified.
+4. Test results.
+5. SQL Server record counts before and after.
+6. Any remaining blocker.
