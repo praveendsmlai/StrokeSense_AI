@@ -1,19 +1,29 @@
-PeopleConnect API #15: PUT /api/v1/actions/{action_id} still returns HTTP 404 after your previous fix.
+Investigate PeopleConnect Action Management architecture.
 
-Action ID: C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2
+We have two suspected tables:
+1. dbo.connect_actions
+2. dbo.pm_actions
 
-Previously, GET listed this action and PATCH updated it successfully.
+GET /api/v1/connects/PC-00001/actions returns action C16A86DE-BAE5-4140-A1D6-69AA59DCCDF2.
 
-Investigate the actual root cause:
+PUT /api/v1/actions/{action_id} returns 404 for this action.
 
-1. Compare GET, PATCH and PUT database queries.
-2. Verify which SQL Server table each endpoint uses.
-3. Check action ID matching, soft-delete filters, database connection and authorization scope.
-4. Run read-only SQL queries to confirm whether this exact action exists.
-5. Identify the precise condition causing PUT to return 404.
+However, PUT succeeds for an action stored in dbo.pm_actions.
 
-Do not modify code or database yet.
+Tasks:
 
-Do not touch Arun's lifecycle code or tables.
+1. Verify the actual tables and SQLAlchemy models used by all Action APIs.
+2. Identify which APIs read/write connect_actions and pm_actions.
+3. Check how T002 AI-generated actions become T003 managed actions.
+4. Check action relationships with Arun's plan_connect_initiations.
+5. Identify risks for Action Tracker, SLA, reminders, dashboard and reporting.
+6. Recommend ONE canonical action table based on existing requirements and architecture.
+7. Explain how existing data can be preserved during integration.
 
-Report the confirmed root cause with file names and line numbers. Do not claim the issue is fixed without an actual HTTP 200 verification.
+STRICT RULES:
+- READ-ONLY investigation.
+- Do not modify code, database or migrations.
+- Do not delete or merge tables.
+- Do not modify Arun's lifecycle code or nine tables.
+- Provide exact file names, line numbers and evidence.
+- Clearly separate confirmed findings from assumptions.
