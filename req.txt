@@ -1,21 +1,31 @@
-URGENT: GET /api/v1/admin/config?active_only=true still returns HTTP 500 after restart and previous fixes.
+Before testing Transcript and Media APIs, verify the following in PeopleConnect.
 
-Both Admin tables already exist in SQL Server PeopleConnect_Dev.
+Database: SQL Server PeopleConnect_Dev.
 
-Stop guessing the root cause.
-
-1. Capture the FULL Python traceback from the running backend for this exact request.
-2. Identify the precise failing file, line, SQL statement or exception.
-3. Fix the confirmed root cause in Praveen-owned code.
-4. Verify against the actual SQL Server schema.
-5. Report the exact exception and code changes.
+1. Check whether all Transcript and Media-related tables actually exist in SQL Server.
+2. Compare existing tables with SQLAlchemy models and Alembic migrations.
+3. Identify missing tables, columns, foreign keys or incorrect mappings.
+4. Verify that Transcript APIs save and retrieve data using Arun's actual PC-xxxxx Connect IDs.
+5. Trace the complete MoM Generation API flow.
+6. Confirm whether MoM Generation reads transcript content from the actual Transcript table or another source.
+7. Verify that uploaded transcripts are correctly linked to their Connect IDs and available to MoM Generation.
+8. Check whether Media uploads and their database references work correctly.
 
 IMPORTANT:
-- TechM Windows: use `py -m`, NEVER `python` or `python3`.
+- TechM Windows: use `py -m`, never `python` or `python3`.
+- Do not modify Arun's lifecycle code or tables.
+- Do not modify existing database records.
 - Do not read .env or expose credentials.
-- Do not modify Arun's code or tables.
-- Do not delete or insert database records.
-- Do not claim PASS based on unit tests or code inspection.
-- If authenticated execution is unavailable, report NOT VERIFIED.
+- Do not create tables or run migrations without approval.
+- Do not generate dummy records in PeopleConnect_Dev.
+- Inspect actual SQL Server schema, not just model definitions.
 
-Keep the response short. Do not generate documents or lengthy reports.
+Report briefly:
+- Transcript tables: EXIST / MISSING
+- Media tables: EXIST / MISSING
+- MoM reads transcript table: YES / NO
+- Transcript-to-Connect ID mapping: CORRECT / INCORRECT
+- Missing migrations or code defects
+- Exact files requiring fixes
+
+Do not claim verification without evidence.
