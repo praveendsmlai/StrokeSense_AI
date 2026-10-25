@@ -1,25 +1,19 @@
-Implement a safe pytest database isolation fix for PeopleConnect.
+Review the recently implemented pytest database isolation changes.
 
-Confirmed issue:
-Tests currently connect to PeopleConnect_Dev, commit records, and leave orphaned test data.
+Important: session.rollback() after a test cannot undo data already committed by session.commit().
 
-Requirements:
+Inspect tests/conftest.py and verify:
 
-1. Never run database-writing tests against PeopleConnect_Dev.
-2. Add fail-closed protection in tests/conftest.py to reject PeopleConnect_Dev and any non-test database.
-3. Support a separately configured PeopleConnect_Test database.
-4. Do not create, drop, truncate, delete, or modify any existing SQL Server database.
-5. Do not automatically create PeopleConnect_Test. If unavailable, fail with a clear setup error.
-6. Do not hardcode PC-00001.
-7. Preserve production database configuration and API behavior.
-8. Do not modify Arun's lifecycle code or tables.
-9. Do not delete the existing 156 orphaned records.
-10. Do not execute database-writing tests until isolation is verified.
+1. Whether each test runs inside an outer database transaction.
+2. Whether nested transactions/savepoints are used correctly.
+3. Whether db_session.commit() can persist records permanently.
+4. Whether all test database connections use the isolated test database.
+5. Whether application API tests override the production database dependency.
+6. Whether any tests create independent sessions or engines that bypass isolation.
 
-First inspect the complete pytest database configuration and identify all test fixtures that commit data.
+Do not modify code or databases yet.
+Do not execute database-writing tests.
+Do not touch Arun's lifecycle code or tables.
 
-Implement only the minimal test configuration and safety guards.
-
-After implementation, perform read-only verification and report changed files, safeguards, and any remaining setup requirements.
-
-Use py -m commands on Tech Mahindra Windows.
+Report confirmed risks and the smallest safe fix.
+Use py -m commands.
