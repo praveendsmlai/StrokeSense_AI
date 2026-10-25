@@ -1,26 +1,21 @@
-PeopleConnect T003 Admin APIs verification and fixes.
+GET /api/v1/admin/config?active_only=true still returns HTTP 500 after backend restart.
 
-GET /api/v1/admin/config?active_only=true currently returns HTTP 500: "Failed to retrieve configurations".
+Both dbo.admin_configuration and dbo.admin_configuration_audit exist in SQL Server PeopleConnect_Dev.
+
+Your previous fix did not resolve the issue.
+
+IMPORTANT: This is a Tech Mahindra Windows environment. Use `py -m` for all Python commands. Never use `python`, `python3`, or WindowsApps/python.exe.
 
 TASK:
-1. Identify and fix the root cause of this 500 error.
-2. Check all 8 Admin Configuration APIs one by one:
-   - GET /api/v1/admin/config
-   - POST /api/v1/admin/config
-   - GET /api/v1/admin/config/{config_key}
-   - PATCH /api/v1/admin/config/{config_key}
-   - DELETE /api/v1/admin/config/{config_key}
-   - PUT /api/v1/admin/config/{config_key}/activate
-   - PUT /api/v1/admin/config/{config_key}/deactivate
-   - GET /api/v1/admin/config/{config_key}/audit
-3. Verify SQL Server compatibility, database queries, response schemas and RBAC.
-4. Fix confirmed defects in Praveen-owned code only.
-5. Test APIs in dependency order using safe test configurations, without changing existing production/development records.
-6. Do not modify Arun's lifecycle code or tables.
-7. Do not read .env, expose credentials or run tests against PeopleConnect_Dev.
-8. Do not claim an API passed unless it was actually executed successfully.
+1. Inspect the actual backend exception and SQL error.
+2. Verify Admin model mappings, queries and response serialization.
+3. Identify the exact root cause and implement the fix.
+4. Verify the API returns HTTP 200.
+5. Report the exact exception, files changed and verification results.
 
-Finally provide a concise table:
-API | HTTP Status | PASS/FAIL/NOT TESTED | Fix Applied
-
-Report any APIs that could not be tested and why.
+RULES:
+- Do not assume tables are missing.
+- Do not modify Arun's code or tables.
+- Do not delete or modify existing database records.
+- Do not read .env or expose credentials.
+- Do not claim success without actual API execution.
