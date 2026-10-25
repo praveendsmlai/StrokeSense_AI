@@ -1,35 +1,41 @@
-Continue PeopleConnect T002–T003 integration with Phase 2 only.
+Continue PeopleConnect T002–T003 Integration Phase 3.
 
-Phase 1 is reported complete. Verify its database changes and backup before proceeding.
+Decision: Option A. Skip the existing unvalidated test record. Do not delete or modify it.
+
+Implement permanent integration between T002 AI action generation and T003 action management.
 
 MANDATORY RULES:
 
-1. dbo.pm_actions is the canonical table for published actions.
-2. dbo.connect_actions remains the AI draft/review source.
-3. Never migrate unvalidated or unpublished AI actions.
-4. Preserve original action IDs and all existing records.
-5. Do not modify Arun's lifecycle code or any of his 9 tables.
-6. Preserve RBAC, IBU scope, audit history, SLA and relationships.
-7. Do not delete, truncate or drop existing data.
-8. Do not generate duplicate actions.
-9. Use PeopleConnect_Dev, dbo schema and py -m commands.
-10. Do not change API routes in Phase 2.
-11. No mock data or hardcoded success.
-12. Do not claim success without SQL verification.
-13. Follow FR-01–FR-28 requirements.
-14. Do not modify unrelated modules.
+1. dbo.pm_actions must be the single canonical table for published actions.
+2. dbo.connect_actions remains the AI draft/review staging table.
+3. Only validated and published AI actions can enter pm_actions.
+4. Preserve human approval before publication.
+5. Preserve original action IDs or maintain an explicit, stable mapping where IDs are incompatible.
+6. Prevent duplicate action creation through idempotency.
+7. Preserve owner, due date, status, Connect ID, IBU scope and audit history.
+8. Preserve SLA, reminders, escalation, dashboard and reporting compatibility.
+9. Do not modify Arun's lifecycle code or any of his 9 tables.
+10. Do not delete, truncate or overwrite existing records.
+11. Preserve existing API routes, request/response contracts and RBAC.
+12. Follow FR-01–FR-28 requirements.
+13. No mock data, hardcoded responses or silent failures.
+14. Use SQL Server PeopleConnect_Dev, dbo schema and py -m commands.
+15. Do not modify unrelated modules.
 
-TASKS:
+IMPLEMENTATION:
 
-1. Verify Phase 1 schema, backup and existing 418 records.
-2. Verify all 9 Arun tables remain unchanged.
-3. Inspect the existing connect_actions record and its actual validation/publication state.
-4. Check field mappings, ID compatibility, constraints, ownership, status and audit requirements.
-5. If the action is validated and published, migrate it safely to pm_actions using an idempotent transaction.
-6. If it is not validated and published, do not migrate it. Report the exact blocker.
-7. Preserve the source record in connect_actions.
-8. Verify source and target records, counts, metadata and relationships using SQL.
-9. Run focused tests.
-10. Stop after Phase 2 and provide concise results.
+1. Inspect existing T002 validation/publication workflow and T003 action services.
+2. Identify the actual publication boundary.
+3. Integrate publication so approved AI actions are persisted into pm_actions transactionally.
+4. Ensure action GET, PUT, PATCH and list operations use the correct canonical published-action source.
+5. Preserve draft/review endpoints and their existing behavior.
+6. Ensure repeated publication cannot create duplicates.
+7. Ensure invalid or unapproved actions cannot enter pm_actions.
+8. Ensure existing 418 actions remain unchanged.
+9. Add focused integration and regression tests.
+10. Verify SQL persistence, API behavior, RBAC and audit history.
+11. Report exact files changed, tests executed and database changes.
 
-Do not start Phase 3 or modify Arun's code.
+Stop after Phase 3. Do not begin Phase 4.
+
+If any implementation requires changing Arun-owned code or tables, stop and report the blocker instead.
