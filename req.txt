@@ -1,33 +1,71 @@
-Implement Phase 1 of PeopleConnect T002 transcript ingestion.
+Continue PeopleConnect T002 — Phase 2 implementation.
 
-Goal:
-Create a working transcript upload API that extracts text from supported text documents and stores the transcript in the existing SQL Server ConnectInputSource table.
+Phase 1 transcript upload is implemented. Now implement complete audio/video upload, voice recording support, Azure OpenAI Whisper transcription, and Azure Blob Storage integration.
+
+IMPORTANT: Azure OpenAI Whisper and Azure Blob Storage credentials are NOT available yet. Implement real, production-oriented integration code now. We will configure credentials and perform live Azure testing later.
 
 Requirements:
 
-1. Inspect the existing ConnectInputSource SQLAlchemy model and actual SQL Server schema before modifying anything.
-2. Implement POST /api/v1/connects/{connect_id}/transcripts/upload using multipart/form-data.
-3. Support .txt, .docx and text-based .pdf files using real extraction libraries.
-4. Validate connect existence using Arun's existing canonical lifecycle tables, without modifying them.
-5. Reuse existing authentication, BHR+ authorization and IBU-scoping rules.
-6. Validate file extension, MIME/content, size and empty transcript.
-7. Persist extracted transcript text in the existing ConnectInputSource table with correct connect_id and available source metadata.
-8. Store uploaded files securely in configurable local storage, outside publicly served directories, using generated safe filenames.
-9. Return transcript ID, connect ID, filename, extraction status and extracted text length.
-10. Add a GET endpoint to retrieve transcripts for an authorized connect, only if an equivalent endpoint does not already exist.
-11. Add automated tests for successful upload, invalid format, missing connect, unauthorized access, IBU isolation and SQL persistence.
-12. Register new endpoints in existing FastAPI Swagger.
+1. Inspect and reuse existing Phase 1 transcript service, endpoints, schemas, ConnectInputSource model, authentication, and SQL Server configuration.
+
+2. Implement audio/video upload API:
+   POST /api/v1/connects/{connect_id}/media/upload
+
+   Support audio formats MP3, WAV, M4A, OGG, FLAC, WebM and supported video formats MP4, MOV, MKV, WebM.
+
+3. Implement voice recording upload API:
+   POST /api/v1/connects/{connect_id}/recordings/upload
+
+   Accept browser-recorded audio such as WebM and WAV. The browser handles microphone recording and sends the recorded file to this API. Do not claim FastAPI itself captures microphone audio.
+
+4. Implement a real Azure OpenAI audio transcription provider using the supported Azure SDK/API, configurable endpoint, API key, API version, and transcription deployment.
+
+5. For video files, implement real audio extraction using FFmpeg before transcription. Handle missing FFmpeg, unsupported codecs, large files, and provider upload-size limits correctly.
+
+6. Implement Azure Blob Storage integration using the official Azure Storage SDK. Support configurable account/container credentials or approved identity-based authentication. Use private containers and safe generated blob names.
+
+7. Credentials are unavailable now:
+   - Add environment configuration examples with placeholders only.
+   - Never hardcode credentials.
+   - Never invent successful Azure responses.
+   - Never silently substitute fake transcripts.
+   - Return explicit provider-unavailable/pending status when credentials are missing.
+   - Preserve uploaded media and metadata so transcription can be retried later.
+   - Provide a configurable secure local-storage fallback for development; clearly distinguish local storage from Azure Blob.
+   - Do not mark Azure integration as live-tested.
+
+8. Persist successfully generated transcripts in the existing dbo.connect_input_sources SQL Server table. Link every transcript to its correct canonical connect ID, uploaded media, uploader, and timestamp. Inspect the actual schema first; add only Praveen-owned supporting metadata structures if genuinely necessary.
+
+9. Implement reliable transcription status tracking: PENDING, PROCESSING, COMPLETED, FAILED, and retry capability. Use appropriate background processing for long-running audio/video; avoid blocking requests indefinitely.
+
+10. Add an authorized status/retry endpoint only where needed and avoid duplicating existing endpoints.
+
+11. Reuse existing authorization and IBU-scoping checks. Never modify Arun's nine canonical lifecycle tables or lifecycle code.
+
+12. Validate file content, extension, MIME type, file size, and safe storage paths. Protect uploaded recordings and transcripts from unauthorized access.
+
+13. Do not modify the existing generate-minutes API yet. That integration will be Phase 3.
+
+14. Add automated tests covering upload validation, authorization, IBU isolation, local storage, missing Azure credentials, transcription status, retry, and SQL persistence. Mock external Azure calls in unit tests only; keep actual production provider implementations real.
+
+15. Register APIs in the existing FastAPI application and Swagger.
 
 Constraints:
-- Modify only Praveen-owned T002 files and supporting infrastructure.
-- Do not modify Arun's lifecycle code or nine canonical tables.
+- Work only on Praveen-owned T002 code and necessary supporting infrastructure.
 - Use existing PeopleConnect_Dev SQL Server database and dbo schema.
-- Do not create a duplicate transcript table.
-- Do not change the existing MoM generation API in this phase.
-- Do not implement audio/video transcription or voice recording yet.
-- Do not use mock success responses.
-- Do not delete or overwrite existing records.
-- Use py -m for Python commands.
-- Inspect the existing code before editing.
+- No separate microservice or database.
+- No destructive database operations.
+- Preserve existing Phase 1 functionality.
+- Use py -m for Python commands on Tech Mahindra Windows.
+- Do not require live Azure credentials to complete implementation.
 
-After implementation, run relevant tests and report exact files changed, endpoint contracts, SQL persistence evidence, and any remaining limitations. Do not claim tests passed unless actually executed.
+After implementation, report:
+- New and modified files.
+- Exact API endpoints and request/response contracts.
+- Azure environment variables required.
+- Storage and transcription workflow.
+- SQL tables used.
+- Actual automated test results.
+- Features implemented but pending live Azure testing.
+
+Do not claim Azure OpenAI or Blob Storage works until tested with real credentials.
