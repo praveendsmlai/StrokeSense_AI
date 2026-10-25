@@ -1,28 +1,21 @@
-Perform a STRICT READ-ONLY API inventory reconciliation for Praveen-owned PeopleConnect tasks T002 and T003-1 through T003-11.
+Inspect the existing PeopleConnect FastAPI backend for implementing two requirements:
 
-Compare:
-1. Original PRD
-2. Task Breakdown Planner Excel
-3. Requirements Traceability
-4. All supplied UI reference screenshots
-5. FINAL_PRD_TASK_UI_COMPLIANCE_AUDIT.md
-6. Actual registered FastAPI OpenAPI endpoints
+1. Transcript, audio and video upload, with extracted/transcribed text persisted in a SQL Server transcript table. Existing MoM generation must read this persisted transcript.
+2. Voice recording upload API, accepting browser-recorded audio and persisting its transcript in the same table.
 
-Use the running application's OpenAPI specification or registered routes as the source of truth for actual API paths.
+First inspect existing transcript, document, meeting, recording, AI generation, SQLAlchemy models, migrations, and Azure OpenAI integration.
 
-For every required operation, report:
-- Task ID and requirement
-- Expected functionality
-- API path claimed in the compliance audit
-- Actual registered HTTP method and API path
-- Request/response schema compatibility
-- Whether the required UI functionality is supported
-- Status: MATCH, DIFFERENT_PATH_COMPATIBLE, MISSING, or NEEDS_VERIFICATION
+Identify reusable components, missing functionality, and exact required changes.
 
-Identify missing endpoints, duplicate operations, incorrect mappings, and UI integration mismatches.
+Constraints:
+- Work only within Praveen-owned T002/T003 scope.
+- Do not modify Arun's lifecycle code or nine canonical tables.
+- Use existing SQL Server PeopleConnect_Dev, dbo schema.
+- No separate service or database.
+- Do not duplicate existing endpoints or tables.
+- Preserve existing MoM generation and approval workflows.
+- No mock transcription or fake success.
+- Do not modify code or database yet.
+- Use py -m for Python commands.
 
-Do not modify code, database, tests, configurations, or Arun-owned lifecycle modules/tables.
-
-Do not claim 100% completeness without requirement-level evidence.
-
-Generate API_INVENTORY_RECONCILIATION.md with a summary of missing APIs and mismatches.
+Report existing endpoints, existing transcript table/schema, current MoM data source, supported media formats, transcription provider availability, and a minimal implementation plan.
