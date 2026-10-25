@@ -1,14 +1,41 @@
-Fix the 500 errors in GET /api/v1/reports/coverage and GET /api/v1/reports/trends.
+Fix all five failing PeopleConnect Insights APIs:
 
-Backend logs show SQLAlchemy TextClause FROM expression errors.
+1. GET /api/v1/insights/sentiment
+2. GET /api/v1/insights/themes
+3. GET /api/v1/insights/trends
+4. GET /api/v1/insights/health-score
+5. GET /api/v1/insights/hotspots
 
-1. Inspect report endpoints and service queries.
-2. Fix invalid query patterns using SQLAlchemy 2.x-compatible execute(text(...)) or proper ORM queries.
-3. Check actual SQL Server table and column names.
-4. Preserve existing report calculations, date filters, RBAC and response schemas.
-5. Do not modify Arun's lifecycle code or tables.
-6. Do not modify database records or migrations.
-7. Run relevant tests using py -m.
-8. Report modified files and test results.
+All five currently return HTTP 500 in Swagger.
 
-Do not claim the APIs pass until they are actually verified.
+Inspect the complete backend tracebacks, especially the original SQL Server errors.
+
+Check:
+- SQLAlchemy query execution
+- SQL Server table and column names
+- SQL joins and filtering
+- Date preset handling
+- Aggregation and percentage calculations
+- Response serialization
+
+Fix the actual root causes without introducing mock data or hardcoded results.
+
+Preserve:
+- Existing API paths and response schemas
+- RBAC and IBU filtering
+- FR-24, FR-25 and FR-26 requirements
+- SQL Server compatibility
+
+Do not modify Arun's lifecycle code or tables.
+Do not modify existing database records.
+Do not change unrelated modules.
+
+Run focused tests using py -m.
+
+Provide:
+1. Exact root cause for each API.
+2. Files and lines changed.
+3. Test results.
+4. Any remaining issues.
+
+Do not claim success based only on compilation or unit tests. Live Swagger testing will be performed manually.
