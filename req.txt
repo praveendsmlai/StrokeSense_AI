@@ -1,174 +1,531 @@
-Perform a COMPLETE, evidence-based development audit of Praveen's PeopleConnect tasks.
+# PEOPLECONNECT — THREE-DEVELOPER BACKEND INTEGRATION
+# STAGE 1: COMPLETE PRE-MERGE ANALYSIS ONLY
 
-IMPORTANT: This is an AUDIT ONLY. Do not implement or modify anything yet.
+You are responsible for analyzing three independently developed PeopleConnect backend codebases before integration.
 
-PROJECT REFERENCES:
-1. Original PRD and FR-01 to FR-28 requirements.
-2. Task Breakdown Planner and Requirements Traceability documents in the Source Document folder.
-3. ALL original UI reference images in the ui folder.
-4. Current backend source code.
-5. Registered FastAPI Swagger/OpenAPI endpoints.
-6. SQL Server database models and migrations.
+IMPORTANT: THIS STAGE IS STRICTLY READ-ONLY.
 
-SCOPE:
-Audit ONLY tasks assigned to Praveen.
+Do not merge, modify, delete, move, rename, overwrite, or generate application code.
 
-Do not include Arun's or other developers' tasks as Praveen's deliverables. However, verify integration dependencies with their modules.
+Do not execute database migrations.
 
-PART 1 — TASK-WISE DEVELOPMENT AUDIT
+After completing the analysis, STOP and wait for my explicit approval before starting Stage 2.
 
-For EVERY task assigned to Praveen:
+## 1. PROJECT LOCATIONS
 
-1. Identify task ID and task name.
-2. Extract exact requirements from PRD and task planner.
-3. Identify corresponding UI screenshots.
-4. List every required feature, button, filter, action and workflow.
-5. Verify whether each feature is implemented in backend code.
-6. Verify API request/response fields match UI requirements.
-7. Verify database models, tables, relationships and persistence.
-8. Verify integration with Arun's canonical PC-xxxxx Connect IDs.
-9. Identify missing, partial or incorrectly implemented functionality.
-10. Classify each task as COMPLETE, PARTIAL or MISSING.
+PRAVEEN BACKEND:
+C:\FinalProject\peopleconnect\backend
 
-Do not mark a task COMPLETE based only on API existence.
+ARUN BACKEND:
+C:\FinalProject\arun\backend
 
-PART 2 — COMPLETE API INVENTORY
+ABHISHEK BACKEND:
+C:\FinalProject\abhishek\backend
 
-For EVERY Praveen-owned task, provide a separate table containing:
+PROJECT DOCUMENTS:
+C:\FinalProject\peopleconnect\Source_document
 
-- Serial Number
-- Task ID
-- Task Name
-- HTTP Method
-- Exact API Endpoint
-- API Description (what it does)
-- Required Inputs
-- Expected Outputs
-- Database Tables Used
-- Related PRD Requirement
-- Related UI Screenshot
-- Implementation Status
-- Manual Testing Status
+UI REFERENCES:
+C:\FinalProject\peopleconnect\UI
 
-Include EVERY registered API belonging to Praveen's tasks.
+If any folder does not exist, locate the correct folder within the project and report its actual path.
 
-Do not skip APIs even if multiple endpoints perform similar operations.
+Do not assume missing files or folders exist.
 
-PART 3 — TASK-WISE API COUNT
+Do not modify any of the three original codebases.
 
-Provide a summary table:
+## 2. SOURCE OF TRUTH — MANDATORY
 
-Task ID | Task Name | Total APIs | Implemented | Missing | Manually Passed | Failed | Pending Testing
+Before analyzing integration, inspect:
 
-Also provide:
-- Total Praveen tasks
-- Total required APIs
-- Total registered APIs
-- Total missing APIs
-- Total manually tested APIs
-- Total pending APIs
+1. Original PRD containing revised FR-01 to FR-28.
+2. Task Breakdown Planner Excel.
+3. Requirements Traceability documents.
+4. All relevant original UI reference screenshots.
+5. All three backend implementations.
+6. Existing SQL Server models and Alembic migrations.
 
-Distinguish required APIs from implemented APIs. Do not invent required endpoints without supporting requirements.
+Use the Task Breakdown Planner to identify exact developer ownership.
 
-PART 4 — UI VS BACKEND GAP ANALYSIS
+Do not assume ownership based only on filenames or module names.
 
-Inspect EVERY relevant UI screenshot.
-
-For each screen, verify:
-- Buttons and actions
-- Search and filters
-- Dropdowns
-- Create/Edit/Delete operations
-- Data tables and details
-- Dashboard metrics
-- Reporting and analytics
-- Role-based permissions
-- API request/response compatibility
-
-List every missing or mismatched API.
-
-Pay special attention to:
-- Administration and Add User
-- Transcript and Media
-- Azure Blob Storage integration
-- MoM Generation
-- Action Generation and Management
-- Notifications and Reminders
-- Dashboard and Reporting
-- Insights, Trends and Hotspots
-- FR-24, FR-25 and FR-26 calculations
-
-PART 5 — INTEGRATION VERIFICATION
-
-Verify:
-1. Praveen APIs use Arun's actual PC-xxxxx Connect IDs.
-2. Transcript/Media persistence and retrieval.
-3. Transcript → AI Generation → MoM → Actions.
-4. Actions → SLA → Reminders → Escalations.
-5. Dashboard/Reporting uses canonical lifecycle data.
-6. RBAC and authorized scope.
-7. SQL Server schema compatibility.
-8. Actual Azure Blob Storage implementation.
-9. Real AI provider integration code versus mock/stub logic.
-
-Clearly mark anything that cannot be verified without credentials or runtime execution.
-
-PART 6 — FINAL REPORT
-
-Provide:
-A. Task-wise development completion summary.
-B. Complete task-wise API inventory with descriptions.
-C. API count for each task.
-D. PRD and UI compliance gaps.
-E. Missing functionality and APIs.
-F. Integration issues.
-G. Priority-wise remaining development work.
-
-For every gap, mention:
-- Task ID
-- Requirement reference
-- UI screenshot reference
-- Existing endpoint, if any
-- Exact missing functionality
-- Relevant source file
-
-
-PART 7 — COPILOT REQUIREMENT VERIFICATION
-
-1. Search the complete PRD (FR-01 to FR-28), Task Breakdown Planner and Requirements Traceability documents for Copilot, AI Assistant, Chatbot and conversational AI requirements.
-2. Confirm whether Copilot is explicitly required in the PRD.
-3. Identify exact FR numbers, task IDs and responsible developer.
-4. Check whether Copilot appears in the original UI reference images.
-5. If required, verify whether Copilot APIs, RAG integration, knowledge retrieval, chat functionality and RBAC are implemented.
-6. List every Copilot API with method, endpoint and description.
-7. Identify missing or partially implemented Copilot functionality.
-
-Report:
-- Copilot in PRD: YES / NO
-- Exact requirement references
-- Assigned owner
-- Copilot in UI: YES / NO
-- APIs implemented: count and details
-- Development status: COMPLETE / PARTIAL / MISSING / NOT REQUIRED
-
-Do not assume Copilot is required merely because a Copilot page or API exists.
-
-MANDATORY RULES:
-- READ-ONLY AUDIT. Do not change code or database.
-- Do not modify Arun's lifecycle code or tables.
-- Do not read .env or expose credentials.
-- Do not run pytest against PeopleConnect_Dev.
-- TechM Windows: use `py -m`, never `python` or `python3`.
-- Inspect actual source code and registered routes, not just documentation.
-- Do not claim APIs are manually PASSED without recorded evidence.
-- Do not claim 100% completion without verifying every requirement.
-- Do not confuse API implementation with successful testing.
-- Do not include Arun-owned APIs in Praveen's API totals.
+Preserve the revised PRD requirements.
 
 IMPORTANT:
-Generate the COMPLETE report. Do not summarize or omit endpoints.
+- BHR and BHR Leader can create Connects within their authorized scope.
+- UI screenshots define required functionality and API contracts.
+- Every UI option must have functional backend support.
+- Do not invent requirements or APIs.
+- Do not introduce mock data.
 
-Save the report as:
-PRAVEEN_TASK_WISE_API_AUDIT.md
+## 3. DEVELOPER OWNERSHIP
 
-Also provide a short final summary in the terminal.
+ARUN:
+- Connect lifecycle implementation.
+- Existing lifecycle APIs.
+- Arun-owned SQL Server tables and models.
+
+ABHISHEK:
+- Authentication and authorization.
+- Login and token management.
+- User identity and role-based access, as assigned.
+
+PRAVEEN:
+- Only tasks explicitly assigned to Praveen in the Task Breakdown Planner.
+- Include the AI Output Generation Integration Point assigned to Praveen under Arun's section (row 21).
+- AI, Transcript, Media, MoM, Actions, Insights, Reporting and other modules only where confirmed by the planner.
+
+Do not transfer ownership between developers without evidence.
+
+Do not redesign Arun's lifecycle or Abhishek's authentication.
+
+## 4. ANALYZE ALL THREE CODEBASES
+
+Inspect each backend independently.
+
+Identify:
+
+1. FastAPI application entry point.
+2. Folder and package structure.
+3. Registered routers and API prefixes.
+4. Services and business logic.
+5. Pydantic request/response schemas.
+6. SQLAlchemy models.
+7. Database connection and session management.
+8. Alembic migrations.
+9. Authentication dependencies.
+10. Authorization and RBAC.
+11. Configuration management.
+12. Background tasks.
+13. External integrations.
+14. Dependencies and Python package versions.
+15. Test infrastructure.
+
+Identify all integration dependencies and architectural differences.
+
+Do not modify code.
+
+## 5. API INVENTORY AND CONFLICT ANALYSIS
+
+Extract all registered FastAPI routes from each codebase using safe source inspection.
+
+For every API, capture:
+
+- Developer owner
+- HTTP method
+- Full endpoint path
+- Router
+- Handler function
+- Purpose
+- Request schema
+- Response schema
+- Authentication dependency
+- Database tables used
+
+Identify:
+
+1. Duplicate HTTP method + endpoint combinations.
+2. Conflicting route prefixes.
+3. Duplicate functionality under different endpoints.
+4. Conflicting request/response schemas.
+5. Duplicate service implementations.
+6. Missing integration endpoints.
+7. Circular import risks.
+8. Incompatible dependencies.
+
+Do not count the same endpoint twice.
+
+Provide separate API totals for Praveen, Arun and Abhishek.
+
+Also provide the expected combined API count, clearly accounting for duplicates and conflicts.
+
+Do not claim that an API works merely because it exists.
+
+## 6. ARUN LIFECYCLE INTEGRATION
+
+Analyze how Praveen's modules depend on Arun's lifecycle implementation.
+
+Verify:
+
+1. Canonical Connect ID format: PC-xxxxx.
+2. Connect creation and retrieval.
+3. Planned and backdated Connect workflows.
+4. Participant and agenda information.
+5. Connect status transitions.
+6. Connect ownership and IBU scope.
+7. Relationships between lifecycle records and Praveen-owned records.
+8. Existing lifecycle service dependencies.
+9. API and schema compatibility.
+
+Identify every Praveen-owned file that may require changes during integration.
+
+Do not modify Arun's lifecycle code or tables.
+
+Do not create duplicate lifecycle models or APIs unnecessarily.
+
+## 7. ABHISHEK AUTHENTICATION INTEGRATION
+
+Praveen's current backend contains development-only authentication.
+
+Analyze how it will be replaced or integrated with Abhishek's implementation.
+
+Verify:
+
+1. Login API compatibility.
+2. JWT/token format and validation.
+3. Token signing and expiration.
+4. Current-user dependency.
+5. User identity representation.
+6. User-role mapping.
+7. BHR permissions.
+8. BHR Leader permissions.
+9. Platform Admin permissions.
+10. IBU-based authorization.
+11. Employee and BHR master-data dependencies.
+12. SSO/Microsoft Entra ID integration, if implemented.
+13. User Management/Add User ownership and API availability.
+
+Identify:
+
+- Existing development authentication components.
+- Abhishek's corresponding production components.
+- Files requiring replacement or adaptation.
+- Potential breaking changes to Praveen's APIs.
+- Any missing interface or dependency from Abhishek.
+
+Do not modify authentication code.
+
+Do not introduce a second authentication system.
+
+## 8. SQL SERVER DATABASE ANALYSIS
+
+Target database:
+PeopleConnect_Dev
+
+Analyze the existing database architecture.
+
+Verify:
+
+1. Tables owned by each developer.
+2. Existing SQLAlchemy model definitions.
+3. Table names and schemas.
+4. Primary keys.
+5. Foreign keys.
+6. Relationships.
+7. Column types.
+8. Nullable constraints.
+9. Indexes.
+10. Migration revision chains.
+11. Duplicate or conflicting table definitions.
+12. Cross-module dependencies.
+
+Pay special attention to:
+
+- Arun's lifecycle tables.
+- Authentication/user tables.
+- Employee master data.
+- BHR mapping data.
+- connect_input_sources.
+- MoM/minutes tables.
+- Action tables.
+- Insights tables.
+- Admin Configuration tables.
+- Audit tables.
+
+Compare database models and migrations.
+
+If safe read-only SQL Server access is available, inspect the actual schema using SELECT queries only.
+
+If database access is unavailable, clearly mark actual schema verification as NOT VERIFIED.
+
+DATABASE SAFETY RULES:
+
+- Do not execute INSERT, UPDATE, DELETE, DROP, ALTER, CREATE or TRUNCATE.
+- Do not execute Alembic upgrade/downgrade.
+- Do not run Base.metadata.create_all().
+- Do not modify existing records.
+- Do not modify Arun's table definitions.
+- Do not change existing migration history.
+- Do not generate migrations in Stage 1.
+
+Identify any migrations that may be needed during Stage 2, but do not execute them.
+
+## 9. PRAVEEN MODULE INTEGRATION ANALYSIS
+
+Verify integration dependencies for all Praveen-owned tasks.
+
+Include applicable modules:
+
+1. Transcript upload and retrieval.
+2. Audio/video Media management.
+3. Azure Blob Storage.
+4. AI Generation.
+5. MoM generation and persistence.
+6. Action extraction and management.
+7. Insights and Trends.
+8. Dashboard and Reporting.
+9. Notifications and Reminders.
+10. Azure Communication Services Email.
+11. Administration.
+12. RAG/LangGraph/ChromaDB integration.
+
+Trace the expected workflows:
+
+Arun Connect
+→ Transcript/Media
+→ AI Generation
+→ MoM
+→ Actions
+→ Validation
+→ Publish
+→ Notifications
+→ Dashboard/Insights.
+
+Identify missing dependencies or incompatible interfaces.
+
+Clearly distinguish:
+
+- Implemented code.
+- Verified integration.
+- Manually tested APIs.
+- Pending Azure-dependent testing.
+- Missing functionality.
+
+Do not fabricate successful results.
+
+## 10. AZURE AND EXTERNAL SERVICES
+
+Inspect integration code for:
+
+- Azure OpenAI.
+- Azure Communication Services Email.
+- Azure Blob Storage.
+- Microsoft Entra ID.
+- ChromaDB.
+- LangGraph.
+
+Verify configuration variable names and integration interfaces without reading secret values.
+
+Identify:
+
+1. Duplicate configuration definitions.
+2. Conflicting environment variable names.
+3. Missing required configuration keys.
+4. Incompatible SDK versions.
+5. Authentication mechanism conflicts.
+6. Missing integration code.
+
+Do not access external Azure services.
+
+Do not send emails.
+
+Do not upload files.
+
+Do not read .env or expose credentials.
+
+## 11. DEPENDENCY COMPATIBILITY
+
+Compare all three projects' dependency files.
+
+Check:
+
+- Python version compatibility.
+- FastAPI.
+- SQLAlchemy.
+- Alembic.
+- Pydantic.
+- Authentication libraries.
+- Azure SDKs.
+- LangChain/LangGraph.
+- ChromaDB.
+- Testing dependencies.
+
+Praveen's project uses a requirements-lock.txt baseline.
+
+Inspect requirements.txt and requirements-lock.txt.
+
+Preserve Python 3.14 compatibility.
+
+Identify package conflicts and recommend compatible resolutions.
+
+Do not install, upgrade or remove packages during Stage 1.
+
+Do not change dependency files.
+
+## 12. FILE-LEVEL MERGE PLAN
+
+Prepare an exact integration plan.
+
+For every affected file, specify:
+
+- Source developer
+- Source file path
+- Proposed destination path
+- Action: ADD / ADAPT / REUSE / KEEP / CONFLICT
+- Reason
+- Dependencies
+- Risk level
+- Expected impact
+
+Identify:
+
+1. Files that can be added without changes.
+2. Files requiring import changes.
+3. Files requiring dependency injection changes.
+4. Files requiring authentication integration.
+5. Files requiring database relationship changes.
+6. Files containing duplicate logic.
+7. Files that must remain untouched.
+
+Do not overwrite files simply because their filenames match.
+
+## 13. FUTURE MERGE SAFETY PLAN
+
+Prepare the procedure for Stage 2.
+
+The future merge must:
+
+1. Preserve all three original codebases.
+2. Use a separate integration working directory.
+3. Verify backups before modification.
+4. Preserve the existing SQL Server database and records.
+5. Integrate one component at a time.
+6. Maintain one FastAPI application.
+7. Maintain one Swagger interface.
+8. Avoid duplicate authentication and lifecycle logic.
+9. Preserve Praveen's existing API contracts wherever possible.
+10. Require explicit approval before database migrations.
+11. Include rollback procedures.
+12. Include verification after each integration milestone.
+
+Do not perform these actions now.
+
+## 14. TESTING STRATEGY FOR STAGE 2
+
+Prepare a testing plan covering:
+
+1. Application startup.
+2. Import errors.
+3. Router registration.
+4. Duplicate routes.
+5. Authentication.
+6. RBAC.
+7. Arun lifecycle.
+8. Transcript and Media.
+9. MoM and Actions.
+10. Insights and Reporting.
+11. Notifications.
+12. Azure integrations.
+13. SQL Server relationships.
+14. End-to-end workflows.
+
+Identify which existing tests can be reused.
+
+IMPORTANT:
+Never run pytest against PeopleConnect_Dev.
+
+Automated database tests must use a separate isolated test database with safe rollback/cleanup.
+
+Do not run tests in Stage 1.
+
+## 15. MANDATORY ENVIRONMENT RULES
+
+This project runs on a Tech Mahindra Windows environment.
+
+Use:
+
+py -m pip
+py -m pytest
+py -m alembic
+py -m uvicorn
+
+Never use:
+
+python
+python3
+WindowsApps/python.exe
+
+During Stage 1, do not execute tests, migrations, servers or installation commands.
+
+Read-only source inspection is allowed.
+
+## 16. REQUIRED ANALYSIS REPORT
+
+Create one comprehensive report:
+
+PEOPLECONNECT_PRE_MERGE_ANALYSIS.md
+
+Save it outside the three backend source directories.
+
+The report must contain:
+
+A. Executive Summary
+
+B. Developer-wise Architecture Comparison
+
+C. Complete API Inventory
+- Praveen APIs
+- Arun APIs
+- Abhishek APIs
+- Combined API count
+- Duplicate/conflicting APIs
+
+D. Database Compatibility Analysis
+
+E. Authentication Integration Analysis
+
+F. Arun Lifecycle Integration Analysis
+
+G. Praveen Module Integration Analysis
+
+H. Azure Integration Compatibility
+
+I. Dependency Conflicts
+
+J. Exact File-Level Merge Plan
+
+K. Missing Dependencies and Blockers
+
+L. Integration Risk Assessment
+
+M. Proposed Stage 2 Merge Sequence
+
+N. Testing and Rollback Strategy
+
+O. Questions Requiring Developer Clarification
+
+P. Final Integration Readiness Assessment
+
+Classify integration readiness as:
+
+READY / READY WITH BLOCKERS / NOT READY
+
+Support every important finding with actual file paths, function names or database evidence.
+
+If something cannot be verified, explicitly mark it NOT VERIFIED.
+
+## 17. FINAL STOP CONDITION
+
+After completing the report:
+
+1. Display a concise summary in the terminal.
+2. State the total APIs per developer.
+3. State the number of API conflicts.
+4. State the number of database conflicts.
+5. Identify the highest-risk integration issues.
+6. List unresolved blockers.
+7. Recommend the safest merge order.
+
+THEN STOP.
+
+Do not merge any code.
+
+Do not modify any backend files.
+
+Do not modify the database.
+
+Do not install dependencies.
+
+Do not start the application.
+
+Do not proceed to Stage 2 without my explicit approval.
