@@ -79,6 +79,26 @@ Do not transfer ownership between developers without evidence.
 
 Do not redesign Arun's lifecycle or Abhishek's authentication.
 
+CRITICAL ADMIN MODULE OWNERSHIP UPDATE:
+
+1. Abhishek's Admin module is the authoritative implementation for the final merged backend.
+2. Do NOT use Praveen's Admin implementation in the final application.
+3. Compare both Admin implementations during Stage 1 analysis.
+4. Identify duplicate Admin APIs, routers, services, models and database tables.
+5. Identify dependencies from Praveen's other modules on his existing Admin code.
+6. Plan how to replace those dependencies with Abhishek's Admin implementation without breaking existing functionality.
+7. Preserve Abhishek's Admin API contracts and RBAC.
+8. Avoid duplicate Admin routes and conflicting SQLAlchemy models.
+9. Do not delete Praveen's Admin code or database tables during analysis.
+10. During Stage 2, integrate Abhishek's Admin module only after explicit approval.
+
+FINAL OWNERSHIP:
+- Arun: Connect Lifecycle
+- Abhishek: Authentication, Authorization, RBAC and Administration
+- Praveen: Remaining assigned backend tasks, including the AI Output Generation Integration Point.
+
+Stage 1 remains strictly READ-ONLY. Report all Admin integration conflicts and required changes before merging.
+
 ## 4. ANALYZE ALL THREE CODEBASES
 
 Inspect each backend independently.
